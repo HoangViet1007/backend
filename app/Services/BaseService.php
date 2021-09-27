@@ -53,10 +53,10 @@ abstract class BaseService
             // custome querry
             $data = Demo::query();
             if ($OrderBys) {
-                $response = $data->orderBy($OrderBys['column'], $OrderBys['sort']);
+                $data->orderBy($OrderBys['column'], $OrderBys['sort']);
             }
 
-            $response = $data->when($searchKey && count($fillable) > 0, function ($q) use ($fillable, $searchKey) {
+             $data->when($searchKey && count($fillable) > 0, function ($q) use ($fillable, $searchKey) {
                 $q->where(function ($q) use ($searchKey, $fillable) {
                     foreach ($fillable as $field) {
                         $q->orWhere($field, 'LIKE', '%' . $searchKey . '%');
