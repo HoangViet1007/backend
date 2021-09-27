@@ -15,6 +15,7 @@ class DemoController extends Controller
     {
         $this->service = new DemoService();
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -25,6 +26,15 @@ class DemoController extends Controller
         return response()->json($this->service->getAll());
     }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -51,6 +61,18 @@ class DemoController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
      * Update the specified resource in storage.
      *
      * @param         $id
@@ -72,7 +94,7 @@ class DemoController extends Controller
      */
     public function destroy($id)
     {
-        return response()->json($this->service->delete($id)) ;
+        return response()->json($this->service->delete($id));
     }
 
     /**

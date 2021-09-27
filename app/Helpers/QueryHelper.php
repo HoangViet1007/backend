@@ -19,12 +19,13 @@ class QueryHelper
      */
     protected array $operators
         = [
-            '__gt' => OperatorConstant::GT, // Greater than
-            '__ge' => OperatorConstant::GE, // Greater than or equal
-            '__lt' => OperatorConstant::LT, // Less than
-            '__le' => OperatorConstant::LE, // Less than or equal
+            '__gt' => OperatorConstant::GT, // Greater than (>)
+            '__ge' => OperatorConstant::GE, // Greater than or equal (>=)
+            '__lt' => OperatorConstant::LT, // Less than (<)
+            '__le' => OperatorConstant::LE, // Less than or equal (<=)
             '__~'  => OperatorConstant::LIKE, // Like
-            '__eq' => OperatorConstant::EQUAL // equal
+            '___~' => OperatorConstant::I_LIKE,
+            '__eq' => OperatorConstant::EQUAL // equal (=)
         ];
 
     /**

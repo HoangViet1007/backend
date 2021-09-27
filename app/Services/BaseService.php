@@ -225,12 +225,12 @@ abstract class BaseService implements BaseServiceInterface
                 if (isset($request->$fillAble) && !in_array($fillAble, $guarded))
                     $this->model->$fillAble = $this->_handleRequestData($request->$fillAble);
 
-        // Set created_by is current user
-        $this->model->created_by = self::currentUser()?->id ?? null;
-
-        // Set default uuid
-        if (!str_contains($this->driver, 'sql') || Schema::hasColumn($this->model->getTable(), 'uuid'))
-            $this->model->uuid = $request->uuid ?? Uuid::uuid();
+        // // Set created_by is current user
+        // $this->model->created_by = self::currentUser()?->id ?? null;
+        //
+        // // Set default uuid
+        // if (!str_contains($this->driver, 'sql') || Schema::hasColumn($this->model->getTable(), 'uuid'))
+        //     $this->model->uuid = $request->uuid ?? Uuid::uuid();
 
         try {
             $this->model->save();
@@ -281,8 +281,8 @@ abstract class BaseService implements BaseServiceInterface
                 if (isset($request->$fillAble) && !in_array($fillAble, $guarded))
                     $model->$fillAble = $this->_handleRequestData($request->$fillAble) ?? $model->$fillAble;
 
-        if (isset($model->uuid) && $model->uuid === null)
-            $model->uuid = Uuid::uuid();
+        // if (isset($model->uuid) && $model->uuid === null)
+        //     $model->uuid = Uuid::uuid();
 
         try {
             $model->save();
