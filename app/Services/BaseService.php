@@ -261,11 +261,10 @@ abstract class BaseService implements BaseServiceInterface
         $fillAbles = $this->model->getFillable();
         $guarded   = $this->model->getGuarded();
 
+        $model = $this->get($id);
         // Validate
         if ($this->updateRequestValidate($id, $request) !== true)
             return $this->model;
-
-        $model = $this->get($id);
 
         if ($fillAbles === ['*']) { // Insert all data to DB
             if ($request instanceof Request)
