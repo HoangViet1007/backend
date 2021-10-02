@@ -389,9 +389,9 @@ abstract class BaseService implements BaseServiceInterface
      */
     public static function doValidate(object $request, array $rules = [], array $messages = []): bool|array
     {
-        if ($request instanceof Request)
+        if ($request instanceof Request) // set kieu du lieu
             $request = $request->all();
-        elseif ($request instanceof Model)
+        elseif ($request instanceof Model) //
             $request = $request->toArray();
         else
             $request = (array)$request;
