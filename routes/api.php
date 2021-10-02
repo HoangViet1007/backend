@@ -15,6 +15,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::resource('/demo','DemoController');
+Route::group(['prefix'=>'/'],function (){
+    // BMI
+    Route::get('BMI','BMIController@countBMI');
+
+    // contact
+    Route::resource('contact','ContactController');
+
+    // setting
+    Route::resource('setting','SettingController');
+
+    // customer_level
+    Route::resource('customer_level','CustomerLevelController');
+
+    // slide
+    Route::resource('slide','SlideController');
+});
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });

@@ -261,11 +261,10 @@ abstract class BaseService implements BaseServiceInterface
         $fillAbles = $this->model->getFillable();
         $guarded   = $this->model->getGuarded();
 
+        $model = $this->get($id);
         // Validate
         if ($this->updateRequestValidate($id, $request) !== true)
             return $this->model;
-
-        $model = $this->get($id);
 
         if ($fillAbles === ['*']) { // Insert all data to DB
             if ($request instanceof Request)
@@ -390,9 +389,9 @@ abstract class BaseService implements BaseServiceInterface
      */
     public static function doValidate(object $request, array $rules = [], array $messages = []): bool|array
     {
-        if ($request instanceof Request)
+        if ($request instanceof Request) // set kieu du lieu
             $request = $request->all();
-        elseif ($request instanceof Model)
+        elseif ($request instanceof Model) //
             $request = $request->toArray();
         else
             $request = (array)$request;
