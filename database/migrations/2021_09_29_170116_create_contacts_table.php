@@ -17,12 +17,11 @@ class CreateContactsTable extends Migration
         Schema::create('contacts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('address');
             $table->string('phone',50);
             $table->string('email');
             $table->string('title');
             $table->text('content');
-            $table->enum('status', [StatusConstant::ACTIVE, StatusConstant::INACTIVE])->default(StatusConstant::INACTIVE);
+            $table->enum('status', [StatusConstant::PROCESS, StatusConstant::PROCESSED])->default(StatusConstant::PROCESS);
             $table->timestamps();
             $table->softDeletes();
         });

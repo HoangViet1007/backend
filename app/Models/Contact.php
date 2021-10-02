@@ -13,6 +13,6 @@ class Contact extends Model
 
     protected $table    = 'contacts';
     protected $guarded = [] ;
-    protected $fillable = ['name','address','phone','email','title','content','status'];
+    protected $fillable = ['name','phone','email','title','content','status'];
 
 }
