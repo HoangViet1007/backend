@@ -20,10 +20,10 @@ class CreateSlidesTable extends Migration
             $table->string('image');
             $table->string('alt');
             $table->enum('status', [StatusConstant::ACTIVE, StatusConstant::INACTIVE])->default(StatusConstant::INACTIVE);
-            $table->string('link');
-            $table->string('title');
-            $table->text('short_content');
-            $table->text('content');
+            $table->string('link')->nullable();
+            $table->string('title')->nullable();
+            $table->text('short_content')->nullable();
+            $table->text('content')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
