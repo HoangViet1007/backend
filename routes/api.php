@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\DemoController ;
+use App\Http\Controllers\DemoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,19 +14,23 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::resource('/demo','DemoController');
-Route::group(['prefix'=>'/'],function (){
+Route::resource('/demo', 'DemoController');
+Route::group(['prefix' => '/'], function () {
     // BMI
-    Route::get('BMI','BMIController@countBMI');
+    Route::get('BMI', 'BMIController@countBMI');
 
     // contact
-    Route::resource('contact','ContactController');
+    Route::resource('contact', 'ContactController');
 
     // setting
-    Route::resource('setting','SettingController');
+    Route::resource('setting', 'SettingController');
 
     // customer_level
-    Route::resource('customer_level','CustomerLevelController');
+    Route::resource('customer_level', 'CustomerLevelController');
+
+    // certificates
+
+    Route::resource('certificates', 'CertificateController');
 
     // slide
     Route::resource('slide','SlideController');
