@@ -14,10 +14,10 @@ class Certificate extends Model
     protected $table = 'certificates';
     protected $primaryKey = 'id';
     protected $guarded = [];
-    protected $fillable = ['name', 'image', 'specialize_id'];
+    protected $fillable = ['name', 'image', 'specialize_detail_id'];
 
     public function specializes()
     {
-        return $this->belongsTo(Specialize::class);
+        return $this->belongsTo(Specialize::class,'specialize_detail_id');
     }
 }

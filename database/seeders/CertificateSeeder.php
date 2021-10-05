@@ -20,7 +20,7 @@ class CertificateSeeder extends Seeder
                 [
                     'name' => Str::random(),
                     'image' => Str::random(),
-                    'specialize_id' => $i,
+                    'specialize_detail_id' => $i,
                 ]
 
             );

@@ -17,7 +17,7 @@ class CreateCertificatesTable extends Migration
             $table->id();
             $table->string('name', 100);
             $table->string('image', 255);
-            $table->bigInteger('specialize_id');
+            $table->bigInteger('specialize_detail_id');
             $table->softDeletes();
             $table->timestamps();
         });
