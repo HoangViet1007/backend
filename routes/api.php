@@ -30,6 +30,9 @@ Route::group(['prefix'=>'/'],function (){
 
     // slide
     Route::resource('slide','SlideController');
+
+    // specialize
+    Route::resource('specialize','SpecializeController');
 });
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
