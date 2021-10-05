@@ -29,12 +29,16 @@ Route::group(['prefix' => '/'], function () {
     Route::resource('customer_level', 'CustomerLevelController');
 
     // slide
+
     Route::resource('slide', 'SlideController');
 
     // certificates
 
     Route::resource('certificates', 'CertificateController');
 
+
+    // specialize
+    Route::resource('specialize','SpecializeController');
 });
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
