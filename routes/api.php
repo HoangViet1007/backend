@@ -28,14 +28,12 @@ Route::group(['prefix' => '/'], function () {
     // customer_level
     Route::resource('customer_level', 'CustomerLevelController');
 
-    // slide
-
-    Route::resource('slide', 'SlideController');
-
     // certificates
 
     Route::resource('certificates', 'CertificateController');
 
+    // slide
+    Route::resource('slide','SlideController');
 
     // specialize
     Route::resource('specialize','SpecializeController');
