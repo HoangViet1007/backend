@@ -33,6 +33,9 @@ Route::group(['prefix'=>'/'],function (){
 
     // specialize
     Route::resource('specialize','SpecializeController');
+
+    // specialize
+    Route::resource('specialize-detail','SpecializeDetailController');
 });
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
