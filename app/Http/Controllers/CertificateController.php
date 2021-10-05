@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\BaseService;
 use App\Services\CertificateService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CertificateController extends Controller
@@ -20,21 +21,12 @@ class CertificateController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): JsonResponse
     {
 
         return response()->json($this->service->getAll());
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -42,7 +34,7 @@ class CertificateController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         return response()->json($this->service->add($request));
 
@@ -54,22 +46,12 @@ class CertificateController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
         return response()->json($this->service->get($id));
 
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -78,7 +60,7 @@ class CertificateController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
         return response()->json($this->service->update($id, $request));
     }
@@ -89,7 +71,7 @@ class CertificateController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         return response()->json($this->service->delete($id));
     }
