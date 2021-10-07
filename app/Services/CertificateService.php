@@ -36,6 +36,24 @@ class CertificateService extends BaseService
         }
     }
 
+    public function listCertificatesSpecialize($id)
+    {
+        try {
+            $response = Certificate::where('specialize_detail_id', $id)->get();
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    /**
+     * @param object $request
+     * @param array $rules
+     * @param array $messages
+     * @return bool|array
+     */
+
+
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
     {
         $rules = [
