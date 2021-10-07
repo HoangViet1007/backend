@@ -29,6 +29,16 @@ class CertificateController extends Controller
 
 
     /**
+     * @param $id
+     * @return JsonResponse
+     * Lấy tất cả các chứng chỉ theo chuyên môn
+     */
+    public function listCertificatesSpecialize($id): JsonResponse
+    {
+        return response()->json($this->service->listCertificatesSpecialize($id));
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
