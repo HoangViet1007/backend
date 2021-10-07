@@ -28,18 +28,25 @@ Route::group(['prefix' => '/'], function () {
     // customer_level
     Route::resource('customer_level', 'CustomerLevelController');
 
-    // certificates
-
+    // Certificates of PT and Admin
     Route::resource('certificates', 'CertificateController');
-
+    Route::get('get-list-certificates-specialize/{id}', 'CertificateController@listCertificatesSpecialize');
     // slide
-    Route::resource('slide','SlideController');
+    Route::resource('slide', 'SlideController');
 
     // specialize
-    Route::resource('specialize','SpecializeController');
+    Route::resource('specialize', 'SpecializeController');
 
     // specialize
-    Route::resource('specialize-detail','SpecializeDetailController');
+    Route::resource('specialize-detail', 'SpecializeDetailController');
+
+
+    // Stage of PT and Admin
+    Route::get('list-stage/{id}', 'StageController@listStage');
+    Route::post('add-stage', 'StageController@addStage');
+    Route::put('edit-stage/{id}', 'StageController@editStage');
+    Route::delete('delete-stage/{id}', 'StageController@deleteStage');
+
 });
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();

@@ -6,6 +6,7 @@ use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\SpecializeDetail;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @Author apple
@@ -21,7 +22,8 @@ class SpecializeDetailService extends BaseService
     public function getAll(): LengthAwarePaginator
     {
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model);
+        $id = $this->currentUser()->id ?? null ;
+        $data = $this->queryHelper->buildQuery($this->model)->where('user_id', $id);
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
