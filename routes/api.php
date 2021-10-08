@@ -54,7 +54,6 @@ Route::group(['prefix' => '/'], function () {
     // course
     Route::get('course/pt','CourseController@getCourseCurrentPt');
     Route::resource('course','CourseController');
-    Route::resource('specialize-detail', 'SpecializeDetailController');
 
     // Stage of PT and Admin
     Route::get('list-stage/{id}', 'StageController@listStage');
