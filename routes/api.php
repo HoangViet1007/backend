@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\DemoController;
+use App\Http\Controllers\DemoController ;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +15,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::resource('/demo', 'DemoController');
+Route::post('/login', 'UserController@login')->name('login');
+Route::get('/who-am-i', 'UserController@getCurrentUserInformation')->name('who-am-i')->middleware('auth:api');
+Route::get('logout','UserController@logout')->name('logout');
 Route::group(['prefix' => '/'], function () {
+
+    Route::get('/redirect', 'GoogleController@redirectToProvider');
+    Route::get('/callback', 'GoogleController@handleProviderCallback');
     // BMI
     Route::get('BMI', 'BMIController@countBMI');
 
@@ -38,7 +44,16 @@ Route::group(['prefix' => '/'], function () {
     Route::resource('specialize', 'SpecializeController');
 
     // specialize
-    Route::resource('specialize-detail', 'SpecializeDetailController');
+    Route::resource('specialize-detail','SpecializeDetailController');
+
+    //user
+    Route::post('user_pt', 'UserController@addUserHasRolePt');
+    Route::post('user_customer', 'UserController@addUserHasRoleCustomer');
+    Route::resource('user', 'UserController');
+
+    // course
+    Route::get('course/pt','CourseController@getCourseCurrentPt');
+    Route::resource('course','CourseController');
 
     // Stage of PT and Admin
     Route::get('list-stage/{id}', 'StageController@listStage');
@@ -47,6 +62,4 @@ Route::group(['prefix' => '/'], function () {
     Route::delete('delete-stage/{id}', 'StageController@deleteStage');
     Route::get('detail-stage/{id}', 'StageController@detailStage');
 });
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+
