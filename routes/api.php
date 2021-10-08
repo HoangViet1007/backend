@@ -40,13 +40,12 @@ Route::group(['prefix' => '/'], function () {
     // specialize
     Route::resource('specialize-detail', 'SpecializeDetailController');
 
-
     // Stage of PT and Admin
     Route::get('list-stage/{id}', 'StageController@listStage');
     Route::post('add-stage', 'StageController@addStage');
     Route::put('edit-stage/{id}', 'StageController@editStage');
     Route::delete('delete-stage/{id}', 'StageController@deleteStage');
-
+    Route::get('detail-stage/{id}', 'StageController@detailStage');
 });
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
