@@ -46,4 +46,8 @@ class StageController extends Controller
         return response()->json($this->service->delete($id));
 
     }
+
+    public function detailStage($id):JsonResponse {
+        return response()->json(($this->service->get($id)));
+    }
 }
