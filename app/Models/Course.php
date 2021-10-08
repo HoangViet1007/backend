@@ -13,10 +13,15 @@ class Course extends Model
 
     protected $table    = 'courses';
     protected $guarded  = [];
-    protected $fillable = ['name', 'image', 'lessons', 'time_a_lessons', 'price', 'description', 'content', 'status', 'specialize_detail_id', 'customer_level_id'];
+    protected $fillable = ['name', 'image', 'lessons', 'time_a_lessons', 'price', 'description', 'content', 'status', 'specialize_detail_id', 'customer_level_id','created_by'];
 
     public function customerLevel(): BelongsTo
     {
-        return $this->belongsTo(CustomerLevel::class,'customer_level_id','id');
+        return $this->belongsTo(CustomerLevel::class, 'customer_level_id', 'id');
+    }
+
+    public function specializeDetails (): BelongsTo
+    {
+        return $this->belongsTo(SpecializeDetail::class,'specialize_detail_id','id');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\SpecializeDetail;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 

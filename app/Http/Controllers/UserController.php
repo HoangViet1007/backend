@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Constants\RoleConstant;
-use App\Exceptions\BaseException;
 use App\Models\Role;
 use App\Services\BaseService;
 use App\Services\UserService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -25,7 +23,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
@@ -51,7 +49,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
      * @return JsonResponse
      */
@@ -90,14 +88,14 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int                      $id
+     * @param Request $request
+     * @param int     $id
      *
      * @return JsonResponse
      */
     public function update(Request $request, $id): JsonResponse
     {
-        return response()->json($this->service->update($id,$request));
+        return response()->json($this->service->update($id, $request));
     }
 
     /**
@@ -151,8 +149,8 @@ class UserController extends Controller
 
         return response()->json([
                                     'access_token' => $tokenResult->accessToken,
-                                    'token_type' => 'Bearer',
-                                    'expires_at' => Carbon::parse(
+                                    'token_type'   => 'Bearer',
+                                    'expires_at'   => Carbon::parse(
                                         $tokenResult->token->expires_at
                                     )->toDateTimeString()
                                 ]);
@@ -162,11 +160,12 @@ class UserController extends Controller
     {
         if (Auth::check()) {
             $request->user()->token()->revoke();
+
             return response()->json([
                                         'message' => 'Đăng xuất thành công !'
                                     ]);
         } else {
-            return false ;
+            return false;
         }
     }
 }

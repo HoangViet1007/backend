@@ -17,8 +17,9 @@ use Illuminate\Support\Facades\Route;
 Route::resource('/demo', 'DemoController');
 Route::post('/login', 'UserController@login')->name('login');
 Route::get('/who-am-i', 'UserController@getCurrentUserInformation')->name('who-am-i')->middleware('auth:api');
-Route::get('logout','UserController@logout')->name('logout');
-Route::group(['prefix' => '/'], function () {
+Route::get('logout','UserController@logout')->name('logout')->middleware('auth:api');
+
+Route::group(['prefix' => '/','middleware'=>'auth:api'], function () {
 
     Route::get('/redirect', 'GoogleController@redirectToProvider');
     Route::get('/callback', 'GoogleController@handleProviderCallback');
@@ -53,6 +54,7 @@ Route::group(['prefix' => '/'], function () {
 
     // course
     Route::get('course/pt','CourseController@getCourseCurrentPt');
+    Route::get('course/pt/{id}','CourseController@getCourseCurrentPtById');
     Route::resource('course','CourseController');
     Route::resource('specialize-detail', 'SpecializeDetailController');
 
