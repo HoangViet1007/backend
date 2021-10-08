@@ -32,25 +32,15 @@ class CourseController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        return response()->json($this->service->add($request));
     }
 
     /**
@@ -65,16 +55,9 @@ class CourseController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function getCourseCurrentPtById($id): JsonResponse
     {
-        //
+        return response()->json($this->service->getCourseCurrentPtById($id));
     }
 
     /**
@@ -83,11 +66,11 @@ class CourseController extends Controller
      * @param \Illuminate\Http\Request $request
      * @param int                      $id
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
-        //
+        return response()->json($this->service->update($id,$request));
     }
 
     /**
@@ -95,10 +78,10 @@ class CourseController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
-        //
+        return response()->json($this->service->delete($id));
     }
 }
