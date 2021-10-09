@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Course;
