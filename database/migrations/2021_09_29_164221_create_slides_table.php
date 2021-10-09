@@ -1,12 +1,11 @@
 <?php
 
-use App\Constants\SexConstant;
 use App\Constants\StatusConstant;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+class CreateSlidesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,20 +14,18 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('slides', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('image');
-            $table->string('address');
-            $table->string('phone',50);
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('alt');
             $table->enum('status', [StatusConstant::ACTIVE, StatusConstant::INACTIVE])->default(StatusConstant::INACTIVE);
-            $table->enum('sex', [SexConstant::MALE, SexConstant::FEMALE])->default(SexConstant::MALE);
-            $table->float('money', 12, 2);
-            $table->rememberToken();
+            $table->string('link')->nullable();
+            $table->string('title')->nullable();
+            $table->text('short_content')->nullable();
+            $table->text('content')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -39,6 +36,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('slides');
     }
 }

@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Services\BaseService;
-use App\Services\DemoService;
+use App\Services\SettingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class DemoController extends Controller
+class SettingController extends Controller
 {
     public BaseService $service;
 
     public function __construct()
     {
-        $this->service = new DemoService();
+        $this->service = new SettingService();
     }
 
     /**
@@ -27,21 +27,11 @@ class DemoController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
@@ -53,36 +43,24 @@ class DemoController extends Controller
      *
      * @param int $id
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
         return response()->json($this->service->get($id));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
-     * @param         $id
-     * @param Request $request
+     * @param \Illuminate\Http\Request $request
+     * @param int                      $id
      *
      * @return JsonResponse
      */
-    public function update($id, Request $request): JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
-        return response()->json($this->service->update($id, $request));
+        return response()->json($this->service->update($id,$request));
     }
 
     /**
@@ -92,20 +70,8 @@ class DemoController extends Controller
      *
      * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         return response()->json($this->service->delete($id));
-    }
-
-    /**
-     * Remove multiple the specified resource from storage by ids
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function deleteByIds(Request $request): JsonResponse
-    {
-        return response()->json($this->service->deleteByIds($request));
     }
 }
