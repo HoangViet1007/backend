@@ -43,7 +43,7 @@ class StageController extends Controller
 
     public function deleteStage($id): JsonResponse
     {
-        return response()->json($this->service->delete($id));
+        return response()->json($this->service->deleteStage($id));
 
     }
 
