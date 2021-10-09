@@ -46,7 +46,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('specialize', 'SpecializeController');
 
     // specialize
-    Route::resource('specialize-detail', 'SpecializeDetailController');
+    Route::get('specialize-detail/pt','SpecializeDetailController@getAllByPt');
+    Route::delete('specialize-detail/pt/{id}', 'SpecializeDetailController@destroyByPt');
+    Route::resource('specialize-detail','SpecializeDetailController');
 
     //user
     Route::post('user_pt', 'UserController@addUserHasRolePt');
