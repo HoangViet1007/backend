@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Models\CoursePlanes;
 use App\Services\BaseService;
 use App\Models\Stage;
@@ -70,15 +71,19 @@ class StageService extends BaseService
 
     public function listStage($id)
     {
+        $this->preGetAll();
+        $data = $this->queryHelper->buildQuery($this->model)->where('course_id', $id)->get();
         try {
-            $response = Stage::where('course_id', $id)->get();
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+
             return $response;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
     }
 
-    public function deleteStage(int|string $id): bool
+    public function preDelete(int|string $id): bool
     {
         $checkDelete = CoursePlanes::where('stage_id', $id)->count();
         if ($checkDelete > 0) {
@@ -86,6 +91,6 @@ class StageService extends BaseService
                 ['message' => "Bạn không thể xóa được"], new Exception()
             );
         }
-        return $this->delete($id);
     }
+
 }
