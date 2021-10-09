@@ -15,7 +15,7 @@ class SpecializeDetail extends Model
     protected $guarded = [];
     protected $fillable = ['experience', 'specialize_id', 'user_id'];
 
-    public function specialize(): object
+    public function specialize(): BelongsTo
     {
         return $this->belongsTo(Specialize::class, 'specialize_id');
     }
