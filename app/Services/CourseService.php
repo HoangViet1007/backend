@@ -9,6 +9,7 @@ use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Course;
 use App\Models\SpecializeDetail;
+use App\Models\Stage;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -267,8 +268,8 @@ class CourseService extends BaseService
     {
         $userId        = $this->currentUser()->id ?? null;
         $courseForUser = Course::where('created_by', '=', $userId)->where('id', '=', $id)->first();
-        $countStageCurrentCourse = Course::where('stages',$id)->count();
-        if (!$courseForUser || $countStageCurrentCourse > 0) {
+        $countStageCurrentCourse = Stage::where('course_id',$id)->count();
+        if (!$courseForUser || $countStageCurrentCourse > 0 ) {
             throw new BadRequestException(
                 ['message' => __("Khoá học không tồn tại !")], new Exception()
             );
