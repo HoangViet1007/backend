@@ -14,5 +14,9 @@ class Stage extends Model
     protected $table = 'stages';
     protected $primaryKey = 'id';
     protected $fillable = ['name', 'short_content', 'content', 'status', 'course_id'];
-    
+
+    public function course_planes()
+    {
+        return $this->hasMany(CoursePlanes::class);
+    }
 }

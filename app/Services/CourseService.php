@@ -82,8 +82,8 @@ class CourseService extends BaseService
             if (Course::findOrFail($id))
                 $userId = self::currentUser()->id;
             $entity = $this->queryHelper->buildQuery($this->model)
-                                        ->with('customerLevel', 'specializeDetails.specialize',
-                                               'specializeDetails.user')
+                                        ->with('customerLevel', 'specializeDetails.user',
+                                               'specializeDetails.specialize')
                                         ->join('specialize_details', 'courses.specialize_detail_id',
                                                'specialize_details.id')
                                         ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
@@ -207,12 +207,12 @@ class CourseService extends BaseService
     {
         $specialize_detail_id = SpecializeDetail::where('user_id', '=', $this->currentUser()->id)->pluck('id')
                                                 ->toArray();
-        $rules    = [
+        $rules                = [
             'name'                 => [
                 'required',
                 Rule::unique('courses',)->where(function ($query) use ($id) {
                     return $query->where('created_by', '=', $this->currentUser()->id)
-                                 ->where('id', '!=',$id);
+                                 ->where('id', '!=', $id);
                 }),
             ],
             'image'                => 'required',
@@ -225,7 +225,7 @@ class CourseService extends BaseService
             'specialize_detail_id' => 'required|in:' . implode(',', $specialize_detail_id),
             'customer_level_id'    => 'required|exists:customer_levels,id'
         ];
-        $messages = [
+        $messages             = [
             'name.required' => 'Hãy nhập tên khoá học !',
             'name.unique'   => 'Tên khoá học này đã tồn tại !',
 
@@ -259,6 +259,7 @@ class CourseService extends BaseService
             'customer_level_id.exists'   => 'Mức độ không hợp lệ !',
 
         ];
+
         return parent::updateRequestValidate($id, $request, $rules, $messages);
     }
 
@@ -266,13 +267,13 @@ class CourseService extends BaseService
     {
         $userId        = $this->currentUser()->id ?? null;
         $courseForUser = Course::where('created_by', '=', $userId)->where('id', '=', $id)->first();
-        if (!$courseForUser) {
+        $countStageCurrentCourse = Course::where('stages',$id)->count();
+        if (!$courseForUser || $countStageCurrentCourse > 0) {
             throw new BadRequestException(
                 ['message' => __("Khoá học không tồn tại !")], new Exception()
             );
         }
         parent::preDelete($id);
     }
-
 
 }

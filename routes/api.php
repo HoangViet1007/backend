@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\DemoController ;
+use App\Http\Controllers\DemoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Route;
 Route::resource('/demo', 'DemoController');
 Route::post('/login', 'UserController@login')->name('login');
 Route::get('/who-am-i', 'UserController@getCurrentUserInformation')->name('who-am-i')->middleware('auth:api');
-Route::get('logout','UserController@logout')->name('logout')->middleware('auth:api');
+Route::get('logout', 'UserController@logout')->name('logout')->middleware('auth:api');
 
-Route::group(['prefix' => '/','middleware'=>'auth:api'], function () {
+Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     Route::get('/redirect', 'GoogleController@redirectToProvider');
     Route::get('/callback', 'GoogleController@handleProviderCallback');
@@ -37,6 +37,7 @@ Route::group(['prefix' => '/','middleware'=>'auth:api'], function () {
 
     // Certificates of PT and Admin
     Route::resource('certificates', 'CertificateController');
+
     Route::get('get-list-certificates-specialize/{id}', 'CertificateController@listCertificatesSpecialize');
     // slide
     Route::resource('slide', 'SlideController');
@@ -45,6 +46,8 @@ Route::group(['prefix' => '/','middleware'=>'auth:api'], function () {
     Route::resource('specialize', 'SpecializeController');
 
     // specialize
+    Route::get('specialize-detail/pt','SpecializeDetailController@getAllByPt');
+    Route::delete('specialize-detail/pt/{id}', 'SpecializeDetailController@destroyByPt');
     Route::resource('specialize-detail','SpecializeDetailController');
 
     //user
@@ -53,15 +56,24 @@ Route::group(['prefix' => '/','middleware'=>'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
-    Route::get('course/pt','CourseController@getCourseCurrentPt');
-    Route::get('course/pt/{id}','CourseController@getCourseCurrentPtById');
-    Route::resource('course','CourseController');
+    Route::get('course/pt', 'CourseController@getCourseCurrentPt');
+    Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');
+    Route::resource('course', 'CourseController');
 
     // Stage of PT and Admin
-    Route::get('list-stage/{id}', 'StageController@listStage');
-    Route::post('add-stage', 'StageController@addStage');
-    Route::put('edit-stage/{id}', 'StageController@editStage');
-    Route::delete('delete-stage/{id}', 'StageController@deleteStage');
+    Route::get('stage/{id}', 'StageController@listStage');
+    Route::post('stage', 'StageController@addStage');
+    Route::put('stage/{id}', 'StageController@editStage');
+    Route::delete('stage/{id}', 'StageController@deleteStage');
     Route::get('detail-stage/{id}', 'StageController@detailStage');
+
+    // Course_Planes
+    Route::get('course_planes/{id}', 'CoursePlansController@listCoursePlanes');
+    Route::post('course_planes', 'CoursePlansController@addCoursePlanes');
+    Route::put('course_planes/{id}', 'CoursePlansController@editCoursePlanes');
+    Route::delete('course_planes/{id}', 'CoursePlansController@deleteCoursePlanes');
+    Route::get('detail-course_planes/{id}', 'CoursePlansController@detailCoursePlanes');
+
+
 });
 
