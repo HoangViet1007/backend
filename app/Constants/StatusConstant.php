@@ -11,6 +11,10 @@ class StatusConstant
     const INACTIVE  = 'Inactive';
     const PROCESS   = 'Process';
     const PROCESSED = 'Processed';
+    const PENDING   = 'Pending';
+    const HAPPENING = 'Happening';
+    const PAUSE     = 'Pause';
+
 
     const All
         = [
@@ -18,5 +22,8 @@ class StatusConstant
             self::INACTIVE,
             self::PROCESS,
             self::PROCESSED,
+            self::HAPPENING,
+            self::PENDING,
+            self::PAUSE
         ];
 }
