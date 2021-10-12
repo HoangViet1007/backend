@@ -26,9 +26,14 @@ class SpecializeDetailController extends Controller
         return response()->json($this->service->getAllByAdmin());
     }
 
-    public function getAllByPt()
+    public function getAllByPt(): JsonResponse
     {
         return response()->json($this->service->getAllByPt());
+    }
+
+    public function getAllUseSelectOption(): JsonResponse
+    {
+        return response()->json($this->service->getAllUseSelectOption());
     }
 
     /**
