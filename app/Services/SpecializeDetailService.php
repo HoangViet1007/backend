@@ -38,6 +38,20 @@ class SpecializeDetailService extends BaseService
         }
     }
 
+    public function getAllUseSelectOption()
+    {
+        $this->preGetAll();
+        $id = $this->currentUser()->id ?? null;
+        $data = $this->queryHelper->buildQuery($this->model)->with('specialize')->where('user_id', $id);
+        try {
+            $response = $data->get();
+            $this->postGetAll($response);
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
     public function getAllByAdmin(): LengthAwarePaginator
     {
         $this->preGetAll();
@@ -50,6 +64,7 @@ class SpecializeDetailService extends BaseService
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
     }
+
 
     public function deleteByAdmin(int|string $id): bool
     {

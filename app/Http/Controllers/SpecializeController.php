@@ -25,6 +25,11 @@ class SpecializeController extends Controller
         return response()->json($this->service->getAll());
     }
 
+    public function getAllUseSelectOption(): JsonResponse
+    {
+        return response()->json($this->service->getAllUseSelectOption());
+    }
+
     /**
      * Show the form for creating a new resource.
      *
