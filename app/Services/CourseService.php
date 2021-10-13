@@ -22,18 +22,26 @@ use Illuminate\Validation\Rule;
  */
 class CourseService extends BaseService
 {
-    protected array $status = [StatusConstant::HAPPENING, StatusConstant::PENDING];
+    protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING];
+    protected array $display = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
+
 
     function createModel(): void
     {
         $this->model = new Course();
     }
 
+    // get all course for pt no paginate
+    public function getAllCourseCurrentPtNoPaginate()
+    {
+        return Course::all();
+    }
+
     // hàm này cho admin
     public function getAll(): LengthAwarePaginator
     {
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->with('customerLevel', 'specializeDetails.user',
+        $data = $this->queryHelper->buildQuery($this->model)->with('customerLevel', 'stages', 'specializeDetails.user',
                                                                    'specializeDetails.specialize')
                                   ->join('specialize_details', 'courses.specialize_detail_id',
                                          'specialize_details.id')
@@ -45,6 +53,14 @@ class CourseService extends BaseService
                                   ->select('courses.*');
         try {
             $response = $data->paginate(QueryHelper::limit());
+
+            $response->getCollection()->transform(function ($value) {
+                $value->total_stages = count($value->stages);
+                unset($value->stages);
+
+                return $value;
+            });
+
             $this->postGetAll($response);
 
             return $response;
@@ -53,11 +69,12 @@ class CourseService extends BaseService
         }
     }
 
+    // get course cua pt
     public function getCourseCurrentPt()
     {
         $request = request()->all();
         $data    = $this->queryHelper->buildQuery($this->model)
-                                     ->with('customerLevel', 'specializeDetails.user',
+                                     ->with('customerLevel', 'stages', 'specializeDetails.user',
                                             'specializeDetails.specialize')
                                      ->join('specialize_details', 'courses.specialize_detail_id',
                                             'specialize_details.id')
@@ -70,6 +87,13 @@ class CourseService extends BaseService
                                      ->where('users.id', self::currentUser()->id);
         try {
             $response = $data->paginate(QueryHelper::limit());
+
+            $response->getCollection()->transform(function ($value) {
+                $value->total_stages = count($value->stages);
+                unset($value->stages);
+
+                return $value;
+            });
 
             return $response;
         } catch (Exception $e) {
@@ -140,6 +164,7 @@ class CourseService extends BaseService
             'description'          => 'required|min:3',
             'content'              => 'required|min:3',
             'status'               => 'in:' . implode(',', $this->status),
+            'display'              => 'in:' . implode(',', $this->display),
             'specialize_detail_id' => 'required|in:' . implode(',', $specialize_detail_id),
             'customer_level_id'    => 'required|exists:customer_levels,id'
         ];
@@ -169,6 +194,8 @@ class CourseService extends BaseService
             'content.min'      => 'Nội dung phải từ 3 kí tự !',
 
             'status.in' => 'Trạng thái hoạt động không hợp lệ !',
+
+            'display.in' => 'Trạng thái hiển thị không hợp lệ !',
 
             'specialize_detail_id.required' => 'Hãy chọn chuyên môn cho khoá học !',
             'specialize_detail_id.in'       => 'Chuyên môn không hợp lệ !',
@@ -223,6 +250,7 @@ class CourseService extends BaseService
             'description'          => 'required|min:3',
             'content'              => 'required|min:3',
             'status'               => 'in:' . implode(',', $this->status),
+            'display'              => 'in:' . implode(',', $this->display),
             'specialize_detail_id' => 'required|in:' . implode(',', $specialize_detail_id),
             'customer_level_id'    => 'required|exists:customer_levels,id'
         ];
@@ -253,6 +281,8 @@ class CourseService extends BaseService
 
             'status.in' => 'Trạng thái hoạt động không hợp lệ !',
 
+            'display.in' => 'Trạng thái hiển thị không hợp lệ !',
+
             'specialize_detail_id.required' => 'Hãy chọn chuyên môn cho khoá học !',
             'specialize_detail_id.in'       => 'Chuyên môn không hợp lệ !',
 
@@ -266,12 +296,12 @@ class CourseService extends BaseService
 
     public function preDelete(int|string $id)
     {
-        $userId        = $this->currentUser()->id ?? null;
-        $courseForUser = Course::where('created_by', '=', $userId)->where('id', '=', $id)->first();
-        $countStageCurrentCourse = Stage::where('course_id',$id)->count();
-        if (!$courseForUser || $countStageCurrentCourse > 0 ) {
+        $userId                  = $this->currentUser()->id ?? null;
+        $courseForUser           = Course::where('created_by', '=', $userId)->where('id', '=', $id)->first();
+        $countStageCurrentCourse = Stage::where('course_id', $id)->count();
+        if (!$courseForUser || $countStageCurrentCourse > 0) {
             throw new BadRequestException(
-                ['message' => __("Khoá học không tồn tại !")], new Exception()
+                ['message' => __("Xoá khoá học không thành công !")], new Exception()
             );
         }
         parent::preDelete($id);

@@ -19,9 +19,9 @@ class CustomerLevelService extends BaseService
         $this->model = new CustomerLevel();
     }
 
-    public function preGet(int|string $id)
+    public function getAllCustomerLevelNoPaginate()
     {
-        return $this->with('courses');
+        return CustomerLevel::all();
     }
 
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
@@ -56,7 +56,7 @@ class CustomerLevelService extends BaseService
 
     public function preDelete(int|string $id)
     {
-        $data = Course::where('customer_level_id',$id)->count();
+        $data = Course::where('customer_level_id', $id)->count();
         if ($data > 0) {
             throw new BadRequestException(
                 ['message' => __("Xoá không thành công !")], new Exception()

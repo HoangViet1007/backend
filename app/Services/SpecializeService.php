@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
 use App\Models\Specialize;
+use Exception;
 
 /**
  * @Author apple

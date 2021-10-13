@@ -9,11 +9,13 @@ use Illuminate\Http\Request;
 
 class CustomerLevelController extends Controller
 {
-    public BaseService $service ;
+    public BaseService $service;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->service = new CustomerLevelService();
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -21,13 +23,18 @@ class CustomerLevelController extends Controller
      */
     public function index(): JsonResponse
     {
-        return response()->json($this->service->getAll()) ;
+        return response()->json($this->service->getAll());
+    }
+
+    public function getAllCustomerLevelNoPaginate(): JsonResponse
+    {
+       return response()->json($this->service->getAllCustomerLevelNoPaginate());
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      *
      * @return JsonResponse
      */
@@ -39,7 +46,7 @@ class CustomerLevelController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      *
      * @return JsonResponse
      */
@@ -52,20 +59,20 @@ class CustomerLevelController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int                      $id
      *
      * @return JsonResponse
      */
     public function update(Request $request, $id): JsonResponse
     {
-        return response()->json($this->service->update($id,$request));
+        return response()->json($this->service->update($id, $request));
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      *
      * @return JsonResponse
      */

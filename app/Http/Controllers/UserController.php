@@ -6,10 +6,12 @@ use App\Constants\RoleConstant;
 use App\Models\Role;
 use App\Services\BaseService;
 use App\Services\UserService;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Laravel\Passport\Client as OClient;
 
 class UserController extends Controller
 {
@@ -98,6 +100,11 @@ class UserController extends Controller
         return response()->json($this->service->update($id, $request));
     }
 
+    public function editUser(Request $request, $id): JsonResponse
+    {
+        return response()->json($this->service->editUser($id, $request));
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -123,12 +130,14 @@ class UserController extends Controller
             'password' => 'required|min:6'
         ];
         $messages = [
+            'email.required'    => 'Hãy nhập địa chỉ email !',
+            'email.email'       => 'Địa chỉ email không hợp lê !',
             'password.required' => 'Hãy nhập mật khẩu !',
             'password.min'      => 'Mật khẩu phải tối thiểu 6 kí tự !',
         ];
         $this->service->doValidate($request, $rules, $messages);
 
-        // authen
+        // authentication
         $credentials = request(['email', 'password']);
         if (!Auth::attempt($credentials)) {
             return response()->json([
@@ -141,6 +150,7 @@ class UserController extends Controller
         $tokenResult = $user->createToken('Personal Access Token');
         $token       = $tokenResult->token;
 
+
         // check remember me
         if ($request->remember_me) {
             $token->expires_at = Carbon::now()->addWeeks(1);
@@ -152,20 +162,80 @@ class UserController extends Controller
                                     'token_type'   => 'Bearer',
                                     'expires_at'   => Carbon::parse(
                                         $tokenResult->token->expires_at
-                                    )->toDateTimeString()
+                                    )->toDateTimeString(),
+                                    'google_user'  => $user
                                 ]);
     }
 
-    public function logout(Request $request)
+    public function loginVPS(Request $request): JsonResponse
     {
-        if (Auth::check()) {
-            $request->user()->token()->revoke();
+        // validate
+        $rules    = [
+            'email'    => 'required|email',
+            'password' => 'required|min:6'
+        ];
+        $messages = [
+            'email.required'    => 'Hãy nhập địa chỉ email !',
+            'email.email'       => 'Địa chỉ email không hợp lê !',
+            'password.required' => 'Hãy nhập mật khẩu !',
+            'password.min'      => 'Mật khẩu phải tối thiểu 6 kí tự !',
+        ];
+        $this->service->doValidate($request, $rules, $messages);
 
+        // authentication
+        $credentials = request(['email', 'password']);
+        if (!Auth::attempt($credentials)) {
             return response()->json([
-                                        'message' => 'Đăng xuất thành công !'
-                                    ]);
-        } else {
-            return false;
+                                        'message' => 'Mật khẩu hoặc tài khoản không chính xác !'
+                                    ], 401);
         }
+
+        //create token and refresh token
+        $oClient  = OClient::where('password_client', 1)->first();
+        $response = Http::asForm()->post(env('HTTP') . '/oauth/token', [
+            "grant_type"    => "password",
+            "client_id"     => $oClient->id,
+            "client_secret" => $oClient->secret,
+            "username"      => $request->email,
+            "password"      => $request->password,
+            "scope"         => "*"
+        ]);
+
+        return response()->json([
+                                    'token' => $response,
+                                    'user'  => Auth::user()
+                                ]);
+    }
+
+    public function refreshToken(Request $request): JsonResponse
+    {
+        $this->doValidate($request,
+                          ['refresh_token' => 'required'],
+                          ['refresh_token' => 'Hãy nhập refresh-token để gia hạn đăng nhập !']
+        );
+        $oClient  = OClient::where('password_client', 1)->first();
+        $response = Http::asForm()->post(env('HTTP') . '/oauth/token', [
+            "grant_type"    => "refresh_token",
+            'refresh_token' => $request->refresh_token,
+            "client_id"     => $oClient->id,
+            "client_secret" => $oClient->secret,
+            "scope"         => "*",
+        ]);
+
+        return response()->json([
+                                    'token' => $response,
+                                    'user'  => Auth::user()
+                                ]);
+    }
+
+
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->token()->revoke();
+
+        return response()->json([
+                                    'message' => 'Đăng xuất thành công !'
+                                ]);
+
     }
 }
