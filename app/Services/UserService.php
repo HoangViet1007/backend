@@ -4,12 +4,13 @@ namespace App\Services;
 
 use App\Constants\SexConstant;
 use App\Constants\StatusConstant;
+use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Models\SpecializeDetail;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -150,10 +151,82 @@ class UserService extends BaseService
         return parent::updateRequestValidate($id, $request, $rules, $messages);
     }
 
+    public function postUpdate(int|string $id, object $request, Model $model)
+    {
+        if (isset($request->role_ids)) {
+            $model->roles()->sync($request->role_ids);
+            parent::postUpdate($id, $request, $model);
+        }
+    }
+
+    public function editUser($id, object $request)
+    {
+        $this->doValidate($request,
+                          [
+                              'name'    => 'required|min:3',
+                              'image'   => 'required',
+                              'address' => 'required',
+                              'phone'   => 'required|regex:/(0)[0-9]{9}/',
+                              'sex'     => 'required|in:' . implode(',', $this->sex),
+                          ],
+                          [
+                              'name.required'    => 'Hãy nhập họ và tên !',
+                              'name.min'         => 'Họ và tên tối thiểu phải 3 kí tự !',
+                              'image.required'   => 'Hãy nhập hình ảnh !',
+                              'address.required' => 'Hãy nhập địa chỉ !',
+                              'phone.required'   => 'Hãy nhập số điện thoại !',
+                              'phone.regex'      => 'Số điện thoại không hợp lệ !',
+                              'sex.required'     => 'Hãy chọn trạng giới tính !',
+                              'sex.in'           => 'Giới tính không hợp lệ !',
+                          ]);
+
+        DB::beginTransaction();
+        // Set data for updated entity
+        $fillAbles = $this->model->getFillable();
+        $guarded   = $this->model->getGuarded();
+
+        $model = $this->get($id);
+
+        foreach ($fillAbles as $fillAble) {
+            if (isset($request->$fillAble) && !in_array($fillAble, $guarded)) {
+                $model->$fillAble = $this->_handleRequestData($request->$fillAble) ?? $model->$fillAble;
+            }
+        }
+
+        try {
+            $model->save();
+            DB::commit();
+
+            return $model;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+
+    }
+
+    public function preDelete(int|string $id)
+    {
+        $countSpecializeDetailCurrentUser = SpecializeDetail::where('user_id', $id)->count();
+        if ($countSpecializeDetailCurrentUser > 0) {
+            throw new BadRequestException(
+                ['message' => __("Xoá tài khoản không thành công !")], new Exception()
+            );
+        }
+        parent::preDelete($id);
+    }
+
+    public function postDelete(int|string $id)
+    {
+        DB::table('model_has_roles')->where('user_id', '=', $id)->delete();
+        parent::postDelete($id);
+    }
+
     public function getCurrentUserInformation(object $request): object
     {
         try {
             $user = $this->get($request->user()->id);
+
             return $user;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);

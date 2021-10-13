@@ -26,6 +26,11 @@ class CourseController extends Controller
         return response()->json($this->service->getAll());
     }
 
+    public function getAllCourseCurrentPtNoPaginate(): JsonResponse
+    {
+        return response()->json($this->service->getAllCourseCurrentPtNoPaginate());
+    }
+
     public function getCourseCurrentPt(): JsonResponse
     {
         return response()->json($this->service->getCourseCurrentPt());
@@ -70,7 +75,7 @@ class CourseController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        return response()->json($this->service->update($id,$request));
+        return response()->json($this->service->update($id, $request));
     }
 
     /**
