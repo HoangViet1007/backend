@@ -15,14 +15,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::resource('/demo', 'DemoController');
+// login cho tk thuong
 Route::post('/login', 'UserController@login')->name('login');
-Route::get('/who-am-i', 'UserController@getCurrentUserInformation')->name('who-am-i')->middleware('auth:api');
+// login cho tk google
+Route::post('/login/google', 'GoogleController@loginAccountGoogle')->name('loginGoogle');
+// login cho tk thuong co refresh token
+Route::post('/loginVPS', 'UserController@loginVPS')->name('loginVPS');
+// khi het han login truyen refretoken de gia han
+Route::post('/refresh-token', 'UserController@refreshToken');
 Route::get('logout', 'UserController@logout')->name('logout')->middleware('auth:api');
+// redirect va callback acount gg
+Route::get('/redirect', 'GoogleController@redirectToProvider');
+Route::get('/callback', 'GoogleController@handleProviderCallback');
 
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
-
-    Route::get('/redirect', 'GoogleController@redirectToProvider');
-    Route::get('/callback', 'GoogleController@handleProviderCallback');
+    Route::get('/who-am-i', 'UserController@getCurrentUserInformation')->name('who-am-i');
     // BMI
     Route::get('BMI', 'BMIController@countBMI');
 
@@ -50,14 +57,16 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('specialize-detail/select-option/','SpecializeDetailController@getAllUseSelectOption');
     Route::get('specialize-detail/pt','SpecializeDetailController@getAllByPt');
     Route::delete('specialize-detail/pt/{id}', 'SpecializeDetailController@destroyByPt');
-    Route::resource('specialize-detail','SpecializeDetailController');
+    Route::resource('specialize-detail', 'SpecializeDetailController');
 
     //user
     Route::post('user_pt', 'UserController@addUserHasRolePt');
     Route::post('user_customer', 'UserController@addUserHasRoleCustomer');
+    Route::put('user-edit/{id}', 'UserController@editUser');
     Route::resource('user', 'UserController');
 
     // course
+    Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
     Route::get('course/pt', 'CourseController@getCourseCurrentPt');
     Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');
     Route::resource('course', 'CourseController');

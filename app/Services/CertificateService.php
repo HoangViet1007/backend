@@ -7,6 +7,7 @@ use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Certificate;
 use App\Models\User;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
