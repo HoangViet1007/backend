@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Slide extends Model
+class Specialize extends Model
 {
     use HasFactory, softDeletes;
 
-    protected $table = 'slides';
+    protected $table = 'specializes';
     protected $guarded = [] ;
-    protected $fillable = ['name','image','alt','status','link','title','short_content','content'];
+    protected $fillable = ['name', 'status', 'description'];
 }
