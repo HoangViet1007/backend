@@ -6,6 +6,7 @@ use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Certificate;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -25,8 +26,19 @@ class CertificateService extends BaseService
 
     public function getAll(): LengthAwarePaginator
     {
+        $idUser = auth()->user()->id;
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->with(['specializes']);
+        $data = $this->queryHelper->buildQuery($this->model)->with(['user', 'specializes'])
+            ->join('specialize_details', 'certificates.specialize_detail_id',
+                'specialize_details.id')
+            ->join('users',
+                function ($join) use ($idUser) {
+                    $join->on('users.id', '=', 'specialize_details.user_id')
+                        ->where('users.id', $idUser);
+                })
+            ->select('certificates.*');;
+
+
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
