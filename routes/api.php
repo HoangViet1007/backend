@@ -43,10 +43,18 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('slide', 'SlideController');
 
     // specialize
+    Route::get('specialize/select-option/','SpecializeController@getAllUseSelectOption');
     Route::resource('specialize', 'SpecializeController');
 
     // specialize
+<<<<<<< HEAD
     Route::resource('specialize-detail', 'SpecializeDetailController');
+=======
+    Route::get('specialize-detail/select-option/','SpecializeDetailController@getAllUseSelectOption');
+    Route::get('specialize-detail/pt','SpecializeDetailController@getAllByPt');
+    Route::delete('specialize-detail/pt/{id}', 'SpecializeDetailController@destroyByPt');
+    Route::resource('specialize-detail','SpecializeDetailController');
+>>>>>>> 65474b75a689dd68328775a646690eaab3d27b76
 
     //user
     Route::post('user_pt', 'UserController@addUserHasRolePt');

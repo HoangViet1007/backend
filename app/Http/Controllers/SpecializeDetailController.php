@@ -23,7 +23,17 @@ class SpecializeDetailController extends Controller
      */
     public function index(): JsonResponse
     {
-        return response()->json($this->service->getAll());
+        return response()->json($this->service->getAllByAdmin());
+    }
+
+    public function getAllByPt(): JsonResponse
+    {
+        return response()->json($this->service->getAllByPt());
+    }
+
+    public function getAllUseSelectOption(): JsonResponse
+    {
+        return response()->json($this->service->getAllUseSelectOption());
     }
 
     /**
@@ -81,6 +91,11 @@ class SpecializeDetailController extends Controller
      * @return JsonResponse
      */
     public function destroy($id): JsonResponse
+    {
+        return response()->json($this->service->deleteByAdmin($id));
+    }
+
+    public function destroyByPt($id): JsonResponse
     {
         return response()->json($this->service->delete($id));
     }
