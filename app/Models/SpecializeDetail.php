@@ -28,5 +28,10 @@ class SpecializeDetail extends Model
     {
         return $this->hasMany(Certificate::class, 'specialize_detail_id', 'id');
     }
+
+    public function courses(): object
+    {
+        return $this->hasMany(Course::class, 'specialize_detail_id', 'id');
+    }
 }
 
