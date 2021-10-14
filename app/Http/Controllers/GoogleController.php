@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\RoleConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
+use App\Models\Role;
 use App\Models\SocialAccount;
 use App\Models\User;
+use App\Services\UserService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +18,8 @@ use Laravel\Socialite\Facades\Socialite;
 
 class GoogleController extends Controller
 {
+    public $roleConstant = RoleConstant::ALL;
+
     public function redirectToProvider()
     {
         return Socialite::driver('google')->stateless()->redirect();
@@ -48,7 +53,7 @@ class GoogleController extends Controller
 
             return response()->json([
                                         'access_token' => $accessToken,
-                                        'google_user' => $userSocial,
+                                        'google_user'  => $userSocial,
                                     ]);
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
@@ -57,6 +62,19 @@ class GoogleController extends Controller
 
     public function loginAccountGoogle(Request $request): JsonResponse
     {
+        $service = new UserService();
+        $service->doValidate($request,
+                             [
+                                 'access_token' => 'required',
+                                 'role'         => 'required|in:' . implode(',', $this->roleConstant),
+                             ],
+                             [
+                                 'access_token.required' => 'Hãy nhập access_token !',
+                                 'role.required'         => 'Hãy nhập chức vụ !',
+                                 'role.in'               => 'Chức vụ không hợp lệ !',
+                             ]
+        );
+
         try {
             $userSocial = Socialite::driver('google')->stateless()
                                    ->userFromToken($request->access_token);
@@ -69,7 +87,7 @@ class GoogleController extends Controller
                               })
                               ->first();
 
-            DB::transaction(function () use ($userSocial, &$user) {
+            DB::transaction(function () use ($userSocial, &$user, $request) {
                 $socialAccount = SocialAccount::firstOrNew(
                     ['social_id' => $userSocial->getId(), 'social_provider' => 'google']
                 );
@@ -84,6 +102,12 @@ class GoogleController extends Controller
                                              'email_verified_at' => Carbon::now()->toDateTimeString(),
                                          ]);
                     $socialAccount->fill(['user_id' => $user->id])->save();
+
+                    // add role cho user
+                    if (isset($request->role)) {
+                        $role = Role::where('name', $request->role)->first();
+                        DB::table('model_has_roles')->insert(['role_id' => $role->id, 'user_id' => $user->id]);
+                    }
                 }
             });
 
