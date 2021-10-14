@@ -225,9 +225,9 @@ class UserService extends BaseService
     public function getCurrentUserInformation(object $request): object
     {
         try {
-            $user = $this->get($request->user()->id);
+            $entity = $this->model->with('roles')->findOrFail($request->user()->id);
 
-            return $user;
+            return $entity;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }

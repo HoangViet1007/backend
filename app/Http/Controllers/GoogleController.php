@@ -44,7 +44,7 @@ class GoogleController extends Controller
                 }
             });
 
-            $accessToken = $user->createToken('auth')->accessToken;
+            $accessToken = $user->createToken('Personal Access Token')->accessToken;
 
             return response()->json([
                                         'access_token' => $accessToken,
