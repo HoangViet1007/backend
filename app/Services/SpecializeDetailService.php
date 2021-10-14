@@ -29,7 +29,7 @@ class SpecializeDetailService extends BaseService
     {
         $this->preGetAll();
         $id = $this->currentUser()->id ?? null;
-        $data = $this->queryHelper->buildQuery($this->model)->with('specialize')
+        $data = $this->queryHelper->buildQuery($this->model)->with('specialize', 'certificates', 'courses')
             ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
             ->select('specialize_details.*', 'specializes.name')
             ->where('user_id', $id);
