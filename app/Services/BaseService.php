@@ -6,6 +6,7 @@ use Exception;
 use Faker\Provider\Uuid;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -64,7 +65,7 @@ abstract class BaseService implements BaseServiceInterface
         }
     }
 
-    public function getAllNoPaginate(): LengthAwarePaginator
+    public function getAllNoPaginate(): Collection
     {
         $this->preGetAll();
         $data = $this->queryHelper->buildQuery($this->model)->get();
