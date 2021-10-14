@@ -29,7 +29,10 @@ class SpecializeDetailService extends BaseService
     {
         $this->preGetAll();
         $id = $this->currentUser()->id ?? null;
-        $data = $this->queryHelper->buildQuery($this->model)->with('specialize')->where('user_id', $id);
+        $data = $this->queryHelper->buildQuery($this->model)->with('specialize')
+            ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
+            ->select('specialize_details.*', 'specializes.name')
+            ->where('user_id', $id);
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
@@ -43,7 +46,7 @@ class SpecializeDetailService extends BaseService
     {
         $this->preGetAll();
         $id = $this->currentUser()->id ?? null;
-        $data = $this->queryHelper->buildQuery($this->model)->with('specialize')->where('user_id', $id);
+        $data = $this->queryHelper->buildQuery($this->model)->with('specialize', 'certificates', 'courses')->where('user_id', $id);
         try {
             $response = $data->get();
             $this->postGetAll($response);
@@ -56,7 +59,9 @@ class SpecializeDetailService extends BaseService
     public function getAllByAdmin(): LengthAwarePaginator
     {
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->with('specialize');
+        $data = $this->queryHelper->buildQuery($this->model)->with('specialize', 'certificates', 'courses')
+            ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
+            ->select('specialize_details.*', 'specializes.name');
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
@@ -130,7 +135,7 @@ class SpecializeDetailService extends BaseService
                 'exists:specializes,id',
                 Rule::unique('specialize_details',)->where(function ($query) use ($id) {
                     return $query->where('user_id', '=', $this->currentUser()->id)
-                                 ->where('id', '!=', $id);
+                        ->where('id', '!=', $id);
                 }),
             ]
         ];
