@@ -85,7 +85,6 @@ class SpecializeDetailService extends BaseService
         $data = $this->get($id);
         try {
             $deleted = $data->delete();
-            $this->postDelete($id);
             DB::commit();
             return $deleted;
         } catch (Exception $e) {
