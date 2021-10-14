@@ -201,6 +201,8 @@ class UserController extends Controller
             "scope"         => "*"
         ]);
 
+
+
         return response()->json([
                                     'token' => $response->json(),
                                     'user'  => Auth::user()
@@ -223,7 +225,7 @@ class UserController extends Controller
         ]);
 
         return response()->json([
-                                    'token' => $response,
+                                    'token' => $response->json(),
                                     'user'  => Auth::user()
                                 ]);
     }
