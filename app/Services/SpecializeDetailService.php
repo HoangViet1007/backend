@@ -29,7 +29,7 @@ class SpecializeDetailService extends BaseService
     {
         $this->preGetAll();
         $id = $this->currentUser()->id ?? null;
-        $data = $this->queryHelper->buildQuery($this->model)->with('specialize')
+        $data = $this->queryHelper->buildQuery($this->model)->with('specialize', 'certificates', 'courses')
             ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
             ->select('specialize_details.*', 'specializes.name')
             ->where('user_id', $id);
@@ -85,7 +85,6 @@ class SpecializeDetailService extends BaseService
         $data = $this->get($id);
         try {
             $deleted = $data->delete();
-            $this->postDelete($id);
             DB::commit();
             return $deleted;
         } catch (Exception $e) {
