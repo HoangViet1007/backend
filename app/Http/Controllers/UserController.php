@@ -211,7 +211,7 @@ class UserController extends Controller
 
     public function refreshToken(Request $request): JsonResponse
     {
-        $this->doValidate($request,
+        $this->service->doValidate($request,
                           ['refresh_token' => 'required'],
                           ['refresh_token' => 'Hãy nhập refresh-token để gia hạn đăng nhập !']
         );
