@@ -65,18 +65,6 @@ abstract class BaseService implements BaseServiceInterface
         }
     }
 
-    public function getAllNoPaginate(): Collection
-    {
-        $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->get();
-        try {
-            return $data;
-        } catch (Exception $e) {
-            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
-        }
-    }
-
-
     /**
      * Get Entity via Id
      *
