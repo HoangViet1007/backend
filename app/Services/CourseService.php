@@ -22,7 +22,7 @@ use Illuminate\Validation\Rule;
  */
 class CourseService extends BaseService
 {
-    protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING];
+    protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING, StatusConstant::PAUSE];
     protected array $display = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
 
 
@@ -163,7 +163,6 @@ class CourseService extends BaseService
             'price'                => 'required|numeric|min:1',
             'description'          => 'required|min:3',
             'content'              => 'required|min:3',
-            'status'               => 'in:' . implode(',', $this->status),
             'display'              => 'in:' . implode(',', $this->display),
             'specialize_detail_id' => 'required|in:' . implode(',', $specialize_detail_id),
             'customer_level_id'    => 'required|exists:customer_levels,id'
@@ -292,6 +291,25 @@ class CourseService extends BaseService
         ];
 
         return parent::updateRequestValidate($id, $request, $rules, $messages);
+    }
+
+    public function updateCourseForAdmin($id, object $request)
+    {
+        $course = Course::findOrFail($id);
+        if(!$course){
+            throw new BadRequestException(
+                ['message' => __("Khoá học không tồn tại !")], new Exception()
+            );
+        }
+        $this->doValidate($request,
+                          [
+                              'status' => 'in:' . implode(',', $this->status),
+                          ],
+                          [
+                              'status.in' => 'Trạng thái hoạt động không hợp lệ !',
+                          ]
+        );
+        return $course->update(['status'=>$request->status]);
     }
 
     public function preDelete(int|string $id)
