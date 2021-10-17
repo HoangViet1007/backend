@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Models\CoursePlanes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
@@ -88,19 +89,17 @@ class CoursePlaneService extends BaseService
 
     }
 
-    public function add($request): Model
+
+    public function preAdd(object $request)
     {
-        $disk = Storage::disk('s3');
+//        $validate = $this->doValidate($request,['video_link' => 'file|max:1048576'],[]);
+        if (!empty($request->file('video_link'))) {
+            $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
+            $url = env('S3_URL') . $path;
+        }
 
-        $disk->put('aaa/bbb.jpg', file_get_contents($request->file('video_link')));
-
-        $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
-        $request->merge([
-            'size' => $request->file->getClientSize(),
-            'path' => $path
-        ]);
-        dd($path);
-
+        $request->video_link = $url;
+        parent::preAdd($request);
     }
 
 }
