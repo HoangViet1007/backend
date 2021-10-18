@@ -5,7 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddColumnStatusCouserPlanesTable extends Migration
+class CreateTableAccountLevelsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,15 @@ class AddColumnStatusCouserPlanesTable extends Migration
      */
     public function up()
     {
-        Schema::table('course_planes', function (Blueprint $table) {
+        Schema::create('account_levels', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('image');
+            $table->string('display_name');
             $table->enum('status', [StatusConstant::ACTIVE, StatusConstant::INACTIVE])->default(StatusConstant::ACTIVE);
+            $table->integer('course_number');
+            $table->integer('user_number');
+            $table->timestamps();
         });
     }
 
@@ -26,8 +33,6 @@ class AddColumnStatusCouserPlanesTable extends Migration
      */
     public function down()
     {
-        Schema::table('course_planes', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
+        Schema::dropIfExists('account_levels');
     }
 }
