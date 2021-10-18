@@ -26,6 +26,12 @@ Route::get('logout', 'UserController@logout')->name('logout')->middleware('auth:
 Route::get('/redirect', 'GoogleController@redirectToProvider');
 Route::get('/callback', 'GoogleController@handleProviderCallback');
 
+// api clien
+Route::group(['prefix' => '/'], function () {
+    Route::post('user_pt', 'UserController@addUserHasRolePt');
+    Route::post('user_customer', 'UserController@addUserHasRoleCustomer');
+});
+
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
     // BMI
@@ -58,8 +64,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('specialize-detail', 'SpecializeDetailController');
 
     //user
-    Route::post('user_pt', 'UserController@addUserHasRolePt');
-    Route::post('user_customer', 'UserController@addUserHasRoleCustomer');
     Route::put('user-edit/{id}', 'UserController@editUser');
     Route::resource('user', 'UserController');
 
@@ -67,7 +71,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
     Route::get('course/pt', 'CourseController@getCourseCurrentPt');
     Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');
-    Route::put('course/pt/{id}','CourseController@updateCourseForAdmin');
+    Route::put('course/pt/{id}', 'CourseController@updateCourseForAdmin');
     Route::resource('course', 'CourseController');
 
     // Stage of PT and Admin
@@ -83,7 +87,5 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::put('course_planes/{id}', 'CoursePlansController@editCoursePlanes');
     Route::delete('course_planes/{id}', 'CoursePlansController@deleteCoursePlanes');
     Route::get('detail-course_planes/{id}', 'CoursePlansController@detailCoursePlanes');
-
-
 });
 
