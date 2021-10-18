@@ -100,4 +100,8 @@ class SpecializeDetailController extends Controller
         return response()->json($this->service->delete($id));
     }
 
+    public function restore($id){
+
+    }
+
 }
