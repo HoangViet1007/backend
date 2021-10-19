@@ -166,32 +166,6 @@ abstract class BaseService implements BaseServiceInterface
     }
 
     /**
-     * restore 1 entity by ID
-     *
-     * @param int|string $id
-     *
-     * @return bool
-     */
-    public function restore(int|string $id): bool
-    {
-        DB::beginTransaction();
-        $data = $this->get($id);
-        try {
-            if($data->trashed()){
-                $restored = $data->restore();
-            }
-            DB::commit();
-            return $restored;
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw new SystemException(
-                ['message' => __('can-not-del', ['attribute' => __('entity')]) . ": $id"],
-                $e
-            );
-        }
-    }
-
-    /**
      * Delete a Entity via uuid
      *
      * @param string $uuid
