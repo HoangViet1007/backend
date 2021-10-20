@@ -75,14 +75,14 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('course', 'CourseController');
 
     // Stage of PT and Admin
-    Route::get('stage/{id}', 'StageController@listStage');
+    Route::get('stage-of-course/{id}', 'StageController@listStage');
     Route::post('stage', 'StageController@addStage');
     Route::put('stage/{id}', 'StageController@editStage');
     Route::delete('stage/{id}', 'StageController@deleteStage');
     Route::get('detail-stage/{id}', 'StageController@detailStage');
 
     // Course_Planes
-    Route::get('course_planes/{id}', 'CoursePlansController@listCoursePlanes');
+    Route::get('course_planes-of-stage/{id}', 'CoursePlansController@listCoursePlanes');
     Route::post('course_planes', 'CoursePlansController@addCoursePlanes');
     Route::put('course_planes/{id}', 'CoursePlansController@editCoursePlanes');
     Route::delete('course_planes/{id}', 'CoursePlansController@deleteCoursePlanes');

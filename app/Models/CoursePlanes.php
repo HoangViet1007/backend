@@ -22,4 +22,6 @@ class CoursePlanes extends Model
     {
         return $this->belongsTo(Stage::class, 'stage_id');
     }
+
+
 }
