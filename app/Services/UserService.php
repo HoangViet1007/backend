@@ -6,6 +6,7 @@ use App\Constants\SexConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Models\AccountLevel;
 use App\Models\SpecializeDetail;
 use App\Models\User;
 use Exception;
@@ -13,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Testing\Fluent\Concerns\Has;
 
 /**
  * @Author apple
@@ -34,10 +34,15 @@ class UserService extends BaseService
      * @param object $request
      */
 
-    public function addUser(object $request, array $role_ids = []): Model
+    public function addUser(object $request, array $role_ids = [], $account_level_id = null): Model
     {
         DB::beginTransaction();
         $request = $this->preAddUser($request) ?? $request;
+        // check role input
+        $request_role_ids = $request->role_ids ?? [];
+        if (count($request_role_ids) > 0) {
+            $role_ids = $request_role_ids;
+        }
         // Set data to new entity
 
         $fillAbles = $this->model->getFillable();
@@ -48,7 +53,7 @@ class UserService extends BaseService
                 $this->model->$fillAble = $this->_handleRequestData($request->$fillAble);
         try {
             $this->model->save();
-            $this->postAddUser($request, $this->model, $role_ids);
+            $this->postAddUser($request, $this->model, $role_ids, $account_level_id);
             DB::commit();
 
             return $this->model;
@@ -61,90 +66,102 @@ class UserService extends BaseService
 
     public function preAddUser(object $request)
     {
+        $account_level = AccountLevel::where('status', StatusConstant::ACTIVE)->pluck('id')
+                                     ->toArray();
         $this->doValidate($request,
                           [
-                              'name'       => 'required|min:3',
-                              'image'      => 'required',
-                              'address'    => 'required',
-                              'phone'      => 'required|regex:/(0)[0-9]{9}/',
-                              'email'      => 'required|email|unique:users,email',
-                              'sex'        => 'required|in:' . implode(',', $this->sex),
-                              'role_ids'   => 'nullable|array',
-                              'role_ids.*' => 'exists:roles,id',
-                              'password'   => 'required|min:6',
+                              'name'             => 'required|min:3',
+                              'image'            => 'required',
+                              'address'          => 'required',
+                              'phone'            => 'required|regex:/(0)[0-9]{9}/',
+                              'email'            => 'required|email|unique:users,email',
+                              'sex'              => 'required|in:' . implode(',', $this->sex),
+                              'role_ids'         => 'nullable|array',
+                              'role_ids.*'       => 'exists:roles,id',
+                              'password'         => 'required|min:6',
+                              'account_level_id' => 'in:' . implode(',', $account_level),
                           ],
                           [
-                              'name.required'     => 'Hãy nhập họ và tên !',
-                              'name.min'          => 'Họ và tên tối thiểu phải 3 kí tự !',
-                              'image.required'    => 'Hãy nhập hình ảnh !',
-                              'address.required'  => 'Hãy nhập địa chỉ !',
-                              'phone.required'    => 'Hãy nhập số điện thoại !',
-                              'phone.regex'       => 'Số điện thoại không hợp lệ !',
-                              'email.required'    => 'Hãy nhập địa chỉ email !',
-                              'email.email'       => 'Địa chỉ email không hợp lệ !',
-                              'email.unique'      => 'Địa chỉ email đã tồn tại !',
-                              'sex.required'      => 'Hãy chọn trạng giới tính !',
-                              'sex.in'            => 'Giới tính không hợp lệ !',
-                              'status.required'   => 'Hãy chọn trạng thái hoạt động !',
-                              'role_ids.array'    => 'Chức vụ không hợp lệ !',
-                              'role_ids.*.exists' => 'Chức vụ :attribute không  tồn tại !',
-                              'password.required' => 'Hãy nhập mật khẩu !',
-                              'password.min'      => 'Mật khẩu phải tối thiểu 6 kí tự !',
+                              'name.required'       => 'Hãy nhập họ và tên !',
+                              'name.min'            => 'Họ và tên tối thiểu phải 3 kí tự !',
+                              'image.required'      => 'Hãy nhập hình ảnh !',
+                              'address.required'    => 'Hãy nhập địa chỉ !',
+                              'phone.required'      => 'Hãy nhập số điện thoại !',
+                              'phone.regex'         => 'Số điện thoại không hợp lệ !',
+                              'email.required'      => 'Hãy nhập địa chỉ email !',
+                              'email.email'         => 'Địa chỉ email không hợp lệ !',
+                              'email.unique'        => 'Địa chỉ email đã tồn tại !',
+                              'sex.required'        => 'Hãy chọn trạng giới tính !',
+                              'sex.in'              => 'Giới tính không hợp lệ !',
+                              'status.required'     => 'Hãy chọn trạng thái hoạt động !',
+                              'role_ids.array'      => 'Chức vụ không hợp lệ !',
+                              'role_ids.*.exists'   => 'Chức vụ :attribute không  tồn tại !',
+                              'password.required'   => 'Hãy nhập mật khẩu !',
+                              'password.min'        => 'Mật khẩu phải tối thiểu 6 kí tự !',
+                              'account_level_id.in' => 'Cấp độ tài khoản không hợp lệ !'
                           ]
         );
         if ($request instanceof Request) {
             $request->merge(
                 [
                     'password' => Hash::make($request->password),
-                    'status' => StatusConstant::ACTIVE
+                    'status'   => StatusConstant::ACTIVE
                 ]
             );
         } else {
             $request->password = Hash::make($request->password);
-            $request->status = StatusConstant::ACTIVE ;
+            $request->status   = StatusConstant::ACTIVE;
         }
     }
 
-    public function postAddUser(object $request, Model $model, array $role_ids = [])
+    public function postAddUser(object $request, Model $model, array $role_ids, $account_level_id)
     {
         if (isset($role_ids)) {
             $model->roles()->attach($role_ids);
+        }
+        if (isset($account_level_id)) {
+            $model->update(['account_level_id' => $account_level_id]);
         }
     }
 
     public function updateRequestValidate(int|string $id, object $request, array $rules = [],
                                           array      $messages = []): bool|array
     {
-        $rules    = [
-            'name'       => 'required|min:3',
-            'image'      => 'required',
-            'address'    => 'required',
-            'phone'      => 'required|regex:/(0)[0-9]{9}/',
-            'email'      => "required|email|unique:users,email,$id",
-            'sex'        => 'required|in:' . implode(',', $this->sex),
-            'status'     => 'required|in:' . implode(',', $this->status),
-            'password'   => 'required|min:6',
-            'role_ids'   => 'nullable|array',
-            'role_ids.*' => 'exists:roles,id',
+        $account_level = AccountLevel::where('status', StatusConstant::ACTIVE)->pluck('id')
+                                     ->toArray();
+        $rules         = [
+            'name'             => 'required|min:3',
+            'image'            => 'required',
+            'address'          => 'required',
+            'phone'            => 'required|regex:/(0)[0-9]{9}/',
+            'email'            => "required|email|unique:users,email,$id",
+            'sex'              => 'required|in:' . implode(',', $this->sex),
+            'status'           => 'required|in:' . implode(',', $this->status),
+            'password'         => 'required|min:6',
+            'role_ids'         => 'nullable|array',
+            'role_ids.*'       => 'exists:roles,id',
+            'account_level_id' => 'in:' . implode(',', $account_level),
         ];
-        $messages = [
-            'name.required'     => 'Hãy nhập họ và tên !',
-            'name.min'          => 'Họ và tên tối thiểu phải 3 kí tự !',
-            'image.required'    => 'Hãy nhập hình ảnh !',
-            'address.required'  => 'Hãy nhập địa chỉ !',
-            'phone.required'    => 'Hãy nhập số điện thoại !',
-            'phone.regex'       => 'Số điện thoại không hợp lệ !',
-            'email.required'    => 'Hãy nhập địa chỉ email !',
-            'email.email'       => 'Địa chỉ email không hợp lệ !',
-            'email.unique'      => 'Địa chỉ email này đã tồn tại !',
-            'sex.required'      => 'Hãy chọn trạng giới tính !',
-            'sex.in'            => 'Giới tính không hợp lệ !',
-            'status.required'   => 'Hãy chọn trạng thái hoạt động !',
-            'status.in'         => 'Trạng thái hoạt động không hợp lệ !',
-            'password.required' => 'Hãy nhập mật khẩu !',
-            'password.min'      => 'Mật khẩu phải tối thiểu 6 kí tự !',
-            'role_ids.array'    => 'Chức vụ không hợp lệ !',
-            'role_ids.*.exists' => 'Chức vụ :attribute không  tồn tại !'
+        $messages      = [
+            'name.required'       => 'Hãy nhập họ và tên !',
+            'name.min'            => 'Họ và tên tối thiểu phải 3 kí tự !',
+            'image.required'      => 'Hãy nhập hình ảnh !',
+            'address.required'    => 'Hãy nhập địa chỉ !',
+            'phone.required'      => 'Hãy nhập số điện thoại !',
+            'phone.regex'         => 'Số điện thoại không hợp lệ !',
+            'email.required'      => 'Hãy nhập địa chỉ email !',
+            'email.email'         => 'Địa chỉ email không hợp lệ !',
+            'email.unique'        => 'Địa chỉ email này đã tồn tại !',
+            'sex.required'        => 'Hãy chọn trạng giới tính !',
+            'sex.in'              => 'Giới tính không hợp lệ !',
+            'status.required'     => 'Hãy chọn trạng thái hoạt động !',
+            'status.in'           => 'Trạng thái hoạt động không hợp lệ !',
+            'password.required'   => 'Hãy nhập mật khẩu !',
+            'password.min'        => 'Mật khẩu phải tối thiểu 6 kí tự !',
+            'role_ids.array'      => 'Chức vụ không hợp lệ !',
+            'role_ids.*.exists'   => 'Chức vụ :attribute không  tồn tại !',
+            'account_level_id.in' => 'Cấp độ tài khoản không hợp lệ !'
+
         ];
 
         return parent::updateRequestValidate($id, $request, $rules, $messages);
