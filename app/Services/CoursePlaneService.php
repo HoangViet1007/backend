@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Models\CoursePlanes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
@@ -26,7 +27,7 @@ class CoursePlaneService extends BaseService
             'name' => 'required|unique:course_planes,name',
             'content' => 'required',
             'descreption' => 'required',
-            'video_link' => 'required',
+            'video_link' => 'required|file|mimes:mp4|max:1048576',
             'stage_id' => 'required|exists:stages,id',
             'status' => 'required|in:' . implode(',', $this->status),
 
@@ -38,6 +39,9 @@ class CoursePlaneService extends BaseService
             'content.required' => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
             'video_link.required' => 'Hãy nhập video cho khóa học !',
+            'video_link.file' => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
+            'video_link.mimes' => 'Xin mời bạn nhập video !',
+            'video_link.max' => 'Video nhập quá dung lượng !',
             'stage_id.required' => 'Hãy chọn giai đoạn của khóa học  !',
             'stage_id.exists' => 'Giai đoạn của khóa học không tồn tại !',
             'status.required' => 'Hãy chọn trạng thái hoạt động !',
@@ -55,7 +59,7 @@ class CoursePlaneService extends BaseService
             'name' => "required|unique:course_planes,name,$id",
             'content' => 'required',
             'descreption' => 'required',
-            'video_link' => 'required',
+            'video_link' => 'required|file|mimes:mp4|max:1048576',
             'stage_id' => 'required|exists:stages,id',
             'status' => 'required|in:' . implode(',', $this->status),
 
@@ -66,6 +70,9 @@ class CoursePlaneService extends BaseService
             'content.required' => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
             'video_link.required' => 'Hãy nhập video cho khóa học !',
+            'video_link.file' => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
+            'video_link.mimes' => 'Xin mời bạn nhập video !',
+            'video_link.max' => 'Video nhập quá dung lượng !',
             'stage_id.required' => 'Hãy chọn giai đoạn của khóa học  !',
             'stage_id.exists' => 'Giai đoạn của khóa học không tồn tại !',
             'status.required' => 'Hãy chọn trạng thái hoạt động !',
@@ -88,19 +95,54 @@ class CoursePlaneService extends BaseService
 
     }
 
-    public function add($request): Model
+
+    public function preAdd(object $request)
     {
-        $disk = Storage::disk('s3');
+        $url = '';
+        if (!empty($request->file('video_link'))) {
+            $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
+            $url = env('S3_URL') . $path;
 
-        $disk->put('aaa/bbb.jpg', file_get_contents($request->file('video_link')));
+        }
+        $request->video_link = $url;
+        parent::preAdd($request);
+    }
 
-        $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
-        $request->merge([
-            'size' => $request->file->getClientSize(),
-            'path' => $path
-        ]);
-        dd($path);
+    public function preUpdate($id, $request)
+    {
+        $item = $this->get($id);
+
+        $url = '';
+        if ($item) {
+            $result = str_replace(env('S3_URL'), '', $item->video_link);
+            Storage::disk('s3')->delete($result);
+            if (!empty($request->file('video_link'))) {
+                $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
+                $url = env('S3_URL') . $path;
+            }
+            $request->video_link = $url;
+            parent::preUpdate($id, $request);
+
+        }else{
+            parent::preUpdate($id, $request);
+
+        }
+
 
     }
 
+
+    public function preDelete($id)
+    {
+        $item = $this->get($id);
+        if ($item) {
+            $result = str_replace(env('S3_URL'), '', $item->video_link);
+            Storage::disk('s3')->delete($result);
+            parent::preDelete($id);
+
+        }
+        parent::preDelete($id);
+
+
+    }
 }
