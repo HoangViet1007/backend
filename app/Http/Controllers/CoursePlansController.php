@@ -43,4 +43,5 @@ class CoursePlansController extends Controller
     {
         return response()->json(($this->service->get($id)));
     }
+
 }
