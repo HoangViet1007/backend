@@ -31,7 +31,8 @@ class User extends Authenticatable
             'password',
             'socialite_id',
             'type_socialite',
-            'email_verified_at'
+            'email_verified_at',
+            'account_level_id'
         ];
 
     /**
