@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Constants\RoleConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
+use App\Models\ModelHasRole;
 use App\Models\Role;
 use App\Models\SocialAccount;
 use App\Models\User;
+use App\Services\BaseService;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -15,10 +17,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class GoogleController extends Controller
 {
-    public $roleConstant = RoleConstant::ALL;
+    public             $roleConstant = RoleConstant::ALL;
+    public BaseService $service;
+
+    public function __construct()
+    {
+        $this->service = new UserService();
+    }
 
     public function redirectToProvider()
     {
@@ -35,7 +44,6 @@ class GoogleController extends Controller
                 $socialAccount = SocialAccount::firstOrNew(
                     ['social_id' => $userSocial->getId(), 'social_provider' => 'google']
                 );
-
                 if (!($user = $socialAccount->user)) {
                     $user = User::create([
                                              'email'             => $userSocial->getEmail(),
@@ -86,6 +94,18 @@ class GoogleController extends Controller
                                         ->where('social_accounts.social_id', '=', $social_id);
                               })
                               ->first();
+            // check khi đăng nhập pt vs customer cùng một email thì ko đc
+            //check role truyền lên với role của user trong hệ thông có trùng nhau hay ko
+            // nếu có thi true nếu ko thì false
+
+            // lấy za role_id của user trong he thong
+            $modelHasRole = ModelHasRole::where('user_id', $user->user_id)->first();
+            // lấy za name role
+            $role = Role::find($modelHasRole->role_id);
+            if ($role->name != $request->role) {
+                // throw new SystemException('Đăng nhập thất bại !' ?? __('system-500'));
+                throw new HttpException(500, 'Đăng nhập thất bại !');
+            }
 
             DB::transaction(function () use ($userSocial, &$user, $request) {
                 $socialAccount = SocialAccount::firstOrNew(
@@ -93,6 +113,10 @@ class GoogleController extends Controller
                 );
 
                 if (!($user = $socialAccount->user)) {
+                    $this->service->doValidate($request,
+                                               ['email' => 'unique:users,email'],
+                                               ['email.unique' => 'Email này đã tồn tại !']
+                    );
                     $user = User::create([
                                              'email'             => $userSocial->getEmail(),
                                              'name'              => $userSocial->getName(),
@@ -116,7 +140,7 @@ class GoogleController extends Controller
 
             return response()->json([
                                         'access_token' => $accessToken,
-                                        'user'  => $user,
+                                        'user'         => $user,
                                     ]);
 
         } catch (Exception $e) {
