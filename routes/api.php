@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use App\Http\Controllers\DemoController ;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -87,5 +89,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::put('course_planes/{id}', 'CoursePlansController@editCoursePlanes');
     Route::delete('course_planes/{id}', 'CoursePlansController@deleteCoursePlanes');
     Route::get('detail-course_planes/{id}', 'CoursePlansController@detailCoursePlanes');
+
+    // account level
+    Route::get('account-level/select-option/', 'AccountLevelController@getAllUseSelectOption');
+    Route::resource('account-level', 'AccountLevelController');
 });
 
