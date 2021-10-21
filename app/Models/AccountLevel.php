@@ -12,4 +12,9 @@ class AccountLevel extends Model
     protected $table    = 'account_levels';
     protected $guarded  = [];
     protected $fillable = ['name', 'image', 'status', 'display_name', 'course_number', 'user_number', 'is_mutable'];
+
+    public function users(): object
+    {
+        return $this->hasMany(User::class, 'account_level_id', 'id');
+    }
 }
