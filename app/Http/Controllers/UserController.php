@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\AccountLevelConstant;
 use App\Constants\RoleConstant;
+use App\Models\AccountLevel;
 use App\Models\Role;
 use App\Services\BaseService;
 use App\Services\UserService;
@@ -10,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Laravel\Passport\Client as OClient;
 
@@ -37,7 +40,10 @@ class UserController extends Controller
         $data     = Role::where('name', RoleConstant::PT)->first();
         $role_ids = [$data->id];
 
-        return response()->json($this->service->addUser($request, $role_ids));
+        $account_level = AccountLevel::where('name',AccountLevelConstant::ACCOUNT_LEVEL_DEFAULT)->first();
+        $account_level_id = $account_level->id;
+
+        return response()->json($this->service->addUser($request, $role_ids, $account_level_id));
     }
 
     public function addUserHasRoleCustomer(Request $request): JsonResponse
@@ -57,22 +63,12 @@ class UserController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $rules    = [
-            'role_ids'   => 'nullable|array',
-            'role_ids.*' => 'exists:roles,id'
-        ];
-        $messages = [
-            'role_ids.array'    => 'Chức vụ không hợp lệ !',
-            'role_ids.*.exists' => 'Chức vụ :attribute không  tồn tại !'
-        ];
-        $this->service->doValidate($request, $rules, $messages);
-        $role_ids = $request->role_ids ?? [];
-        if (count($role_ids) <= 0) {
-            $data     = Role::where('name', RoleConstant::CUSTOMER)->first();
-            $role_ids = [$data->id];
-        }
+        $data     = Role::where('name', RoleConstant::CUSTOMER)->first();
+        $role_ids = [$data->id];
 
-        return response()->json($this->service->addUser($request, $role_ids));
+        $account_level_id = $request->account_level_id ?? null;
+
+        return response()->json($this->service->addUser($request, $role_ids, $account_level_id));
     }
 
     /**
@@ -201,7 +197,6 @@ class UserController extends Controller
         ]);
 
 
-
         return response()->json([
                                     'token' => $response->json(),
                                     'user'  => Auth::user()
@@ -211,8 +206,8 @@ class UserController extends Controller
     public function refreshToken(Request $request): JsonResponse
     {
         $this->service->doValidate($request,
-                          ['refresh_token' => 'required'],
-                          ['refresh_token' => 'Hãy nhập refresh-token để gia hạn đăng nhập !']
+                                   ['refresh_token' => 'required'],
+                                   ['refresh_token' => 'Hãy nhập refresh-token để gia hạn đăng nhập !']
         );
         $oClient  = OClient::where('password_client', 1)->first();
         $response = Http::asForm()->post(env('HTTP') . '/oauth/token', [

@@ -116,7 +116,7 @@ class GoogleController extends Controller
 
             return response()->json([
                                         'access_token' => $accessToken,
-                                        'google_user'  => $userSocial,
+                                        'user'  => $user,
                                     ]);
 
         } catch (Exception $e) {
