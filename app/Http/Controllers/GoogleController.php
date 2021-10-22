@@ -99,12 +99,14 @@ class GoogleController extends Controller
             // nếu có thi true nếu ko thì false
 
             // lấy za role_id của user trong he thong
-            $modelHasRole = ModelHasRole::where('user_id', $user->user_id)->first();
-            // lấy za name role
-            $role = Role::find($modelHasRole->role_id);
-            if ($role->name != $request->role) {
-                // throw new SystemException('Đăng nhập thất bại !' ?? __('system-500'));
-                throw new HttpException(500, 'Đăng nhập thất bại !');
+            if(!empty($user)){
+                $modelHasRole = ModelHasRole::where('user_id', $user->user_id)->first();
+                // lấy za name role
+                $role = Role::find($modelHasRole->role_id);
+                if ($role->name != $request->role) {
+                    // throw new SystemException('Đăng nhập thất bại !' ?? __('system-500'));
+                    throw new HttpException(500, 'Đăng nhập thất bại !');
+                }
             }
 
             DB::transaction(function () use ($userSocial, &$user, $request) {
