@@ -79,7 +79,7 @@ class UserService extends BaseService
                               'role_ids'         => 'nullable|array',
                               'role_ids.*'       => 'exists:roles,id',
                               'password'         => 'required|min:6',
-                              'cf_password'      => 'required:same:password',
+                              'cf_password'      => 'required|same:password',
                               'account_level_id' => 'in:' . implode(',', $account_level),
                           ],
                           [
@@ -99,7 +99,7 @@ class UserService extends BaseService
                               'role_ids.*.exists'    => 'Chức vụ :attribute không  tồn tại !',
                               'password.required'    => 'Hãy nhập mật khẩu !',
                               'password.min'         => 'Mật khẩu phải tối thiểu 6 kí tự !',
-                              'cf_password.required' => 'Nhập lại mật khẩu không hợp lệ !',
+                              'cf_password.required' => 'Hãy nhập lại mật khẩu !',
                               'cf_password.same'     => 'Nhập lại mật khẩu không hợp lệ !',
                               'account_level_id.in'  => 'Cấp độ tài khoản không hợp lệ !'
                           ]
@@ -161,7 +161,7 @@ class UserService extends BaseService
             'status.required'      => 'Hãy chọn trạng thái hoạt động !',
             'status.in'            => 'Trạng thái hoạt động không hợp lệ !',
             'password.required'    => 'Hãy nhập mật khẩu !',
-            'cf_password.required' => 'Nhập lại mật khẩu không hợp lệ !',
+            'cf_password.required' => 'Hãy nhập lại mật khẩu !',
             'cf_password.same'     => 'Nhập lại mật khẩu không hợp lệ !',
             'password.min'         => 'Mật khẩu phải tối thiểu 6 kí tự !',
             'role_ids.array'       => 'Chức vụ không hợp lệ !',
