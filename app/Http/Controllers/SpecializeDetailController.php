@@ -67,7 +67,12 @@ class SpecializeDetailController extends Controller
      */
     public function show($id): JsonResponse
     {
-        return response()->json($this->service->get($id));
+        return response()->json($this->service->getDetailByAdmin($id));
+    }
+
+    public function showByPt($id): JsonResponse
+    {
+        return response()->json($this->service->getDetailByPt($id));
     }
 
     /**

@@ -62,6 +62,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // specialize
     Route::get('specialize-detail/select-option/', 'SpecializeDetailController@getAllUseSelectOption');
     Route::get('specialize-detail/pt', 'SpecializeDetailController@getAllByPt');
+    Route::get('specialize-detail/pt/{id}', 'SpecializeDetailController@showByPt');
     Route::delete('specialize-detail/pt/{id}', 'SpecializeDetailController@destroyByPt');
     Route::resource('specialize-detail', 'SpecializeDetailController');
 
