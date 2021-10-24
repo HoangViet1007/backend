@@ -87,8 +87,22 @@ class CoursePlaneService extends BaseService
     public function listCoursePlanes($id)
     {
         try {
-            $response = CoursePlanes::where('stage_id', $id)->get();
-            return $response;
+            $userID = self::currentUser()->id;
+            $response = CoursePlanes::where('stage_id', $id)->with('cousre')->get();
+            $idUser = '';
+            foreach ($response as $podcast) {
+                if ($podcast['cousre'] != null) {
+                    foreach ($podcast['cousre'] as $value) {
+                        $idUser = $value->created_by;
+                    }
+                }
+            }
+            if ($userID == $idUser) {
+                return $response;
+            } else {
+                return [];
+            }
+
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
@@ -123,7 +137,7 @@ class CoursePlaneService extends BaseService
             $request->video_link = $url;
             parent::preUpdate($id, $request);
 
-        }else{
+        } else {
             parent::preUpdate($id, $request);
 
         }
