@@ -67,14 +67,19 @@ class User extends Authenticatable
                                     'id');
     }
 
-    public function pecializeDetails()
+    public function specializeDetails()
     {
-        return $this->hasOne(SpecializeDetail::class);
+        return $this->hasMany(SpecializeDetail::class);
     }
 
     public function socialAccounts()
     {
         return $this->hasMany(SocialAccount::class);
+    }
+
+    public function accountLevels()
+    {
+        return $this->belongsTo(AccountLevel::class,'account_level_id','id');
     }
 
 }

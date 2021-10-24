@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SpecializeDetail extends Model
 {
@@ -16,7 +17,7 @@ class SpecializeDetail extends Model
 
     public function specialize(): BelongsTo
     {
-        return $this->belongsTo(Specialize::class, 'specialize_id');
+        return $this->belongsTo(Specialize::class, 'specialize_id','id');
     }
     public function user(): BelongsTo
     {
@@ -28,7 +29,7 @@ class SpecializeDetail extends Model
         return $this->hasMany(Certificate::class, 'specialize_detail_id', 'id');
     }
 
-    public function courses(): object
+    public function courses(): HasMany
     {
         return $this->hasMany(Course::class, 'specialize_detail_id', 'id');
     }

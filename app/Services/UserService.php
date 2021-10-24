@@ -5,12 +5,16 @@ namespace App\Services;
 use App\Constants\SexConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Models\AccountLevel;
 use App\Models\SpecializeDetail;
 use App\Models\User;
 use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -28,6 +32,69 @@ class UserService extends BaseService
     function createModel(): void
     {
         $this->model = new User();
+    }
+
+    public function getAll(): LengthAwarePaginator
+    {
+        $this->preGetAll();
+        $request      = \request()->all();
+        $specializes  = $request['specializes__id__eq'] ?? null;
+        $experience   = $request['specialize_details__experience__gt'] ?? null;
+        $accountLevel = $request['account_levels__id__eq'] ?? null;
+        $data         = $this->queryHelper->buildQuery($this->model)
+                                          ->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels'])
+                                          ->when($specializes, function ($q) {
+                                              $q->leftJoin('specialize_details', 'users.id',
+                                                           'specialize_details.user_id');
+                                              $q->leftJoin('specializes', 'specializes.id',
+                                                           'specialize_details.specialize_id');
+                                              $q->distinct();
+                                          })
+                                          ->when($experience, function ($q) {
+                                              $q->leftJoin('specialize_details', 'users.id',
+                                                           'specialize_details.user_id');
+                                              $q->leftJoin('specializes', 'specializes.id',
+                                                           'specialize_details.specialize_id');
+                                              $q->distinct();
+                                          })
+                                          ->when($accountLevel, function ($q) {
+                                              $q->leftJoin('specialize_details', 'users.id',
+                                                           'specialize_details.user_id');
+                                              $q->leftJoin('specializes', 'specializes.id',
+                                                           'specialize_details.specialize_id');
+                                              $q->leftJoin('account_levels', 'users.account_level_id',
+                                                           'account_levels.id');
+                                              $q->distinct();
+                                          })
+                                          ->select('users.*');
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function get(int|string $id): Model
+    {
+        $this->preGet($id);
+        try {
+            $entity
+                = $this->model->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels'])
+                              ->findOrFail($id);
+            $this->postGet($id, $entity);
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     /**
@@ -141,7 +208,7 @@ class UserService extends BaseService
             'sex'              => 'required|in:' . implode(',', $this->sex),
             'status'           => 'required|in:' . implode(',', $this->status),
             'password'         => 'required|min:6',
-            'cf_password'      => 'required:same:password',
+            'cf_password'      => 'required|same:password',
             'role_ids'         => 'nullable|array',
             'role_ids.*'       => 'exists:roles,id',
             'account_level_id' => 'in:' . implode(',', $account_level),
