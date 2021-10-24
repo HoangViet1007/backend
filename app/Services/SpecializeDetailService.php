@@ -3,12 +3,15 @@
 namespace App\Services;
 
 use App\Exceptions\BadRequestException;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Course;
 use App\Models\SpecializeDetail;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -23,6 +26,61 @@ class SpecializeDetailService extends BaseService
     function createModel(): void
     {
         $this->model = new SpecializeDetail();
+    }
+
+    public function getDetailByAdmin(int|string $id): Model
+    {
+        $this->preGet($id);
+        try {
+            if ($this->queryHelper->relations)
+                $this->model = $this->model->with($this->queryHelper->relations);
+
+            $entity = $this->model->with('specialize')
+                ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
+                ->select('specialize_details.*', 'specializes.name')
+                ->findOrFail($id);
+            $this->postGet($id, $entity);
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function getDetailByPt(int|string $id): Model
+    {
+        $userId = $this->currentUser()->id ?? null;
+        $specializeByUser = SpecializeDetail::where('user_id', '=', $userId)->where('id', '=', $id)->first();
+        if (!$specializeByUser) {
+            throw new BadRequestException(
+                ['message' => 'Không có chuyên môn nào theo yêu cầu !'], new Exception()
+            );
+        }
+        parent::preDelete($id);
+        try {
+            if ($this->queryHelper->relations)
+                $this->model = $this->model->with($this->queryHelper->relations);
+
+            $entity = $this->model->with('specialize')
+                ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
+                ->select('specialize_details.*', 'specializes.name')
+                ->findOrFail($id);
+            $this->postGet($id, $entity);
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     public function getAllByPt(): LengthAwarePaginator
