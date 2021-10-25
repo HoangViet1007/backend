@@ -15,7 +15,7 @@ class CoursePlanes extends Model
     protected $primaryKey = 'id';
     protected $guarded = [];
 
-    protected $fillable = ['name', 'content', 'descreption', 'video_link', 'stage_id', 'status'];
+    protected $fillable = ['name', 'content', 'descreption', 'video_link', 'stage_id', 'status','image','type'];
 
 
     public function stage()
