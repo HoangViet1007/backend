@@ -3,14 +3,13 @@
 namespace App\Services;
 
 use App\Constants\StatusConstant;
+use App\Models\Course;
 use App\Models\CoursePlanes;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
-use App\Services\BaseService;
 use App\Models\Stage;
+use Illuminate\Validation\Rule;
 
 class CoursePlaneService extends BaseService
 {
@@ -24,13 +23,19 @@ class CoursePlaneService extends BaseService
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
     {
         $rules = [
-            'name' => 'required|unique:course_planes,name',
+            'name' => [
+                'required',
+                Rule::unique('course_planes',)->where(function ($query) use ($request) {
+                    return $query->where('stage_id', $request->stage_id);
+                }),
+            ],
             'content' => 'required',
             'descreption' => 'required',
-            'video_link' => 'required|file|mimes:mp4|max:1048576',
+            'video_link' => 'file|mimes:mp4|max:1048576',
             'stage_id' => 'required|exists:stages,id',
             'status' => 'required|in:' . implode(',', $this->status),
-
+            'image'=> 'required',
+            'type' =>'required|in:' . implode(',', config('constant.type'))
 
         ];
         $messages = [
@@ -38,7 +43,6 @@ class CoursePlaneService extends BaseService
             'name.unique' => 'Tên kế hoạch khóa học đã tồn tại !',
             'content.required' => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
-            'video_link.required' => 'Hãy nhập video cho khóa học !',
             'video_link.file' => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
             'video_link.mimes' => 'Xin mời bạn nhập video !',
             'video_link.max' => 'Video nhập quá dung lượng !',
@@ -46,6 +50,9 @@ class CoursePlaneService extends BaseService
             'stage_id.exists' => 'Giai đoạn của khóa học không tồn tại !',
             'status.required' => 'Hãy chọn trạng thái hoạt động !',
             'status.in' => 'Trạng thái hoạt động không hợp lệ !',
+            'image.required' => 'Xin mời bạn nhập ảnh',
+            'type.required' => 'Hãy nhập kiểu học cho kế hoạch khóa học',
+            'type.in'=>'Kiểu học không hợp lệ !'
 
         ];
 
@@ -56,12 +63,20 @@ class CoursePlaneService extends BaseService
     public function updateRequestValidate(int|string $id, object $request, array $rules = [], array $messages = []): bool|array
     {
         $rules = [
-            'name' => "required|unique:course_planes,name,$id",
+            'name' => [
+                'required',
+                Rule::unique('course_planes',)->where(function ($query) use ($request,$id) {
+                    return $query->where('stage_id', $request->stage_id)
+                        ->where('id', '!=', $id);
+                }),
+            ],
             'content' => 'required',
             'descreption' => 'required',
-            'video_link' => 'required|file|mimes:mp4|max:1048576',
+            'video_link' => 'file|mimes:mp4|max:1048576',
             'stage_id' => 'required|exists:stages,id',
             'status' => 'required|in:' . implode(',', $this->status),
+            'image'                => 'required',
+            'type' =>'required|in:' . implode(',', config('constant.type')),
 
         ];
         $messages = [
@@ -69,7 +84,6 @@ class CoursePlaneService extends BaseService
             'name.unique' => 'Tên kế hoạch khóa học đã tồn tại !',
             'content.required' => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
-            'video_link.required' => 'Hãy nhập video cho khóa học !',
             'video_link.file' => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
             'video_link.mimes' => 'Xin mời bạn nhập video !',
             'video_link.max' => 'Video nhập quá dung lượng !',
@@ -77,7 +91,9 @@ class CoursePlaneService extends BaseService
             'stage_id.exists' => 'Giai đoạn của khóa học không tồn tại !',
             'status.required' => 'Hãy chọn trạng thái hoạt động !',
             'status.in' => 'Trạng thái hoạt động không hợp lệ !',
-
+            'image.required' => 'Xin mời bạn nhập ảnh',
+            'type.required' => 'Hãy nhập kiểu học cho kế hoạch khóa học',
+            'type.in'=>'Kiểu học không hợp lệ !'
         ];
 
 
@@ -87,8 +103,22 @@ class CoursePlaneService extends BaseService
     public function listCoursePlanes($id)
     {
         try {
-            $response = CoursePlanes::where('stage_id', $id)->get();
-            return $response;
+            $userID = self::currentUser()->id;
+            $response = CoursePlanes::where('stage_id', $id)->with('cousre')->get();
+            $idUser = '';
+            foreach ($response as $podcast) {
+                if ($podcast['cousre'] != null) {
+                    foreach ($podcast['cousre'] as $value) {
+                        $idUser = $value->created_by;
+                    }
+                }
+            }
+            if ($userID == $idUser) {
+                return $response;
+            } else {
+                return [];
+            }
+
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
@@ -116,18 +146,15 @@ class CoursePlaneService extends BaseService
         if ($item) {
             $result = str_replace(env('S3_URL'), '', $item->video_link);
             Storage::disk('s3')->delete($result);
-            if (!empty($request->file('video_link'))) {
+            if (!empty($request->file('video_link')) || $request->file('video_link') != "") {
                 $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
                 $url = env('S3_URL') . $path;
+                $request->video_link = $url;
+            } else {
+                $request->video_link = $item->video_link;
             }
-            $request->video_link = $url;
-            parent::preUpdate($id, $request);
-
-        }else{
-            parent::preUpdate($id, $request);
-
         }
-
+        parent::preUpdate($id, $request);
 
     }
 
@@ -138,11 +165,8 @@ class CoursePlaneService extends BaseService
         if ($item) {
             $result = str_replace(env('S3_URL'), '', $item->video_link);
             Storage::disk('s3')->delete($result);
-            parent::preDelete($id);
-
         }
         parent::preDelete($id);
-
 
     }
 }

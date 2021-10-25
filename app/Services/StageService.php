@@ -5,12 +5,14 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
+use App\Models\Course;
 use App\Models\CoursePlanes;
 use App\Services\BaseService;
 use App\Models\Stage;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\BadRequestException;
+use Illuminate\Validation\Rule;
 
 class StageService extends BaseService
 {
@@ -24,7 +26,12 @@ class StageService extends BaseService
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
     {
         $rules = [
-            'name' => 'required|unique:stages,name',
+            'name' => [
+                'required',
+                Rule::unique('stages',)->where(function ($query) use ($request) {
+                    return $query->where('course_id', $request->course_id);
+                }),
+            ],
             'short_content' => 'required',
             'content' => 'required',
             'status' => 'required|in:' . implode(',', $this->status),
@@ -48,7 +55,13 @@ class StageService extends BaseService
     public function updateRequestValidate(int|string $id, object $request, array $rules = [], array $messages = []): bool|array
     {
         $rules = [
-            'name' => "required|unique:stages,name,$id",
+            'name' => [
+                'required',
+                Rule::unique('stages',)->where(function ($query) use ($request, $id) {
+                    return $query->where('course_id', $request->course_id)
+                                 ->where('id', '!=', $id);
+                }),
+            ],
             'short_content' => 'required',
             'content' => 'required',
             'status' => 'required|in:' . implode(',', $this->status),
