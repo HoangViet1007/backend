@@ -28,7 +28,12 @@ class CustomerLevelController extends Controller
 
     public function getAllCustomerLevelNoPaginate(): JsonResponse
     {
-       return response()->json($this->service->getAllCustomerLevelNoPaginate());
+        return response()->json($this->service->getAllCustomerLevelNoPaginate());
+    }
+
+    public function getCustomerLevel()
+    {
+        return response()->json($this->service->getCustomerLevel());
     }
 
     /**
