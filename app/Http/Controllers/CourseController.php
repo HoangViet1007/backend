@@ -71,6 +71,11 @@ class CourseController extends Controller
         return response()->json($this->service->getCourseCurrentPtById($id));
     }
 
+    public function getCourseByIdInClient($id): JsonResponse
+    {
+        return response()->json($this->service->getCourseByIdInClient($id));
+    }
+
     /**
      * Update the specified resource in storage.
      *

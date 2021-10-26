@@ -41,7 +41,10 @@ Route::group(['prefix' => '/'], function () {
     Route::resource('contact', 'ContactController');
 
     // get course noi bat
-    Route::get('list-source','CourseController@getCourse');
+    Route::get('list-cource','CourseController@getCourse');
+
+    // get course by id in client
+    Route::get('course-detail/client/{id}','CourseController@getCourseByIdInClient');
 
     // get customer level cho list course in client
     Route::get('list-customer-level','CustomerLevelController@getCustomerLevel');
