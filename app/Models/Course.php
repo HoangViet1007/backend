@@ -30,7 +30,6 @@ class Course extends Model
         return $this->hasMany(Stage::class);
     }
 
-
     public function cousre_planes()
     {
         return $this->hasManyThrough(

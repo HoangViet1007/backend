@@ -105,10 +105,8 @@ class CourseService extends BaseService
     public function getCourse()
     {
         $this->preGetAll();
-        $request         = \request()->all();
         $statusActive    = StatusConstant::ACTIVE;
         $statusHappening = StatusConstant::HAPPENING;
-        $ids = $request['status'] ?? null;
         $data            = $this->queryHelper->buildQuery($this->model)
                                              ->with(['customerLevel', 'specializeDetails.user',
                                                      'specializeDetails.specialize'])
@@ -120,15 +118,47 @@ class CourseService extends BaseService
                                                     'customer_levels.id')
                                              ->join('users', 'specialize_details.user_id', 'users.id')
                                              ->select('courses.*')
+                                             // ->when($specializesId, function ($q) use ($specializesId) {
+                                             //    $q->where('specializes.id',$specializesId);
+                                             // })
                                              ->where(function ($query) use ($statusActive, $statusHappening) {
                                                  $query->where('courses.display', $statusActive)
                                                        ->where('courses.status', $statusHappening);
                                              });
-        dd($data->toSql());
+        // dd($data->toSql());
         try {
             $response = $data->paginate(QueryHelper::limit());
 
             return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    // get course detail in client by id
+    public function getCourseByIdInClient($id)
+    {
+        try {
+            $course = Course::findOrFail($id);
+            if ($course && $course->status == StatusConstant::HAPPENING && $course->status == StatusConstant::ACTIVE)
+                $entity = $this->queryHelper->buildQuery($this->model)
+                                            ->with(['customerLevel', 'specializeDetails.user',
+                                                    'specializeDetails.specialize', 'cousre_planes'])
+                                            ->join('specialize_details', 'courses.specialize_detail_id',
+                                                   'specialize_details.id')
+                                            ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
+                                            ->join('customer_levels', 'courses.customer_level_id', 'customer_levels.id')
+                                            ->join('users', 'specialize_details.user_id', 'users.id')
+                                            ->select('courses.*')
+                                            ->where('courses.id', $id)
+                                            ->first();
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
