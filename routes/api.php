@@ -30,17 +30,29 @@ Route::get('/callback', 'GoogleController@handleProviderCallback');
 
 // api clien
 Route::group(['prefix' => '/'], function () {
+    // register customer and pt
     Route::post('user_pt', 'UserController@addUserHasRolePt');
     Route::post('user_customer', 'UserController@addUserHasRoleCustomer');
-});
 
-Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
-    Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
     // BMI
     Route::get('BMI', 'BMIController@countBMI');
 
     // contact
     Route::resource('contact', 'ContactController');
+
+    // get course noi bat
+    Route::get('list-source','CourseController@getCourse');
+
+    // get customer level cho list course in client
+    Route::get('list-customer-level','CustomerLevelController@getCustomerLevel');
+
+    // get all chuyên môn cho list khoá học client
+    Route::get('list-specialize-for-client','SpecializeController@getSpecializeForClient');
+
+});
+
+Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
+    Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
 
     // setting
     Route::resource('setting', 'SettingController');
@@ -94,5 +106,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // account level
     Route::get('account-level/select-option/', 'AccountLevelController@getAllUseSelectOption');
     Route::resource('account-level', 'AccountLevelController');
+
+    // role
+    Route::resource('role','RoleController');
 });
 
