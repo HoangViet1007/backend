@@ -101,6 +101,39 @@ class CourseService extends BaseService
         }
     }
 
+    // get courses in client
+    public function getCourse()
+    {
+        $this->preGetAll();
+        $request         = \request()->all();
+        $statusActive    = StatusConstant::ACTIVE;
+        $statusHappening = StatusConstant::HAPPENING;
+        $ids = $request['status'] ?? null;
+        $data            = $this->queryHelper->buildQuery($this->model)
+                                             ->with(['customerLevel', 'specializeDetails.user',
+                                                     'specializeDetails.specialize'])
+                                             ->join('specialize_details', 'courses.specialize_detail_id',
+                                                    'specialize_details.id')
+                                             ->join('specializes', 'specialize_details.specialize_id',
+                                                    'specializes.id')
+                                             ->join('customer_levels', 'courses.customer_level_id',
+                                                    'customer_levels.id')
+                                             ->join('users', 'specialize_details.user_id', 'users.id')
+                                             ->select('courses.*')
+                                             ->where(function ($query) use ($statusActive, $statusHappening) {
+                                                 $query->where('courses.display', $statusActive)
+                                                       ->where('courses.status', $statusHappening);
+                                             });
+        dd($data->toSql());
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
     public function getCourseCurrentPtById($id)
     {
         try {
@@ -296,7 +329,7 @@ class CourseService extends BaseService
     public function updateCourseForAdmin($id, object $request)
     {
         $course = Course::findOrFail($id);
-        if(!$course){
+        if (!$course) {
             throw new BadRequestException(
                 ['message' => __("Khoá học không tồn tại !")], new Exception()
             );
@@ -309,7 +342,8 @@ class CourseService extends BaseService
                               'status.in' => 'Trạng thái hoạt động không hợp lệ !',
                           ]
         );
-        return $course->update(['status'=>$request->status]);
+
+        return $course->update(['status' => $request->status]);
     }
 
     public function preDelete(int|string $id)

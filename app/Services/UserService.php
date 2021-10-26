@@ -42,7 +42,7 @@ class UserService extends BaseService
         $experience   = $request['specialize_details__experience__gt'] ?? null;
         $accountLevel = $request['account_levels__id__eq'] ?? null;
         $data         = $this->queryHelper->buildQuery($this->model)
-                                          ->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels'])
+                                          ->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels','specializeDetails.courses'])
                                           ->when($specializes, function ($q) {
                                               $q->leftJoin('specialize_details', 'users.id',
                                                            'specialize_details.user_id');
@@ -82,7 +82,7 @@ class UserService extends BaseService
         $this->preGet($id);
         try {
             $entity
-                = $this->model->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels'])
+                = $this->model->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels','specializeDetails.courses'])
                               ->findOrFail($id);
             $this->postGet($id, $entity);
 
