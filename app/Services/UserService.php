@@ -42,7 +42,7 @@ class UserService extends BaseService
         $experience   = $request['specialize_details__experience__gt'] ?? null;
         $accountLevel = $request['account_levels__id__eq'] ?? null;
         $data         = $this->queryHelper->buildQuery($this->model)
-                                          ->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels','specializeDetails.courses'])
+                                          ->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels', 'specializeDetails.courses'])
                                           ->when($specializes, function ($q) {
                                               $q->leftJoin('specialize_details', 'users.id',
                                                            'specialize_details.user_id');
@@ -82,7 +82,7 @@ class UserService extends BaseService
         $this->preGet($id);
         try {
             $entity
-                = $this->model->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels','specializeDetails.courses'])
+                = $this->model->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels', 'specializeDetails.courses'])
                               ->findOrFail($id);
             $this->postGet($id, $entity);
 
@@ -137,10 +137,10 @@ class UserService extends BaseService
                                      ->toArray();
         $this->doValidate($request,
                           [
-                              'name'             => 'required|min:3',
+                              'name'             => 'required|min:3|max:100',
                               'image'            => 'required',
-                              'address'          => 'required',
-                              'phone'            => 'required|regex:/(0)[0-9]{9}/',
+                              'address'          => 'required|min:6|max:100',
+                              'phone'            => ['required', 'regex:/(^[\+]{0,1}+(84){1}+[0-9]{9})|((^0)(32|33|34|35|36|37|38|39|56|58|59|70|76|77|78|79|81|82|83|84|85|86|88|89|90|92|91|93|94|96|97|98|99)+([0-9]{7}))$/'],
                               'email'            => 'required|email|unique:users,email',
                               'sex'              => 'required|in:' . implode(',', $this->sex),
                               'role_ids'         => 'nullable|array',
@@ -152,8 +152,11 @@ class UserService extends BaseService
                           [
                               'name.required'        => 'Hãy nhập họ và tên !',
                               'name.min'             => 'Họ và tên tối thiểu phải 3 kí tự !',
+                              'name.max'             => 'Họ và tên tối đa chỉ 100 kí tự !',
                               'image.required'       => 'Hãy nhập hình ảnh !',
                               'address.required'     => 'Hãy nhập địa chỉ !',
+                              'address.min'          => 'Địa chỉ phải tối thiểu 6 kí tự !',
+                              'address.max'          => 'Địa chỉ tối đa chỉ 100 kí tự !',
                               'phone.required'       => 'Hãy nhập số điện thoại !',
                               'phone.regex'          => 'Số điện thoại không hợp lệ !',
                               'email.required'       => 'Hãy nhập địa chỉ email !',
@@ -200,10 +203,10 @@ class UserService extends BaseService
         $account_level = AccountLevel::where('status', StatusConstant::ACTIVE)->pluck('id')
                                      ->toArray();
         $rules         = [
-            'name'             => 'required|min:3',
+            'name'             => 'required|min:3|max:100',
             'image'            => 'required',
-            'address'          => 'required',
-            'phone'            => 'required|regex:/(0)[0-9]{9}/',
+            'address'          => 'required|min:6|max:100',
+            'phone'            => ['required', 'regex:/(^[\+]{0,1}+(84){1}+[0-9]{9})|((^0)(32|33|34|35|36|37|38|39|56|58|59|70|76|77|78|79|81|82|83|84|85|86|88|89|90|92|91|93|94|96|97|98|99)+([0-9]{7}))$/'],
             'email'            => "required|email|unique:users,email,$id",
             'sex'              => 'required|in:' . implode(',', $this->sex),
             'status'           => 'required|in:' . implode(',', $this->status),
@@ -214,26 +217,29 @@ class UserService extends BaseService
             'account_level_id' => 'in:' . implode(',', $account_level),
         ];
         $messages      = [
-            'name.required'        => 'Hãy nhập họ và tên !',
-            'name.min'             => 'Họ và tên tối thiểu phải 3 kí tự !',
-            'image.required'       => 'Hãy nhập hình ảnh !',
-            'address.required'     => 'Hãy nhập địa chỉ !',
-            'phone.required'       => 'Hãy nhập số điện thoại !',
-            'phone.regex'          => 'Số điện thoại không hợp lệ !',
-            'email.required'       => 'Hãy nhập địa chỉ email !',
-            'email.email'          => 'Địa chỉ email không hợp lệ !',
-            'email.unique'         => 'Địa chỉ email này đã tồn tại !',
-            'sex.required'         => 'Hãy chọn trạng giới tính !',
-            'sex.in'               => 'Giới tính không hợp lệ !',
-            'status.required'      => 'Hãy chọn trạng thái hoạt động !',
-            'status.in'            => 'Trạng thái hoạt động không hợp lệ !',
+            'name.required'       => 'Hãy nhập họ và tên !',
+            'name.min'            => 'Họ và tên tối thiểu phải 3 kí tự !',
+            'name.max'            => 'Họ và tên tối đa chỉ 100 kí tự !',
+            'image.required'      => 'Hãy nhập hình ảnh !',
+            'address.required'    => 'Hãy nhập địa chỉ !',
+            'address.min'         => 'Địa chỉ phải tối thiểu 6 kí tự !',
+            'address.max'          => 'Địa chỉ tối đa chỉ 100 kí tự !',
+            'phone.required'      => 'Hãy nhập số điện thoại !',
+            'phone.regex'         => 'Số điện thoại không hợp lệ !',
+            'email.required'      => 'Hãy nhập địa chỉ email !',
+            'email.email'         => 'Địa chỉ email không hợp lệ !',
+            'email.unique'        => 'Địa chỉ email này đã tồn tại !',
+            'sex.required'        => 'Hãy chọn trạng giới tính !',
+            'sex.in'              => 'Giới tính không hợp lệ !',
+            'status.required'     => 'Hãy chọn trạng thái hoạt động !',
+            'status.in'           => 'Trạng thái hoạt động không hợp lệ !',
             // 'password.required'    => 'Hãy nhập mật khẩu !',
             // 'cf_password.required' => 'Hãy nhập lại mật khẩu !',
             // 'cf_password.same'     => 'Nhập lại mật khẩu không hợp lệ !',
             // 'password.min'         => 'Mật khẩu phải tối thiểu 6 kí tự !',
-            'role_ids.array'       => 'Chức vụ không hợp lệ !',
-            'role_ids.*.exists'    => 'Chức vụ :attribute không  tồn tại !',
-            'account_level_id.in'  => 'Cấp độ tài khoản không hợp lệ !'
+            'role_ids.array'      => 'Chức vụ không hợp lệ !',
+            'role_ids.*.exists'   => 'Chức vụ :attribute không  tồn tại !',
+            'account_level_id.in' => 'Cấp độ tài khoản không hợp lệ !'
 
         ];
 
