@@ -105,26 +105,33 @@ class CourseService extends BaseService
     public function getCourse()
     {
         $this->preGetAll();
-        $statusActive    = StatusConstant::ACTIVE;
-        $statusHappening = StatusConstant::HAPPENING;
-        $data            = $this->queryHelper->buildQuery($this->model)
-                                             ->with(['customerLevel', 'specializeDetails.user',
-                                                     'specializeDetails.specialize'])
-                                             ->join('specialize_details', 'courses.specialize_detail_id',
-                                                    'specialize_details.id')
-                                             ->join('specializes', 'specialize_details.specialize_id',
-                                                    'specializes.id')
-                                             ->join('customer_levels', 'courses.customer_level_id',
-                                                    'customer_levels.id')
-                                             ->join('users', 'specialize_details.user_id', 'users.id')
-                                             ->select('courses.*')
-                                             // ->when($specializesId, function ($q) use ($specializesId) {
-                                             //    $q->where('specializes.id',$specializesId);
-                                             // })
-                                             ->where(function ($query) use ($statusActive, $statusHappening) {
-                                                 $query->where('courses.display', $statusActive)
-                                                       ->where('courses.status', $statusHappening);
-                                             });
+        $statusActive      = StatusConstant::ACTIVE;
+        $statusHappening   = StatusConstant::HAPPENING;
+        $request           = request()->all();
+        $specializesId     = $request['specializes__id__eq'] ?? null;
+        $customer_levelsId = $request['customer_levels__id__eq'] ?? null;
+
+        $data = $this->queryHelper->removeParam('specializes__id__eq')->removeParam('customer_levels__id__eq')->buildQuery($this->model)
+                                  ->with(['customerLevel', 'specializeDetails.user',
+                                          'specializeDetails.specialize'])
+                                  ->join('specialize_details', 'courses.specialize_detail_id',
+                                         'specialize_details.id')
+                                  ->join('specializes', 'specialize_details.specialize_id',
+                                         'specializes.id')
+                                  ->join('customer_levels', 'courses.customer_level_id',
+                                         'customer_levels.id')
+                                  ->join('users', 'specialize_details.user_id', 'users.id')
+                                  ->select('courses.*')
+                                  ->when($specializesId, function ($q) use ($specializesId) {
+                                      $q->whereIn('specializes.id', $specializesId);
+                                  })
+                                  ->when($customer_levelsId, function ($q) use ($customer_levelsId) {
+                                      $q->whereIn('customer_levels.id', $customer_levelsId);
+                                  })
+                                  ->where(function ($query) use ($statusActive, $statusHappening) {
+                                      $query->where('courses.display', $statusActive)
+                                            ->where('courses.status', $statusHappening);
+                                  });
         // dd($data->toSql());
         try {
             $response = $data->paginate(QueryHelper::limit());
