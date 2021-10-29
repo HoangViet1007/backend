@@ -105,13 +105,15 @@ class CourseService extends BaseService
     public function getCourse()
     {
         $this->preGetAll();
-        $statusActive      = StatusConstant::ACTIVE;
-        $statusHappening   = StatusConstant::HAPPENING;
-        $request           = request()->all();
-        $specializesId     = $request['specializes__id__eq'] ?? null;
-        $customer_levelsId = $request['customer_levels__id__eq'] ?? null;
+        $statusActive    = StatusConstant::ACTIVE;
+        $statusHappening = StatusConstant::HAPPENING;
+        $request         = request()->all();
+        $specializes     = $request['specializes'] ?? null;
+        $level           = $request['level'] ?? null;
 
-        $data = $this->queryHelper->removeParam('specializes__id__eq')->removeParam('customer_levels__id__eq')->buildQuery($this->model)
+        $data = $this->queryHelper->removeParam('level')
+                                  ->removeParam('specializes')
+                                  ->buildQuery($this->model)
                                   ->with(['customerLevel', 'specializeDetails.user',
                                           'specializeDetails.specialize'])
                                   ->join('specialize_details', 'courses.specialize_detail_id',
@@ -122,17 +124,18 @@ class CourseService extends BaseService
                                          'customer_levels.id')
                                   ->join('users', 'specialize_details.user_id', 'users.id')
                                   ->select('courses.*')
-                                  ->when($specializesId, function ($q) use ($specializesId) {
-                                      $q->whereIn('specializes.id', $specializesId);
+                                  ->when($specializes, function ($q) use ($specializes) {
+                                      $arraySpecialize = explode(',', $specializes) ?? [0];
+                                      $q->whereIn('specializes.id', $arraySpecialize);
                                   })
-                                  ->when($customer_levelsId, function ($q) use ($customer_levelsId) {
-                                      $q->whereIn('customer_levels.id', $customer_levelsId);
+                                  ->when($level, function ($q) use ($level) {
+                                      $arrayLevel = explode(',', $level) ?? [0];
+                                      $q->whereIn('customer_levels.id', $arrayLevel);
                                   })
                                   ->where(function ($query) use ($statusActive, $statusHappening) {
                                       $query->where('courses.display', $statusActive)
                                             ->where('courses.status', $statusHappening);
                                   });
-        // dd($data->toSql());
         try {
             $response = $data->paginate(QueryHelper::limit());
 
@@ -147,7 +150,7 @@ class CourseService extends BaseService
     {
         try {
             $course = Course::findOrFail($id);
-            if ($course && $course->status == StatusConstant::HAPPENING && $course->status == StatusConstant::ACTIVE)
+            if ($course && $course->status == StatusConstant::HAPPENING && $course->display == StatusConstant::ACTIVE)
                 $entity = $this->queryHelper->buildQuery($this->model)
                                             ->with(['customerLevel', 'specializeDetails.user',
                                                     'specializeDetails.specialize', 'cousre_planes'])
