@@ -41,7 +41,7 @@ Route::group(['prefix' => '/'], function () {
     Route::resource('contact', 'ContactController');
 
     // get course noi bat
-    Route::get('list-cource','CourseController@getCourse');
+    Route::get('list-course','CourseController@getCourse');
 
     // get course by id in client
     Route::get('course-detail/client/{id}','CourseController@getCourseByIdInClient');
@@ -82,6 +82,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('specialize-detail', 'SpecializeDetailController');
 
     //user
+    Route::post('update-password','UserController@updatePassword');
     Route::put('user-edit/{id}', 'UserController@editUser');
     Route::resource('user', 'UserController');
 

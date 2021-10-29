@@ -16,8 +16,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @Author apple
@@ -223,7 +225,7 @@ class UserService extends BaseService
             'image.required'      => 'Hãy nhập hình ảnh !',
             'address.required'    => 'Hãy nhập địa chỉ !',
             'address.min'         => 'Địa chỉ phải tối thiểu 6 kí tự !',
-            'address.max'          => 'Địa chỉ tối đa chỉ 100 kí tự !',
+            'address.max'         => 'Địa chỉ tối đa chỉ 100 kí tự !',
             'phone.required'      => 'Hãy nhập số điện thoại !',
             'phone.regex'         => 'Số điện thoại không hợp lệ !',
             'email.required'      => 'Hãy nhập địa chỉ email !',
@@ -323,6 +325,40 @@ class UserService extends BaseService
             $entity = $this->model->with('roles')->findOrFail($request->user()->id);
 
             return $entity;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function updatePassword(object $request)
+    {
+        $this->doValidate($request,
+                          [
+                              'old_password' => 'required|min:6',
+                              'new_password' => 'required|min:6',
+                              'cf_password'  => 'required|same:new_password',
+                          ],
+                          [
+                              'old_password.required' => 'Hãy nhập mật khẩu !',
+                              'old_password.min'      => 'Mật khẩu phải tối thiểu 6 kí tự !',
+                              'new_password.required' => 'Hãy nhập mật khẩu mới !',
+                              'new_password.min'      => 'Mật khẩu mới phải tối thiểu 6 kí tự !',
+                              'cf_password.required'  => 'Hãy nhập lại mật khẩu mới !',
+                              'cf_password.same'      => 'Nhập lại mật khẩu mới không hợp lệ !',
+                          ]
+        );
+        try {
+            $user = Auth::user();
+            if (Hash::check($request->old_password, $user['password'])) {
+                // đổi mk
+                $userChangePass           = User::find($user['id']);
+                $userChangePass->password = Hash::make($request->new_password);
+                $userChangePass->save();
+
+                return true;
+            } else {
+                throw new HttpException(500, 'Mật khẩu cũ không đúng !');
+            }
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
