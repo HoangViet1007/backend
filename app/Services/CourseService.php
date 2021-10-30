@@ -333,7 +333,6 @@ class CourseService extends BaseService
             'lessons.required' => 'Hãy nhập tổng số buổi của khoá học !',
             'lessons.numeric'  => 'Tổng số buổi không hợp lệ !',
             'lessons.min'      => 'Tổng số buổi tối thiểu phải từ 1 !',
-
             'time_a_lessons.required' => 'Hãy nhập thời lượng 1 buổi học !',
             'time_a_lessons.numeric'  => 'Thời lượng buổi học không hợp lệ !',
             'time_a_lessons.min'      => 'Thời lượng buổi học phải tối thiểu 30 phút !',
