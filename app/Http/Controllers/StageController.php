@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Stage;
+use Illuminate\Support\Facades\Mail;
 use App\Services\BaseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\StageService;
+use App\Mail\TetSendMailNotify;
 
 class StageController extends Controller
 {
@@ -47,7 +48,15 @@ class StageController extends Controller
 
     }
 
-    public function detailStage($id):JsonResponse {
+    public function detailStage($id): JsonResponse
+    {
         return response()->json(($this->service->get($id)));
+    }
+
+// test send email
+    public function sendEmail()
+    {
+       return Mail::to('ngohongnguyen016774@gmail.com')->send(new TetSendMailNotify());
+
     }
 }
