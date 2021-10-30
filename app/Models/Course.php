@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Constants\StatusConstant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
@@ -30,7 +33,12 @@ class Course extends Model
         return $this->hasMany(Stage::class);
     }
 
-    public function cousre_planes()
+    public function stagesClient(): HasMany
+    {
+        return $this->hasMany(Stage::class)->where('status',StatusConstant::ACTIVE);
+    }
+
+    public function cousre_planes(): HasManyThrough
     {
         return $this->hasManyThrough(
             CoursePlanes::class,
