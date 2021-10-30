@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Constants\S3Constant;
 use App\Constants\StatusConstant;
 use App\Models\Course;
 use App\Models\CoursePlanes;
@@ -131,7 +132,8 @@ class CoursePlaneService extends BaseService
         $url = '';
         if (!empty($request->file('video_link'))) {
             $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
-            $url = env('S3_URL') . $path;
+
+            $url = S3Constant::LINK_S3.$path;
 
         }
         $request->video_link = $url;
@@ -148,7 +150,7 @@ class CoursePlaneService extends BaseService
             Storage::disk('s3')->delete($result);
             if (!empty($request->file('video_link')) || $request->file('video_link') != "") {
                 $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
-                $url = env('S3_URL') . $path;
+                $url = S3Constant::LINK_S3. $path;
                 $request->video_link = $url;
             } else {
                 $request->video_link = $item->video_link;
@@ -163,7 +165,7 @@ class CoursePlaneService extends BaseService
     {
         $item = $this->get($id);
         if ($item) {
-            $result = str_replace(env('S3_URL'), '', $item->video_link);
+            $result = str_replace(S3Constant::LINK_S3, '', $item->video_link);
             Storage::disk('s3')->delete($result);
         }
         parent::preDelete($id);
