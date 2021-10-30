@@ -30,7 +30,14 @@ class CustomerLevelService extends BaseService
     // get all customer for list course in client
     public function getCustomerLevel()
     {
-       return CustomerLevel::all();
+        $data = $this->queryHelper->buildQuery($this->model)->with('coursesClient');
+        try {
+            $response = $data->get();
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array

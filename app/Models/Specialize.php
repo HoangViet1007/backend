@@ -9,7 +9,12 @@ class Specialize extends Model
 {
     use HasFactory;
 
-    protected $table = 'specializes';
-    protected $guarded = [];
+    protected $table    = 'specializes';
+    protected $guarded  = [];
     protected $fillable = ['name', 'status', 'description'];
+
+    public function specializeDetail()
+    {
+        return $this->hasMany(SpecializeDetail::class);
+    }
 }
