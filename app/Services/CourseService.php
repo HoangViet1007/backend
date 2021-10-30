@@ -153,12 +153,10 @@ class CourseService extends BaseService
             if ($course && $course->status == StatusConstant::HAPPENING && $course->display == StatusConstant::ACTIVE)
                 $entity = $this->queryHelper->buildQuery($this->model)
                                             ->with(['customerLevel', 'specializeDetails.user',
-                                                    'specializeDetails.specialize', 'cousre_planes'])
-                                            ->join('specialize_details', 'courses.specialize_detail_id',
-                                                   'specialize_details.id')
-                                            ->join('specializes', 'specialize_details.specialize_id', 'specializes.id')
-                                            ->join('customer_levels', 'courses.customer_level_id', 'customer_levels.id')
-                                            ->join('users', 'specialize_details.user_id', 'users.id')
+                                                    'specializeDetails.specialize'])
+                                            ->with(['stagesClient.course_planes' => function ($q) {
+                                                $q->where('course_planes.status', StatusConstant::ACTIVE);
+                                            }])
                                             ->select('courses.*')
                                             ->where('courses.id', $id)
                                             ->first();
@@ -335,7 +333,6 @@ class CourseService extends BaseService
             'lessons.required' => 'Hãy nhập tổng số buổi của khoá học !',
             'lessons.numeric'  => 'Tổng số buổi không hợp lệ !',
             'lessons.min'      => 'Tổng số buổi tối thiểu phải từ 1 !',
-
             'time_a_lessons.required' => 'Hãy nhập thời lượng 1 buổi học !',
             'time_a_lessons.numeric'  => 'Thời lượng buổi học không hợp lệ !',
             'time_a_lessons.min'      => 'Thời lượng buổi học phải tối thiểu 30 phút !',
