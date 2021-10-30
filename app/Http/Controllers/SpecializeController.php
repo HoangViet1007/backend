@@ -31,7 +31,7 @@ class SpecializeController extends Controller
         return response()->json($this->service->getAllUseSelectOption());
     }
 
-    public function getSpecializeForClient()
+    public function getSpecializeForClient(): JsonResponse
     {
         return response()->json($this->service->getSpecializeForClient());
     }
