@@ -28,6 +28,7 @@ Route::get('logout', 'UserController@logout')->name('logout')->middleware('auth:
 Route::get('/redirect', 'GoogleController@redirectToProvider');
 Route::get('/callback', 'GoogleController@handleProviderCallback');
 
+Route::get('/send-email','StageController@sendEmail');
 // api clien
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
