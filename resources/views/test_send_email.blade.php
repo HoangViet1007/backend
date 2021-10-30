@@ -6,8 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
 </head>
-<body>
-Dear fdsds! <br><br>
+<body> Helolo world<br><br>
 Your password is fds<br>
 If it was you, please visit link bellow to reset your password <br><br>
 </body>
