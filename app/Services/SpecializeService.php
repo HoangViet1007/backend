@@ -29,7 +29,14 @@ class SpecializeService extends BaseService
     // get all specialize for client
     public function getSpecializeForClient()
     {
-       return Specialize::where('status',StatusConstant::ACTIVE)->get();
+        $data = $this->queryHelper->buildQuery($this->model)->with('specializeDetail.coursesClient');
+        try {
+            $response = $data->get();
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
