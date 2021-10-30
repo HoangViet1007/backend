@@ -28,7 +28,7 @@ class TetSendMailNotify extends Mailable
      */
     public function build()
     {
-        return $this->subject('Mail from ItSolutionStuff.com')
+        return $this->subject('Nguyên gửi mail')
             ->view('test_send_email');
     }
 }
