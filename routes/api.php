@@ -114,5 +114,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // role
     Route::resource('role','RoleController');
+
+    // course student
+    Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
+    Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
+    Route::resource('course_student','CourseStudentController');
 });
 
