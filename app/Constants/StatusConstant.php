@@ -15,6 +15,13 @@ class StatusConstant
     const HAPPENING = 'Happening';
     const PAUSE     = 'Pause';
 
+    // course_student
+    const CANCELED = 'Canceled';
+    const CANCELEDBYPT = 'CanceledByPt';
+    const UNSCHEDULED= 'Unscheduled';
+    const SCHEDULE = 'Schedule';
+    const COMPLETE = 'Complete';
+
 
     const All
         = [
@@ -24,6 +31,11 @@ class StatusConstant
             self::PROCESSED,
             self::HAPPENING,
             self::PENDING,
-            self::PAUSE
+            self::PAUSE,
+            self::CANCELED,
+            self::CANCELEDBYPT,
+            self::UNSCHEDULED,
+            self::SCHEDULE,
+            self::COMPLETE
         ];
 }
