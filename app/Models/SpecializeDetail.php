@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\StatusConstant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,6 +33,13 @@ class SpecializeDetail extends Model
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class, 'specialize_detail_id', 'id');
+    }
+
+    public function coursesClient(): HasMany
+    {
+        return $this->hasMany(Course::class, 'specialize_detail_id', 'id')
+                    ->where('status',StatusConstant::HAPPENING)
+                    ->where('display',StatusConstant::ACTIVE);
     }
 }
 
