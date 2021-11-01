@@ -88,6 +88,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
+    Route::put('/course/display/{id}','CourseController@updateDisplay');
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
     Route::get('course/pt', 'CourseController@getCourseCurrentPt');
     Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');

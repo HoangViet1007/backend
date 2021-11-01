@@ -94,6 +94,11 @@ class CourseController extends Controller
         return response()->json($this->service->updateCourseForAdmin($id, $request));
     }
 
+    public function updateDisplay(Request $request, $id): JsonResponse
+    {
+        return response()->json($this->service->updateDisplay($request, $id));
+    }
+
     /**
      * Remove the specified resource from storage.
      *

@@ -363,6 +363,28 @@ class CourseService extends BaseService
         return parent::updateRequestValidate($id, $request, $rules, $messages);
     }
 
+    // update display index
+    public function updateDisplay(object $request, $id){
+        $this->doValidate($request,
+                          [
+                              'display'              => 'in:' . implode(',', $this->display),
+                          ],
+                          [
+                              'display.in' => 'Trạng thái hiển thị không hợp lệ !',
+                          ]
+        );
+        try {
+            $course = Course::find($id);
+            $course->update(['display' => $request->display]);
+
+            return Course::find($id);
+        }catch (Exception $exception){
+            throw new BadRequestException(
+                ['message' => __("Update trạng thái hiển thị không thành công !")], new Exception()
+            );
+        }
+    }
+
     public function updateCourseForAdmin($id, object $request)
     {
         $course = Course::findOrFail($id);
