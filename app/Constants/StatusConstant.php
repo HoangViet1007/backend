@@ -16,11 +16,11 @@ class StatusConstant
     const PAUSE     = 'Pause';
 
     // course_student
-    const CANCELED = 'Canceled';
+    const CANCELED     = 'Canceled';
     const CANCELEDBYPT = 'CanceledByPt';
-    const UNSCHEDULED= 'Unscheduled';
-    const SCHEDULE = 'Schedule';
-    const COMPLETE = 'Complete';
+    const UNSCHEDULED  = 'Unscheduled';
+    const SCHEDULE     = 'Schedule';
+    const COMPLETE     = 'Complete';
 
 
     const All
