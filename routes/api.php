@@ -118,6 +118,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // course student
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
+    Route::get('course_student/customer/{id}','CourseStudentController@getCourseForCustomer');
     Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
     Route::resource('course_student','CourseStudentController');
 });
