@@ -117,7 +117,7 @@ class CoursePlaneService extends BaseService
             if ($userID == $idUser) {
                 return $response;
             } else {
-                return [];
+                return "lỗi";
             }
 
         } catch (Exception $e) {
