@@ -291,11 +291,11 @@ class CourseService extends BaseService
         if ($request instanceof Request) {
             $request->merge([
                                 'created_by' => $this->currentUser()->id ?? null,
-                                'status'     => StatusConstant::PENDING
+                                'status'     => $courseForUser->status
                             ]);
         } else {
             $request->created_by = $this->currentUser()->id ?? null;
-            $request->status     = StatusConstant::PENDING;
+            $request->status     = $courseForUser->status;
         }
         parent::preUpdate($id, $request);
     }
