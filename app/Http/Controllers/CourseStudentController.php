@@ -26,6 +26,11 @@ class CourseStudentController extends Controller
         return response()->json($this->service->getAll());
     }
 
+    public function getCourseForCustomer($id): JsonResponse
+    {
+        return response()->json($this->service->getCourseForCustomer($id));
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -87,7 +92,7 @@ class CourseStudentController extends Controller
 
     public function customerCancel(Request $request, $id)
     {
-       return response()->json($this->service->customerCancel($request, $id));
+        return response()->json($this->service->customerCancel($request, $id));
     }
 
     public function ptCancel(Request $request, $id)
