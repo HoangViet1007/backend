@@ -405,7 +405,6 @@ abstract class BaseService implements BaseServiceInterface
             else
                 return $validator->errors()->toArray();
         }
-
         return true;
     }
 
