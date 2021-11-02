@@ -84,7 +84,7 @@ class PaymentController extends Controller
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
 //        dd($vnp_Url);
-        return $vnp_Url;
+        return redirect($vnp_Url);
     }
 
     public function returnPayment(Request $request)
