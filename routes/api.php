@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\DemoController ;
+use App\Http\Controllers\DemoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -94,5 +94,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // account level
     Route::get('account-level/select-option/', 'AccountLevelController@getAllUseSelectOption');
     Route::resource('account-level', 'AccountLevelController');
+
+    // thanh toan
+    Route::post('thanh-toan', 'PaymentController@createPayment');
+    Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
+    Route::resource('payment', 'PaymentController');
 });
 

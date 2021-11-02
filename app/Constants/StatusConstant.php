@@ -15,6 +15,19 @@ class StatusConstant
     const HAPPENING = 'Happening';
     const PAUSE     = 'Pause';
 
+    // course student
+    const CANCELED = 'Canceled';
+    const UNSCHEDULED= 'Unscheduled';
+    const SCHEDULE = 'Schedule';
+    const COMPLETE = 'Complete';
+
+    // payments
+    const RECHARGE = 'Nap tien';
+    const PAY = 'Thanh toan khoa hoc';
+
+    // bills
+    const WALLET = 'Thanh toan bang vi';
+    const DIRECT = 'Thanh toan truc tiep';
 
     const All
         = [
@@ -24,6 +37,14 @@ class StatusConstant
             self::PROCESSED,
             self::HAPPENING,
             self::PENDING,
-            self::PAUSE
+            self::PAUSE,
+            self::CANCELED,
+            self::UNSCHEDULED,
+            self::SCHEDULE,
+            self::COMPLETE,
+            self::RECHARGE,
+            self::PAY,
+            self::WALLET,
+            self::DIRECT,
         ];
 }
