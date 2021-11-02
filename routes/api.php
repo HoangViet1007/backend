@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\DemoController ;
+use App\Http\Controllers\DemoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -121,5 +121,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('course_student/customer/{id}','CourseStudentController@getCourseForCustomer');
     Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
     Route::resource('course_student','CourseStudentController');
+
+    // thanh toan
+    Route::post('thanh-toan', 'PaymentController@createPayment');
+    Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
+    Route::resource('payment', 'PaymentController');
 });
 
