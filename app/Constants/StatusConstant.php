@@ -15,11 +15,12 @@ class StatusConstant
     const HAPPENING = 'Happening';
     const PAUSE     = 'Pause';
 
-    // course student
-    const CANCELED = 'Canceled';
-    const UNSCHEDULED= 'Unscheduled';
-    const SCHEDULE = 'Schedule';
-    const COMPLETE = 'Complete';
+    // course_student
+    const CANCELED     = 'Canceled';
+    const CANCELEDBYPT = 'CanceledByPt';
+    const UNSCHEDULED  = 'Unscheduled';
+    const SCHEDULE     = 'Schedule';
+    const COMPLETE     = 'Complete';
 
     // payments
     const RECHARGE = 'Nap tien';
@@ -39,6 +40,7 @@ class StatusConstant
             self::PENDING,
             self::PAUSE,
             self::CANCELED,
+            self::CANCELEDBYPT,
             self::UNSCHEDULED,
             self::SCHEDULE,
             self::COMPLETE,

@@ -3,37 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Services\BaseService;
-use App\Services\SpecializeService;
+use App\Services\CourseStudentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class SpecializeController extends Controller
+class CourseStudentController extends Controller
 {
     public BaseService $service;
 
     public function __construct()
     {
-        $this->service = new SpecializeService();
+        $this->service = new CourseStudentService();
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(): JsonResponse
     {
         return response()->json($this->service->getAll());
     }
 
-    public function getAllUseSelectOption(): JsonResponse
+    public function getCourseForCustomer($id): JsonResponse
     {
-        return response()->json($this->service->getAllUseSelectOption());
-    }
-
-    public function getSpecializeForClient(): JsonResponse
-    {
-        return response()->json($this->service->getSpecializeForClient());
+        return response()->json($this->service->getCourseForCustomer($id));
     }
 
     /**
@@ -53,9 +48,9 @@ class SpecializeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
-        return response()->json($this->service->add($request));
+        //
     }
 
     /**
@@ -65,9 +60,9 @@ class SpecializeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function show($id): JsonResponse
+    public function show($id)
     {
-        return response()->json($this->service->get($id));
+        //
     }
 
     /**
@@ -90,9 +85,19 @@ class SpecializeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $id)
     {
-        return response()->json($this->service->update($id, $request));
+        //
+    }
+
+    public function customerCancel(Request $request, $id)
+    {
+        return response()->json($this->service->customerCancel($request, $id));
+    }
+
+    public function ptCancel(Request $request, $id)
+    {
+        return response()->json($this->service->ptCancel($request, $id));
     }
 
     /**
@@ -102,8 +107,8 @@ class SpecializeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id): JsonResponse
+    public function destroy($id)
     {
-        return response()->json($this->service->delete($id));
+        //
     }
 }

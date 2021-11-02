@@ -5,15 +5,21 @@ namespace App\Services;
 use App\Constants\SexConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Models\AccountLevel;
 use App\Models\SpecializeDetail;
 use App\Models\User;
 use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * @Author apple
@@ -28,6 +34,69 @@ class UserService extends BaseService
     function createModel(): void
     {
         $this->model = new User();
+    }
+
+    public function getAll(): LengthAwarePaginator
+    {
+        $this->preGetAll();
+        $request      = \request()->all();
+        $specializes  = $request['specializes__id__eq'] ?? null;
+        $experience   = $request['specialize_details__experience__gt'] ?? null;
+        $accountLevel = $request['account_levels__id__eq'] ?? null;
+        $data         = $this->queryHelper->buildQuery($this->model)
+                                          ->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels', 'specializeDetails.courses'])
+                                          ->when($specializes, function ($q) {
+                                              $q->leftJoin('specialize_details', 'users.id',
+                                                           'specialize_details.user_id');
+                                              $q->leftJoin('specializes', 'specializes.id',
+                                                           'specialize_details.specialize_id');
+                                              $q->distinct();
+                                          })
+                                          ->when($experience, function ($q) {
+                                              $q->leftJoin('specialize_details', 'users.id',
+                                                           'specialize_details.user_id');
+                                              $q->leftJoin('specializes', 'specializes.id',
+                                                           'specialize_details.specialize_id');
+                                              $q->distinct();
+                                          })
+                                          ->when($accountLevel, function ($q) {
+                                              $q->leftJoin('specialize_details', 'users.id',
+                                                           'specialize_details.user_id');
+                                              $q->leftJoin('specializes', 'specializes.id',
+                                                           'specialize_details.specialize_id');
+                                              $q->leftJoin('account_levels', 'users.account_level_id',
+                                                           'account_levels.id');
+                                              $q->distinct();
+                                          })
+                                          ->select('users.*');
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function get(int|string $id): Model
+    {
+        $this->preGet($id);
+        try {
+            $entity
+                = $this->model->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels', 'specializeDetails.courses'])
+                              ->findOrFail($id);
+            $this->postGet($id, $entity);
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     /**
@@ -70,10 +139,10 @@ class UserService extends BaseService
                                      ->toArray();
         $this->doValidate($request,
                           [
-                              'name'             => 'required|min:3',
+                              'name'             => 'required|min:3|max:100',
                               'image'            => 'required',
-                              'address'          => 'required',
-                              'phone'            => 'required|regex:/(0)[0-9]{9}/',
+                              'address'          => 'required|min:6|max:100',
+                              'phone'            => ['required', 'regex:/(^[\+]{0,1}+(84){1}+[0-9]{9})|((^0)(32|33|34|35|36|37|38|39|56|58|59|70|76|77|78|79|81|82|83|84|85|86|88|89|90|92|91|93|94|96|97|98|99)+([0-9]{7}))$/'],
                               'email'            => 'required|email|unique:users,email',
                               'sex'              => 'required|in:' . implode(',', $this->sex),
                               'role_ids'         => 'nullable|array',
@@ -85,8 +154,11 @@ class UserService extends BaseService
                           [
                               'name.required'        => 'Hãy nhập họ và tên !',
                               'name.min'             => 'Họ và tên tối thiểu phải 3 kí tự !',
+                              'name.max'             => 'Họ và tên tối đa chỉ 100 kí tự !',
                               'image.required'       => 'Hãy nhập hình ảnh !',
                               'address.required'     => 'Hãy nhập địa chỉ !',
+                              'address.min'          => 'Địa chỉ phải tối thiểu 6 kí tự !',
+                              'address.max'          => 'Địa chỉ tối đa chỉ 100 kí tự !',
                               'phone.required'       => 'Hãy nhập số điện thoại !',
                               'phone.regex'          => 'Số điện thoại không hợp lệ !',
                               'email.required'       => 'Hãy nhập địa chỉ email !',
@@ -133,40 +205,43 @@ class UserService extends BaseService
         $account_level = AccountLevel::where('status', StatusConstant::ACTIVE)->pluck('id')
                                      ->toArray();
         $rules         = [
-            'name'             => 'required|min:3',
+            'name'             => 'required|min:3|max:100',
             'image'            => 'required',
-            'address'          => 'required',
-            'phone'            => 'required|regex:/(0)[0-9]{9}/',
+            'address'          => 'required|min:6|max:100',
+            'phone'            => ['required', 'regex:/(^[\+]{0,1}+(84){1}+[0-9]{9})|((^0)(32|33|34|35|36|37|38|39|56|58|59|70|76|77|78|79|81|82|83|84|85|86|88|89|90|92|91|93|94|96|97|98|99)+([0-9]{7}))$/'],
             'email'            => "required|email|unique:users,email,$id",
             'sex'              => 'required|in:' . implode(',', $this->sex),
             'status'           => 'required|in:' . implode(',', $this->status),
-            'password'         => 'required|min:6',
-            'cf_password'      => 'required:same:password',
+            // 'password'         => 'required|min:6',
+            // 'cf_password'      => 'required|same:password',
             'role_ids'         => 'nullable|array',
             'role_ids.*'       => 'exists:roles,id',
             'account_level_id' => 'in:' . implode(',', $account_level),
         ];
         $messages      = [
-            'name.required'        => 'Hãy nhập họ và tên !',
-            'name.min'             => 'Họ và tên tối thiểu phải 3 kí tự !',
-            'image.required'       => 'Hãy nhập hình ảnh !',
-            'address.required'     => 'Hãy nhập địa chỉ !',
-            'phone.required'       => 'Hãy nhập số điện thoại !',
-            'phone.regex'          => 'Số điện thoại không hợp lệ !',
-            'email.required'       => 'Hãy nhập địa chỉ email !',
-            'email.email'          => 'Địa chỉ email không hợp lệ !',
-            'email.unique'         => 'Địa chỉ email này đã tồn tại !',
-            'sex.required'         => 'Hãy chọn trạng giới tính !',
-            'sex.in'               => 'Giới tính không hợp lệ !',
-            'status.required'      => 'Hãy chọn trạng thái hoạt động !',
-            'status.in'            => 'Trạng thái hoạt động không hợp lệ !',
-            'password.required'    => 'Hãy nhập mật khẩu !',
-            'cf_password.required' => 'Hãy nhập lại mật khẩu !',
-            'cf_password.same'     => 'Nhập lại mật khẩu không hợp lệ !',
-            'password.min'         => 'Mật khẩu phải tối thiểu 6 kí tự !',
-            'role_ids.array'       => 'Chức vụ không hợp lệ !',
-            'role_ids.*.exists'    => 'Chức vụ :attribute không  tồn tại !',
-            'account_level_id.in'  => 'Cấp độ tài khoản không hợp lệ !'
+            'name.required'       => 'Hãy nhập họ và tên !',
+            'name.min'            => 'Họ và tên tối thiểu phải 3 kí tự !',
+            'name.max'            => 'Họ và tên tối đa chỉ 100 kí tự !',
+            'image.required'      => 'Hãy nhập hình ảnh !',
+            'address.required'    => 'Hãy nhập địa chỉ !',
+            'address.min'         => 'Địa chỉ phải tối thiểu 6 kí tự !',
+            'address.max'         => 'Địa chỉ tối đa chỉ 100 kí tự !',
+            'phone.required'      => 'Hãy nhập số điện thoại !',
+            'phone.regex'         => 'Số điện thoại không hợp lệ !',
+            'email.required'      => 'Hãy nhập địa chỉ email !',
+            'email.email'         => 'Địa chỉ email không hợp lệ !',
+            'email.unique'        => 'Địa chỉ email này đã tồn tại !',
+            'sex.required'        => 'Hãy chọn trạng giới tính !',
+            'sex.in'              => 'Giới tính không hợp lệ !',
+            'status.required'     => 'Hãy chọn trạng thái hoạt động !',
+            'status.in'           => 'Trạng thái hoạt động không hợp lệ !',
+            // 'password.required'    => 'Hãy nhập mật khẩu !',
+            // 'cf_password.required' => 'Hãy nhập lại mật khẩu !',
+            // 'cf_password.same'     => 'Nhập lại mật khẩu không hợp lệ !',
+            // 'password.min'         => 'Mật khẩu phải tối thiểu 6 kí tự !',
+            'role_ids.array'      => 'Chức vụ không hợp lệ !',
+            'role_ids.*.exists'   => 'Chức vụ :attribute không  tồn tại !',
+            'account_level_id.in' => 'Cấp độ tài khoản không hợp lệ !'
 
         ];
 
@@ -250,6 +325,40 @@ class UserService extends BaseService
             $entity = $this->model->with('roles')->findOrFail($request->user()->id);
 
             return $entity;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function updatePassword(object $request)
+    {
+        $this->doValidate($request,
+                          [
+                              'old_password' => 'required|min:6',
+                              'new_password' => 'required|min:6',
+                              'cf_password'  => 'required|same:new_password',
+                          ],
+                          [
+                              'old_password.required' => 'Hãy nhập mật khẩu !',
+                              'old_password.min'      => 'Mật khẩu phải tối thiểu 6 kí tự !',
+                              'new_password.required' => 'Hãy nhập mật khẩu mới !',
+                              'new_password.min'      => 'Mật khẩu mới phải tối thiểu 6 kí tự !',
+                              'cf_password.required'  => 'Hãy nhập lại mật khẩu mới !',
+                              'cf_password.same'      => 'Nhập lại mật khẩu mới không hợp lệ !',
+                          ]
+        );
+        try {
+            $user = Auth::user();
+            if (Hash::check($request->old_password, $user['password'])) {
+                // đổi mk
+                $userChangePass           = User::find($user['id']);
+                $userChangePass->password = Hash::make($request->new_password);
+                $userChangePass->save();
+
+                return true;
+            } else {
+                throw new HttpException(500, 'Mật khẩu cũ không đúng !');
+            }
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }

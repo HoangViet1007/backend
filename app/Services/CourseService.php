@@ -101,6 +101,77 @@ class CourseService extends BaseService
         }
     }
 
+    // get courses in client
+    public function getCourse()
+    {
+        $this->preGetAll();
+        $statusActive    = StatusConstant::ACTIVE;
+        $statusHappening = StatusConstant::HAPPENING;
+        $request         = request()->all();
+        $specializes     = $request['specializes'] ?? null;
+        $level           = $request['level'] ?? null;
+
+        $data = $this->queryHelper->removeParam('level')
+                                  ->removeParam('specializes')
+                                  ->buildQuery($this->model)
+                                  ->with(['customerLevel', 'specializeDetails.user',
+                                          'specializeDetails.specialize'])
+                                  ->join('specialize_details', 'courses.specialize_detail_id',
+                                         'specialize_details.id')
+                                  ->join('specializes', 'specialize_details.specialize_id',
+                                         'specializes.id')
+                                  ->join('customer_levels', 'courses.customer_level_id',
+                                         'customer_levels.id')
+                                  ->join('users', 'specialize_details.user_id', 'users.id')
+                                  ->select('courses.*')
+                                  ->when($specializes, function ($q) use ($specializes) {
+                                      $arraySpecialize = explode(',', $specializes) ?? [0];
+                                      $q->whereIn('specializes.id', $arraySpecialize);
+                                  })
+                                  ->when($level, function ($q) use ($level) {
+                                      $arrayLevel = explode(',', $level) ?? [0];
+                                      $q->whereIn('customer_levels.id', $arrayLevel);
+                                  })
+                                  ->where(function ($query) use ($statusActive, $statusHappening) {
+                                      $query->where('courses.display', $statusActive)
+                                            ->where('courses.status', $statusHappening);
+                                  });
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    // get course detail in client by id
+    public function getCourseByIdInClient($id)
+    {
+        try {
+            $course = Course::findOrFail($id);
+            if ($course && $course->status == StatusConstant::HAPPENING && $course->display == StatusConstant::ACTIVE)
+                $entity = $this->queryHelper->buildQuery($this->model)
+                                            ->with(['customerLevel', 'specializeDetails.user',
+                                                    'specializeDetails.specialize'])
+                                            ->with(['stagesClient.course_planes' => function ($q) {
+                                                $q->where('course_planes.status', StatusConstant::ACTIVE);
+                                            }])
+                                            ->select('courses.*')
+                                            ->where('courses.id', $id)
+                                            ->first();
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
     public function getCourseCurrentPtById($id)
     {
         try {
@@ -220,11 +291,11 @@ class CourseService extends BaseService
         if ($request instanceof Request) {
             $request->merge([
                                 'created_by' => $this->currentUser()->id ?? null,
-                                'status'     => StatusConstant::PENDING
+                                'status'     => $courseForUser->status
                             ]);
         } else {
             $request->created_by = $this->currentUser()->id ?? null;
-            $request->status     = StatusConstant::PENDING;
+            $request->status     = $courseForUser->status;
         }
         parent::preUpdate($id, $request);
     }
@@ -262,7 +333,6 @@ class CourseService extends BaseService
             'lessons.required' => 'Hãy nhập tổng số buổi của khoá học !',
             'lessons.numeric'  => 'Tổng số buổi không hợp lệ !',
             'lessons.min'      => 'Tổng số buổi tối thiểu phải từ 1 !',
-
             'time_a_lessons.required' => 'Hãy nhập thời lượng 1 buổi học !',
             'time_a_lessons.numeric'  => 'Thời lượng buổi học không hợp lệ !',
             'time_a_lessons.min'      => 'Thời lượng buổi học phải tối thiểu 30 phút !',
@@ -293,10 +363,32 @@ class CourseService extends BaseService
         return parent::updateRequestValidate($id, $request, $rules, $messages);
     }
 
+    // update display index
+    public function updateDisplay(object $request, $id){
+        $this->doValidate($request,
+                          [
+                              'display'              => 'in:' . implode(',', $this->display),
+                          ],
+                          [
+                              'display.in' => 'Trạng thái hiển thị không hợp lệ !',
+                          ]
+        );
+        try {
+            $course = Course::find($id);
+            $course->update(['display' => $request->display]);
+
+            return Course::find($id);
+        }catch (Exception $exception){
+            throw new BadRequestException(
+                ['message' => __("Update trạng thái hiển thị không thành công !")], new Exception()
+            );
+        }
+    }
+
     public function updateCourseForAdmin($id, object $request)
     {
         $course = Course::findOrFail($id);
-        if(!$course){
+        if (!$course) {
             throw new BadRequestException(
                 ['message' => __("Khoá học không tồn tại !")], new Exception()
             );
@@ -309,7 +401,8 @@ class CourseService extends BaseService
                               'status.in' => 'Trạng thái hoạt động không hợp lệ !',
                           ]
         );
-        return $course->update(['status'=>$request->status]);
+
+        return $course->update(['status' => $request->status]);
     }
 
     public function preDelete(int|string $id)

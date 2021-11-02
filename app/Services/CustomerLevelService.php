@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Models\Course;
 use App\Models\CustomerLevel;
 use Exception;
@@ -22,6 +25,19 @@ class CustomerLevelService extends BaseService
     public function getAllCustomerLevelNoPaginate()
     {
         return CustomerLevel::all();
+    }
+
+    // get all customer for list course in client
+    public function getCustomerLevel()
+    {
+        $data = $this->queryHelper->buildQuery($this->model)->with('coursesClient');
+        try {
+            $response = $data->get();
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array

@@ -31,16 +31,17 @@ return [
     | Supported: "smtp", "sendmail", "mailgun", "ses",
     |            "postmark", "log", "array"
     |
+
     */
 
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+            'host' => 'smtp.gmail.com',
             'port' => env('MAIL_PORT', 587),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
+            'username' => 'ngohongnguyenstudy2020@gmail.com',
+            'password' => 'Nguyen2001',
             'timeout' => null,
             'auth_mode' => null,
         ],

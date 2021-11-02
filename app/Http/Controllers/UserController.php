@@ -12,7 +12,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Laravel\Passport\Client as OClient;
 
@@ -40,7 +39,7 @@ class UserController extends Controller
         $data     = Role::where('name', RoleConstant::PT)->first();
         $role_ids = [$data->id];
 
-        $account_level = AccountLevel::where('name',AccountLevelConstant::ACCOUNT_LEVEL_DEFAULT)->first();
+        $account_level    = AccountLevel::where('name', AccountLevelConstant::ACCOUNT_LEVEL_DEFAULT)->first();
         $account_level_id = $account_level->id;
 
         return response()->json($this->service->addUser($request, $role_ids, $account_level_id));
@@ -158,7 +157,7 @@ class UserController extends Controller
                                     'expires_at'   => Carbon::parse(
                                         $tokenResult->token->expires_at
                                     )->toDateTimeString(),
-                                    'user'  => $user
+                                    'user'         => $user
                                 ]);
     }
 
@@ -233,5 +232,10 @@ class UserController extends Controller
                                     'message' => 'Đăng xuất thành công !'
                                 ]);
 
+    }
+
+    public function updatePassword(Request $request): JsonResponse
+    {
+        return response()->json($this->service->updatePassword($request));
     }
 }
