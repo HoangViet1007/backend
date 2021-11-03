@@ -56,7 +56,7 @@ class StageController extends Controller
 // test send email
     public function sendEmail()
     {
-       return Mail::to('ngohongnguyen016774@gmail.com')->send(new TetSendMailNotify());
-
+        Mail::to('ngohongnguyen016774@gmail.com')->send(new TetSendMailNotify());
+        return env('MAIL_USERNAME');
     }
 }
