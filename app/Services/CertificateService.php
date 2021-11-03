@@ -6,11 +6,13 @@ use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Certificate;
+use App\Models\SpecializeDetail;
 use App\Models\User;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * @Author apple
@@ -69,10 +71,22 @@ class CertificateService extends BaseService
 
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
     {
+        $idUser = auth()->user()->id;
+        $idArray = SpecializeDetail::where('user_id',$idUser)->get('id')->toArray();
+        $array =[];
+       foreach ($idArray as $value){
+           array_push($array,$value['id']);
+       }
         $rules = [
-            'name' => 'required|max:100|unique:certificates,name',
+            'name' => [
+                'required',
+                'max:100',
+                Rule::unique('certificates',)->where(function ($query) use ($request) {
+                    return $query->where('specialize_detail_id', $request->specialize_detail_id);
+                }),
+            ],
             'image' => 'required',
-            'specialize_detail_id' => 'required|exists:specializes,id',
+            'specialize_detail_id' => 'required|in:' . implode(',',$array),
         ];
         $messages = [
             'name.required' => 'Hãy nhập tên chứng chỉ !',
@@ -80,7 +94,7 @@ class CertificateService extends BaseService
             'name.max' => 'Tên chứng chỉ không quá 100 ký tự !',
             'image.required' => 'Hãy nhập ảnh !',
             'specialize_detail_id.required' => 'Hãy chọn chuyên môn của chứng chỉ !',
-            'specialize_detail_id.exists' => 'Chuyên môn không tồn tại !',
+            'specialize_detail_id.in' => 'Chuyên môn không tồn tại !',
         ];
 
         return parent::storeRequestValidate($request, $rules, $messages);
@@ -90,17 +104,33 @@ class CertificateService extends BaseService
     public function updateRequestValidate(int|string $id, object $request, array $rules = [],
                                           array $messages = []): bool|array
     {
+        $idUser = auth()->user()->id;
+        $idArray = SpecializeDetail::where('user_id',$idUser)->get('id')->toArray();
+        $array =[];
+        foreach ($idArray as $value){
+            array_push($array,$value['id']);
+        }
+
         $rules = [
-            'name' => "required|max:100|unique:certificates,name,$id",
+            'name' => [
+                'required',
+                'max:100',
+                Rule::unique('certificates',)->where(function ($query) use ($request,$id) {
+                    return $query->where('specialize_detail_id', $request->specialize_detail_id)
+                        ->where('id', '!=', $id);
+                        ;
+                }),
+            ],
             'image' => 'required',
-            'specialize_detail_id' => 'required|exists:specializes,id',
+            'specialize_detail_id' => 'required|in:' . implode(',',$array),
         ];
         $messages = [
             'name.required' => 'Hãy nhập tên chứng chỉ !',
             'name.unique' => 'Tên chứng chỉ đã tồn tại !',
             'name.max' => 'Tên chứng chỉ không quá 100 ký tự !',
             'image.required' => 'Hãy nhập ảnh !',
-            'specialize_detail_id.exists' => 'Chuyên môn không tồn tại !',
+            'specialize_detail_id.required' => 'Hãy chọn chuyên môn của chứng chỉ !',
+            'specialize_detail_id.in' => 'Chuyên môn không tồn tại !',
         ];
 
         return parent::updateRequestValidate($id, $request, $rules, $messages);
