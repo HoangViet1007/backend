@@ -124,7 +124,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // thanh toan
     Route::post('thanh-toan', 'PaymentController@createPayment');
-    Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
+    Route::get('thanh-toan/thong-bao', 'PaymentController@returnPayment');
     Route::resource('payment', 'PaymentController');
 });
 
