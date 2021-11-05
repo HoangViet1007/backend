@@ -91,18 +91,18 @@ class PaymentController extends Controller
     public function returnPayment(Request $request)
     {
         $returnData = [
-            "money" => $request->vnp_Amount / 100, //vnp_Amount / 100,
-            "code_vnp_response" => $request->vnp_ResponseCode, //vnp_ResponseCode,
-            "code_bank" => $request->vnp_BankCode, //vnp_BankCode,
-            "code_vnp" => $request->vnp_TransactionNo, //vnp_TransactionNo,
+            "money" => $request->money / 100, //vnp_Amount / 100,
+            "code_vnp_response" => $request->code_vnp_response, //vnp_ResponseCode,
+            "code_bank" => $request->code_bank, //vnp_BankCode,
+            "code_vnp" => $request->code_vnp, //vnp_TransactionNo,
             "time" => date('Y-m-d H:i:s'),
             "user_id" => Auth::user()->id,
         ];
         if ($request->course_id) {
             $billData = [
-                "code_bill" => $request->vnp_TxnRef, // vnp_TxnRef
+                "code_bill" => $request->code_bill, // vnp_TxnRef
                 "time" => date('Y-m-d H:i:s'),
-                "money" => $request->vnp_Amount / 100, //vnp_Amount / 100,
+                "money" => $request->money / 100, //vnp_Amount / 100,
                 "status" => StatusConstant::DIRECT,
                 "course_id" => $request->course_id,
                 "user_id" => Auth::id()
@@ -123,7 +123,7 @@ class PaymentController extends Controller
             // cong tien user
             $user = User::find(Auth::id());
             $money = [
-                'money' => $user->money + $request->vnp_Amount / 100
+                'money' => $user->money + $request->money / 100
             ];
             $user->update($money);
             $returnData['note'] = "Nap tien";
