@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\StatusConstant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,6 +20,16 @@ class Stage extends Model
     public function course_planes(): HasMany
     {
         return $this->hasMany(CoursePlanes::class);
+    }
+
+    public function course_planes_client(): HasMany
+    {
+        return $this->hasMany(CoursePlanes::class)->where('status',StatusConstant::ACTIVE);
+    }
+
+    public function course_planes_off(): HasMany
+    {
+        return $this->hasMany(CoursePlanes::class)->where('type',0)->where('status',StatusConstant::ACTIVE);
     }
 
     public function course()

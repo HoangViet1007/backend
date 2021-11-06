@@ -3,32 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Services\BaseService;
-use App\Services\CourseStudentService;
+use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class CourseStudentController extends Controller
+class ScheduleController extends Controller
 {
     public BaseService $service;
 
     public function __construct()
     {
-        $this->service = new CourseStudentService();
+        $this->service = new ScheduleService();
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\Response
      */
     public function index(): JsonResponse
     {
-        return response()->json($this->service->getAll());
+
     }
 
-    public function getCourseForCustomer($id): JsonResponse
+    public function getScheduleByCourseStudent(Request $request, $id)
     {
-        return response()->json($this->service->getCourseForCustomer($id));
+        return response()->json($this->service->getScheduleByCourseStudent($request, $id));
     }
 
     /**
@@ -48,9 +48,9 @@ class CourseStudentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        return response()->json($this->service->add($request));
     }
 
     /**
@@ -85,25 +85,9 @@ class CourseStudentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
-        //
-    }
-
-    public function customerCancel(Request $request, $id)
-    {
-        return response()->json($this->service->customerCancel($request, $id));
-    }
-
-    public function ptCancel(Request $request, $id)
-    {
-        return response()->json($this->service->ptCancel($request, $id));
-    }
-
-    // pt duyet dang ký khoa hoc
-    public function ptThough(Request $request, $id): JsonResponse
-    {
-        return response()->json($this->service->ptThough($request, $id));
+        return response()->json($this->service->update($id, $request));
     }
 
     /**
@@ -113,8 +97,8 @@ class CourseStudentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
-        //
+        return response()->json($this->service->delete($id));
     }
 }
