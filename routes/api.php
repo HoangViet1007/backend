@@ -88,6 +88,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
+    Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
     Route::put('/course/display/{id}','CourseController@updateDisplay');
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
     Route::get('course/pt', 'CourseController@getCourseCurrentPt');
@@ -119,6 +120,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // course student
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
     Route::get('course_student/customer/{id}','CourseStudentController@getCourseForCustomer');
+    Route::put('pt-through/{id}','CourseStudentController@ptThough');
     Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
     Route::resource('course_student','CourseStudentController');
 
@@ -126,5 +128,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
     Route::resource('payment', 'PaymentController');
+
+    //schedule
+    Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
+    Route::resource('schedule','ScheduleController');
 });
 
