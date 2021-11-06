@@ -418,4 +418,23 @@ class CourseService extends BaseService
         parent::preDelete($id);
     }
 
+    public function getCoursePlanOff(object $request, $id)
+    {
+        try {
+            $course = Course::findOrFail($id);
+            if ($course && $course->status == StatusConstant::HAPPENING && $course->display == StatusConstant::ACTIVE)
+                $entity = $this->queryHelper->buildQuery($this->model)
+                                            ->with(['stagesClient.course_planes_off' => function ($q) {
+                                                $q->where('course_planes.status', StatusConstant::ACTIVE);
+                                            }])
+                                            ->select('courses.*')
+                                            ->where('courses.id', $id)
+                                            ->first();
+
+            return $entity;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
 }

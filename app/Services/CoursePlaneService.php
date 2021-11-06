@@ -23,20 +23,20 @@ class CoursePlaneService extends BaseService
 
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
     {
-        $rules = [
-            'name' => [
+        $rules    = [
+            'name'        => [
                 'required',
                 Rule::unique('course_planes',)->where(function ($query) use ($request) {
                     return $query->where('stage_id', $request->stage_id);
                 }),
             ],
-            'content' => 'required',
+            'content'     => 'required',
             'descreption' => 'required',
-            'video_link' => 'file|mimes:mp4|max:1048576',
-            'stage_id' => 'required|exists:stages,id',
-            'status' => 'required|in:' . implode(',', $this->status),
-            'image' => 'required',
-            'type' => 'required|in:' . implode(',', config('constant.type'))
+            'video_link'  => 'file|mimes:mp4|max:1048576',
+            'stage_id'    => 'required|exists:stages,id',
+            'status'      => 'required|in:' . implode(',', $this->status),
+            'image'       => 'required',
+            'type'        => 'required|in:' . implode(',', config('constant.type'))
 
         ];
         $messages = [
