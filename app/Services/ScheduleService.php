@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\SystemException;
 use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
 use App\Models\Schedule;
@@ -28,9 +29,17 @@ class ScheduleService extends BaseService
 
     public function getScheduleByCourseStudent(object $request, $id)
     {
-        $schedule = Schedule::where('course_student_id', $id)->get();
+        $data = $this->queryHelper->buildQuery($this->model)
+                                  ->where('course_student_id', $id)
+                                  ->with(['course_student.users', 'course_student.courses']);
+        try {
+            $response = $data->get();
+            $this->postGetAll($response);
 
-        return $schedule;
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     public function preAdd(object $request)
@@ -102,6 +111,15 @@ class ScheduleService extends BaseService
                     new Exception()
                 );
             }
+        }
+
+        // handle request
+        if ($request instanceof Request) {
+            $request->merge([
+                                'status'     => StatusConstant::UNFINISHED,
+                            ]);
+        } else {
+            $request->status     = StatusConstant::UNFINISHED;
         }
     }
 
@@ -179,13 +197,9 @@ class ScheduleService extends BaseService
         // handle request
         if ($request instanceof Request) {
             $request->merge([
-                                'time_start' => $request->date . ' ' . $request->time_start,
-                                'time_end'   => $request->date . ' ' . $request->time_end,
                                 'status'     => StatusConstant::UNFINISHED,
                             ]);
         } else {
-            $request->time_start = $request->date . ' ' . $request->time_start;
-            $request->time_end   = $request->date . ' ' . $request->time_end;
             $request->status     = StatusConstant::UNFINISHED;
         }
     }
@@ -207,8 +221,8 @@ class ScheduleService extends BaseService
                              ->get();
         if (count($data) > 0) {
             foreach ($data as $item) {
-                $time_start = strtotime($item->time_start);
-                $time_end   = strtotime($item->time_end);
+                $time_start = strtotime($item->date .' ' . $item->time_start);
+                $time_end   = strtotime($item->date .' ' . $item->time_end);
                 $time_check = strtotime($date . $timeCheck);
 
                 if ($time_check >= $time_start && $time_check <= $time_end) {
@@ -283,4 +297,25 @@ class ScheduleService extends BaseService
             );
         }
     }
+
+    // update status schedule complete
+    public function updateStatusScheduleComplete($id, object $request)
+    {
+        /* check xem schedule co phai cua user dang login hay ko
+         * */
+        $user   = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+        // gui email thong bao cho nguoi dung da hoc xong
+
+        dd($id);
+        $schedule = Schedule::find($id);
+        $schedule->update(['status' => StatusConstant::COMPLETE]);
+    }
+
 }

@@ -90,6 +90,12 @@ class ScheduleController extends Controller
         return response()->json($this->service->update($id, $request));
     }
 
+    // update status chedule complete
+    public function updateStatusScheduleComplete($id, Request $request): JsonResponse
+    {
+        return response()->json($this->service->updateStatusScheduleComplete($id, $request));
+    }
+
     /**
      * Remove the specified resource from storage.
      *
