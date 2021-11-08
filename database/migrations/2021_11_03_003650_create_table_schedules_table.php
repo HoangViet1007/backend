@@ -26,7 +26,6 @@ class CreateTableSchedulesTable extends Migration
             $table->unsignedBigInteger('course_plan_id');
             $table->unsignedBigInteger('course_student_id');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

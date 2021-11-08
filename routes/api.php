@@ -130,6 +130,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('payment', 'PaymentController');
 
     //schedule
+    Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
     Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
     Route::resource('schedule','ScheduleController');
 });
