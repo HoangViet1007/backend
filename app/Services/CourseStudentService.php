@@ -12,6 +12,7 @@ use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
+use App\Models\Bill;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -79,6 +80,47 @@ class CourseStudentService extends BaseService
                 ['message' => __("Bạn không thể huỷ khoá học !")], new Exception()
             );
         }
+    }
+
+    public function createCourseStudent(object $request)
+    {
+        $course_ids = Course::all()->pluck('id')->toArray();
+        $user= User::find(Auth::id());
+        $this->doValidate(
+            $request,
+            [
+                'course_id' => 'in:'. implode(',', $course_ids),
+                'money' => 'required|numeric|lt:' . $user->money,
+            ],
+            [
+                'course_id.in' => 'Không tồn tại khóa học!',
+                'money.required' => 'Không có số tiền !',
+                'money.numeric' => 'Số tiền không hợp lệ !',
+                'money.lt' => 'Số tiền trong ví không đủ để mua khóa học !',
+            ]
+        );
+        $billData = [
+            "code_bill" => date("YmdHis") . Auth::id(), // vnp_TxnRef
+            "time" => date('Y-m-d H:i:s'),
+            "money" => $request->money,
+            "status" => StatusConstant::WALLET,
+            "course_id" => $request->course_id,
+            "user_id" => Auth::id()
+        ];
+//             them vao bang hoc vien
+        $courseStudentData = [
+            "status" => StatusConstant::UNSCHEDULED,
+            "user_id" => Auth::id(),
+            "course_id" => $request->course_id
+        ];
+        $user->update([
+            'money' => $user->money - $request->money,
+        ]);
+        CourseStudent::create($courseStudentData);
+        $bill = Bill::create($billData);
+        $billRel = Bill::with('course', 'user')->where('bills.id', $bill->id)->first();
+        return $billRel;
+
     }
 
     public function ptCancel(object $request, $id)

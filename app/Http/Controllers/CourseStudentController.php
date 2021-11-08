@@ -50,7 +50,7 @@ class CourseStudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return response()->json($this->service->createCourseStudent($request));
     }
 
     /**
