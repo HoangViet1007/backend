@@ -22,13 +22,14 @@ class StatusConstant
     const CANCELEDBYPT = 'CanceledByPt';
     const UNSCHEDULED  = 'Unscheduled';
     const SCHEDULE     = 'Schedule';
+    const SUGGESTION   = 'Suggestion';// gui yeu cau cho admin khi ket thuc khoa hoc
     const COMPLETE     = 'Complete';
 
     // status schedule hoan thanh và chua hoan thanh (complete)
-    const UNFINISHED     = 'unfinished';
+    const UNFINISHED = 'unfinished';
     // payments
     const RECHARGE = 'Nap tien';
-    const PAY = 'Thanh toan khoa hoc';
+    const PAY      = 'Thanh toan khoa hoc';
 
     // bills
     const WALLET = 'Thanh toan bang vi';
@@ -47,6 +48,7 @@ class StatusConstant
             self::CANCELEDBYPT,
             self::UNSCHEDULED,
             self::SCHEDULE,
+            self::SUGGESTION,
             self::COMPLETE,
             self::RECHARGE,
             self::PAY,
