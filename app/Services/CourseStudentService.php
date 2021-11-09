@@ -168,7 +168,7 @@ class CourseStudentService extends BaseService
                                               ->join('users', 'users.id', 'course_students.user_id')
                                               ->join('courses', 'courses.id', 'course_students.course_id')
                                               ->select('course_students.*')
-                                              ->where('user_id', $id);
+                                              ->where('user_id', '=', $id);
                 $response = $data->paginate(QueryHelper::limit());
 
                 return $response;
@@ -197,7 +197,7 @@ class CourseStudentService extends BaseService
         }
 
         // check duyet tuan tu
-        if($this->getCourseStudentOldEst($id) == false){
+        if ($this->getCourseStudentOldEst($id) == false) {
             throw new BadRequestException(
                 ['message' => __("Không thể duyệt đăng ký này, hãy duyệt một cách tuần tự !")],
                 new Exception()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CourseStudent;
 use App\Services\BaseService;
 use App\Services\ScheduleService;
 use Illuminate\Http\JsonResponse;
@@ -23,12 +24,34 @@ class ScheduleController extends Controller
      */
     public function index(): JsonResponse
     {
-
+        //
     }
 
+    // lay za schedule trong pt (all)
     public function getScheduleByCourseStudent(Request $request, $id)
     {
         return response()->json($this->service->getScheduleByCourseStudent($request, $id));
+    }
+
+    // get schedule by customer
+    public function getScheduleByCustomer(Request $request, $id)
+    {
+        /* check course_student truyen len co phai cua no hay ko
+         * */
+        $course_student = CourseStudent::find($id);
+        $user_id        = $course_student->user_id;
+
+        return response()->json($this->service->getScheduleByCourseStudent($request, $id, $user_id));
+    }
+
+    public function getCalenderCustomer(Request $request): JsonResponse
+    {
+        return response()->json($this->service->getCalenderCustomer($request));
+    }
+
+    public function getCalenderPt(Request $request): JsonResponse
+    {
+        return response()->json($this->service->getCalenderPt($request));
     }
 
     /**

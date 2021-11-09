@@ -27,16 +27,68 @@ class ScheduleService extends BaseService
         $this->model = new Schedule();
     }
 
-    public function getScheduleByCourseStudent(object $request, $id)
+    public function getScheduleByCourseStudent(object $request, $id, $user_id = null)
     {
+        if ($user_id) {
+            $userLogin = Auth::user();
+            if (!($user_id == $userLogin['id'])) {
+                throw new BadRequestException(
+                    ['message' => __("Lịch học không tồn tại !")], new Exception()
+                );
+            }
+        }
         $data = $this->queryHelper->buildQuery($this->model)
-                                  ->where('course_student_id', $id)
-                                  ->with(['course_student.users', 'course_student.courses']);
+                                  ->with(['course_student.users', 'course_student.courses'])
+                                  ->when($user_id, function ($q) use ($user_id) {
+                                      $q->join('course_students', 'schedules.course_student_id', 'course_students.id')
+                                        ->where('course_students.user_id', $user_id);
+                                  })
+                                  ->select('schedules.*')
+                                  ->where('course_student_id', $id);
         try {
             $response = $data->get();
             $this->postGetAll($response);
 
             return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    // get calender work
+    public function getCalenderCustomer(object $request)
+    {
+        try {
+            $date                 = $request->date ?? null;
+            $user                 = Auth::user();
+            $arrayCourseStudentId = CourseStudent::where('user_id', $user['id'])
+                                                 ->where('status', StatusConstant::SCHEDULE)
+                                                 ->pluck('id')->toArray();
+            $schedule             = Schedule::whereIn('course_student_id', $arrayCourseStudentId)
+                                            ->when($date, function ($q) use ($date) {
+                                                $q->where('date', $date);
+                                            })
+                                            ->with(['course_student.users', 'course_student.courses'])
+                                            ->get();
+
+            return $schedule;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function getCalenderPt(object $request)
+    {
+        $user = Auth::user();
+        try {
+            $schedule = Schedule::leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
+                                ->leftJoin('courses', 'course_students.course_id', 'courses.id')
+                                ->where('course_students.status', StatusConstant::SCHEDULE)
+                                ->where('courses.created_by', $user['id'])
+                                ->select('schedules.*')
+                                ->get();
+
+            return $schedule;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
@@ -63,7 +115,7 @@ class ScheduleService extends BaseService
                               'title'             => 'required|min:3',
                               'date'              => 'required|date',
                               'time_start'        => 'required',
-                              'time_end'          => 'required',
+                              'time_end'          => 'required|after:time_start',
                               // 'status'            => 'in:' . implode(',', $this->arrayStatusChedule),
                               'link_room'         => 'required',
                               'course_plan_id'    => [
@@ -81,6 +133,7 @@ class ScheduleService extends BaseService
                               'date.required'              => 'Hãy nhập ngày tháng cho lịch học !',
                               'date.date'                  => 'Định dạng ngày tháng không hợp lệ !',
                               'time_start.required'        => 'Hãy nhập thời gian bắt đầu cho lịch học !',
+                              'time_end.after'             => 'Thời gian không hợp lệ !',
                               'time_end.required'          => 'Hãy nhập thời gian kết thúc cho lịch học !',
                               // 'status.in'                  => 'Trạng thái lịch học không hợp lệ !',
                               'link_room.required'         => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
@@ -116,10 +169,10 @@ class ScheduleService extends BaseService
         // handle request
         if ($request instanceof Request) {
             $request->merge([
-                                'status'     => StatusConstant::UNFINISHED,
+                                'status' => StatusConstant::UNFINISHED,
                             ]);
         } else {
-            $request->status     = StatusConstant::UNFINISHED;
+            $request->status = StatusConstant::UNFINISHED;
         }
     }
 
@@ -157,7 +210,7 @@ class ScheduleService extends BaseService
                               'title'             => 'required|min:3',
                               'date'              => 'required|date',
                               'time_start'        => 'required',
-                              'time_end'          => 'required',
+                              'time_end'          => 'require|after:time_start',
                               // 'status'            => 'in:' . implode(',', $this->arrayStatusChedule),
                               'link_room'         => 'required',
                               'course_plan_id'    => [
@@ -176,6 +229,7 @@ class ScheduleService extends BaseService
                               'date.required'              => 'Hãy nhập ngày tháng cho lịch học !',
                               'date.date'                  => 'Định dạng ngày tháng không hợp lệ !',
                               'time_start.required'        => 'Hãy nhập thời gian bắt đầu cho lịch học !',
+                              'time_end.after'             => 'Thời gian không hợp lệ !',
                               'time_end.required'          => 'Hãy nhập thời gian kết thúc cho lịch học !',
                               // 'status.in'                  => 'Trạng thái lịch học không hợp lệ !',
                               'link_room.required'         => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
@@ -197,10 +251,10 @@ class ScheduleService extends BaseService
         // handle request
         if ($request instanceof Request) {
             $request->merge([
-                                'status'     => StatusConstant::UNFINISHED,
+                                'status' => StatusConstant::UNFINISHED,
                             ]);
         } else {
-            $request->status     = StatusConstant::UNFINISHED;
+            $request->status = StatusConstant::UNFINISHED;
         }
     }
 
@@ -221,8 +275,8 @@ class ScheduleService extends BaseService
                              ->get();
         if (count($data) > 0) {
             foreach ($data as $item) {
-                $time_start = strtotime($item->date .' ' . $item->time_start);
-                $time_end   = strtotime($item->date .' ' . $item->time_end);
+                $time_start = strtotime($item->date . ' ' . $item->time_start);
+                $time_end   = strtotime($item->date . ' ' . $item->time_end);
                 $time_check = strtotime($date . $timeCheck);
 
                 if ($time_check >= $time_start && $time_check <= $time_end) {
