@@ -118,13 +118,13 @@ class CourseService extends BaseService
                                   ->buildQuery($this->model)
                                   ->with(['customerLevel', 'specializeDetails.user',
                                           'specializeDetails.specialize'])
-                                  ->join('specialize_details', 'courses.specialize_detail_id',
+                                  ->leftJoin('specialize_details', 'courses.specialize_detail_id',
                                          'specialize_details.id')
-                                  ->join('specializes', 'specialize_details.specialize_id',
+                                  ->leftJoin('specializes', 'specialize_details.specialize_id',
                                          'specializes.id')
-                                  ->join('customer_levels', 'courses.customer_level_id',
+                                  ->leftJoin('customer_levels', 'courses.customer_level_id',
                                          'customer_levels.id')
-                                  ->join('users', 'specialize_details.user_id', 'users.id')
+                                  ->leftJoin('users', 'specialize_details.user_id', 'users.id')
                                   ->select('courses.*')
                                   ->when($specializes, function ($q) use ($specializes) {
                                       $arraySpecialize = explode(',', $specializes) ?? [0];

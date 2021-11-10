@@ -12,6 +12,7 @@ use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
+use App\Models\Bill;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -81,6 +82,47 @@ class CourseStudentService extends BaseService
         }
     }
 
+    public function createCourseStudent(object $request)
+    {
+        $course_ids = Course::all()->pluck('id')->toArray();
+        $user= User::find(Auth::id());
+        $this->doValidate(
+            $request,
+            [
+                'course_id' => 'in:'. implode(',', $course_ids),
+                'money' => 'required|numeric|lt:' . $user->money,
+            ],
+            [
+                'course_id.in' => 'Không tồn tại khóa học!',
+                'money.required' => 'Không có số tiền !',
+                'money.numeric' => 'Số tiền không hợp lệ !',
+                'money.lt' => 'Số tiền trong ví không đủ để mua khóa học !',
+            ]
+        );
+        $billData = [
+            "code_bill" => date("YmdHis") . Auth::id(), // vnp_TxnRef
+            "time" => date('Y-m-d H:i:s'),
+            "money" => $request->money,
+            "status" => StatusConstant::WALLET,
+            "course_id" => $request->course_id,
+            "user_id" => Auth::id()
+        ];
+//             them vao bang hoc vien
+        $courseStudentData = [
+            "status" => StatusConstant::UNSCHEDULED,
+            "user_id" => Auth::id(),
+            "course_id" => $request->course_id
+        ];
+        $user->update([
+            'money' => $user->money - $request->money,
+        ]);
+        CourseStudent::create($courseStudentData);
+        $bill = Bill::create($billData);
+        $billRel = Bill::with('course', 'user')->where('bills.id', $bill->id)->first();
+        return $billRel;
+
+    }
+
     public function ptCancel(object $request, $id)
     {
         $this->doValidate($request,
@@ -126,7 +168,7 @@ class CourseStudentService extends BaseService
                                               ->join('users', 'users.id', 'course_students.user_id')
                                               ->join('courses', 'courses.id', 'course_students.course_id')
                                               ->select('course_students.*')
-                                              ->where('user_id', $id);
+                                              ->where('user_id', '=', $id);
                 $response = $data->paginate(QueryHelper::limit());
 
                 return $response;
@@ -154,6 +196,14 @@ class CourseStudentService extends BaseService
             );
         }
 
+        // check duyet tuan tu
+        if ($this->getCourseStudentOldEst($id) == false) {
+            throw new BadRequestException(
+                ['message' => __("Không thể duyệt đăng ký này, hãy duyệt một cách tuần tự !")],
+                new Exception()
+            );
+        }
+
         /*
          * khi duyêt khoa hoc để học viên bắt đầu học thì cần phải thêm đủ lịch cho những buổi học off
          * check tổng số buổi học off = tổng số lịch học đã lên  (ví dụ có 5 buổi off = 5 lịch
@@ -164,6 +214,10 @@ class CourseStudentService extends BaseService
                 new Exception()
             );
         }
+
+        // duyet khoa hoc mot cach tuan tu (dk status = unchedule)
+        /*
+         * */
 
         // update duyet dang ki
         $course_student->update(['status' => StatusConstant::SCHEDULE]);
@@ -200,6 +254,36 @@ class CourseStudentService extends BaseService
         $course_plan = CoursePlanes::whereIn('stage_id', $stageId)->where('type', 0)->count();
 
         return $course_plan;
+    }
+
+    public function getCourseStudentOldEst($id_course_student_though)
+    {
+        /*  lay za created_at cua course_student min
+         *  so sanh voi created_at course_student dang muon duyet
+         * */
+        try {
+            $courseStudentThough = CourseStudent::find($id_course_student_though);
+            $createdAtThough     = $courseStudentThough->created_at->format('Y-m-d H:i:s');
+
+
+            // get create min in course_student
+            $courseStudent             = CourseStudent::where('status', StatusConstant::UNSCHEDULED)
+                                                      ->orderBy('created_at', 'asc')
+                                                      ->first();
+            $courseStudentMinCreatedAt = $courseStudent->created_at->format('Y-m-d H:i:s');
+
+            if (!($createdAtThough <= $courseStudentMinCreatedAt)) {
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception $exception) {
+            throw new BadRequestException(
+                ['message' => __("Không thể duyệt đăng ký này, hãy duyệt một cách tuần tự !")],
+                new Exception()
+            );
+        }
     }
 
 }

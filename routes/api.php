@@ -144,7 +144,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('payment', 'PaymentController');
 
     //schedule
+    Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
     Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
+    Route::get('get-schedule-by-customer/{id}','ScheduleController@getScheduleByCustomer');
+    Route::get('get-calender-work-customer','ScheduleController@getCalenderCustomer');
+    Route::get('get-calender-work-pt','ScheduleController@getCalenderPt');
     Route::resource('schedule','ScheduleController');
 });
 
