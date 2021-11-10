@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+
+
 Route::resource('/demo', 'DemoController');
 // login cho tk thuong
 Route::post('/login', 'UserController@login')->name('login');
@@ -29,6 +32,17 @@ Route::get('/redirect', 'GoogleController@redirectToProvider');
 Route::get('/callback', 'GoogleController@handleProviderCallback');
 
 Route::get('/send-email','StageController@sendEmail');
+// gửi email thông báo lịch học
+Route::get('/send-email-student','StageController@sendEmailStudent');
+// hủy khóa học
+Route::get('/send-email-cancel-course','StageController@sendEmailCancelStudent');
+// PT không thể dạy khóa học đấy
+Route::get('/send-email-pt-cant-teach','StageController@sendEmailStudent');
+// xác thực email
+Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')->middleware('auth:api')->name('verification.send');;
+
+// check verify email
+Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')->middleware('auth:api')->name('verification.verify');;
 // api clien
 Route::group(['prefix' => '/'], function () {
     // register customer and pt

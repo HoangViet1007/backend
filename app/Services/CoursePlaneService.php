@@ -34,11 +34,12 @@ class CoursePlaneService extends BaseService
             ],
             'content'     => 'required',
             'descreption' => 'required',
-            'video_link'  => 'file|mimes:mp4|max:1048576',
-            'stage_id'    => 'required|exists:stages,id',
-            'status'      => 'required|in:' . implode(',', $this->status),
-            'image'       => 'required',
-            'type'        => 'required|in:' . implode(',', config('constant.type'))
+            'video_link' => 'file|mimes:mp4|max:1048576',
+            'stage_id' => 'required|exists:stages,id',
+            'status' => 'required|in:' . implode(',', $this->status),
+            'image' => 'required',
+            'type' => 'required|in:' . implode(',', config('constant.type'))
+
 
         ];
         $messages = [
