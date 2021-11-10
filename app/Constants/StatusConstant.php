@@ -11,6 +11,8 @@ class StatusConstant
     const INACTIVE  = 'Inactive';
     const PROCESS   = 'Process';
     const PROCESSED = 'Processed';
+
+    // status course
     const PENDING   = 'Pending';
     const HAPPENING = 'Happening';
     const PAUSE     = 'Pause';
@@ -22,6 +24,8 @@ class StatusConstant
     const SCHEDULE     = 'Schedule';
     const COMPLETE     = 'Complete';
 
+    // status schedule hoan thanh và chua hoan thanh (complete)
+    const UNFINISHED     = 'unfinished';
     // payments
     const RECHARGE = 'Nap tien';
     const PAY = 'Thanh toan khoa hoc';
@@ -48,5 +52,7 @@ class StatusConstant
             self::PAY,
             self::WALLET,
             self::DIRECT,
+            self::COMPLETE,
+            self::UNFINISHED
         ];
 }

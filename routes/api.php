@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+
+
 Route::resource('/demo', 'DemoController');
 // login cho tk thuong
 Route::post('/login', 'UserController@login')->name('login');
@@ -29,6 +32,17 @@ Route::get('/redirect', 'GoogleController@redirectToProvider');
 Route::get('/callback', 'GoogleController@handleProviderCallback');
 
 Route::get('/send-email','StageController@sendEmail');
+// gửi email thông báo lịch học
+Route::get('/send-email-student','StageController@sendEmailStudent');
+// hủy khóa học
+Route::get('/send-email-cancel-course','StageController@sendEmailCancelStudent');
+// PT không thể dạy khóa học đấy
+Route::get('/send-email-pt-cant-teach','StageController@sendEmailStudent');
+// xác thực email
+Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')->middleware('auth:api')->name('verification.send');;
+
+// check verify email
+Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')->middleware('auth:api')->name('verification.verify');;
 // api clien
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
@@ -88,6 +102,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
+    Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
     Route::put('/course/display/{id}','CourseController@updateDisplay');
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
     Route::get('course/pt', 'CourseController@getCourseCurrentPt');
@@ -119,6 +134,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // course student
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
     Route::get('course_student/customer/{id}','CourseStudentController@getCourseForCustomer');
+    Route::put('pt-through/{id}','CourseStudentController@ptThough');
     Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
     Route::resource('course_student','CourseStudentController');
 
@@ -126,5 +142,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
     Route::resource('payment', 'PaymentController');
+
+    //schedule
+    Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
+    Route::resource('schedule','ScheduleController');
 });
 

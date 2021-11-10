@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\Bill;
+use App\Models\CourseStudent;
 use App\Constants\StatusConstant;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Payment\CreatePayentRequest;
@@ -80,55 +81,59 @@ class PaymentController extends Controller
 
         $vnp_Url = $vnp_Url . "?" . $query;
         if (isset($vnp_HashSecret)) {
-            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);//
+            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret); //
             $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
-//        dd($vnp_Url);
+        //        dd($vnp_Url);
         return $vnp_Url;
     }
 
     public function returnPayment(Request $request)
     {
-        try {
-            $returnData = [
-                "money" => $request->money / 100, //vnp_Amount / 100,
-                "code_vnp_response" => $request->code_vnp_response, //vnp_ResponseCode,
-                "code_bank" => $request->code_bank, //vnp_BankCode,
-                "code_vnp" => $request->code_vnp, //vnp_TransactionNo,
+        $returnData = [
+            "money" => $request->money / 100, //vnp_Amount / 100,
+            "code_vnp_response" => $request->code_vnp_response, //vnp_ResponseCode,
+            "code_bank" => $request->code_bank, //vnp_BankCode,
+            "code_vnp" => $request->code_vnp, //vnp_TransactionNo,
+            "time" => date('Y-m-d H:i:s'),
+            "user_id" => Auth::user()->id,
+        ];
+        if ($request->course_id) {
+            $billData = [
+                "code_bill" => $request->code_bill, // vnp_TxnRef
                 "time" => date('Y-m-d H:i:s'),
-                "user_id" => Auth::user()->id,
+                "money" => $request->money / 100, //vnp_Amount / 100,
+                "status" => StatusConstant::DIRECT,
+                "course_id" => $request->course_id,
+                "user_id" => Auth::id()
             ];
-            if ($request->course_id) {
-                $billData = [
-                    "code_bill" => $request->code_bill, // vnp_TxnRef
-                    "time" => date('Y-m-d H:i:s'),
-                    "money" => $request->money / 100, //vnp_Amount / 100,
-                    "status" => StatusConstant::DIRECT,
-                    "course_id" => $request->course_id,
-                    "user_id" => Auth::id()
-                ];
-//                dd($returnData, $billData);
-                $bill = Bill::create($billData);
-                $returnData['bill_id'] = $bill->id;
-                $returnData['note'] = "Thanh toan khoa hoc";
-            } else {
-                // cong tien user
-                $user = User::find(Auth::id());
-                $money = [
-                    'money' => $user->money + $request->money / 100
-                ];
-                $user->update($money);
-                $returnData['note'] = "Nap tien";
-            }
-            $payment = Payment::create($returnData);
-            $paymentRel = Payment::with('bill.course', 'user')->where('payments.id', $payment->id)->first();
-            return response()->json([
-                $paymentRel,
-                "message" => "Giao dịch thành công !"
-            ]);
-        } catch (Exception $e) {
-            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+//             them vao bang hoc vien
+            $courseStudentData = [
+                "status" => StatusConstant::UNSCHEDULED,
+                "user_id" => Auth::id(),
+                "course_id" => $request->course_id
+            ];
+            CourseStudent::create($courseStudentData);
+            //                dd($returnData, $billData);
+            $bill = Bill::create($billData);
+            $returnData['bill_id'] = $bill->id;
+            $returnData['note'] = "Thanh toan khoa hoc";
+
+        } else {
+            // cong tien user
+            $user = User::find(Auth::id());
+            $money = [
+                'money' => $user->money + $request->money / 100
+            ];
+            $user->update($money);
+            $returnData['note'] = "Nap tien";
         }
+        $payment = Payment::create($returnData);
+        $paymentRel = Payment::with('bill.course', 'user')->where('payments.id', $payment->id)->first();
+        return response()->json([
+            $paymentRel,
+            "message" => "Giao dịch thành công !"
+        ]);
     }
 
     /**

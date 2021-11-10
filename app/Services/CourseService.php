@@ -8,6 +8,7 @@ use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Course;
+use App\Models\CourseStudent;
 use App\Models\SpecializeDetail;
 use App\Models\Stage;
 use Exception;
@@ -15,6 +16,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use phpseclib3\Crypt\EC\Formats\Keys\Common;
 
 /**
  * @Author apple
@@ -330,9 +332,9 @@ class CourseService extends BaseService
 
             'image.required' => 'Hãy nhập hình ảnh đại diện cho khoá học !',
 
-            'lessons.required' => 'Hãy nhập tổng số buổi của khoá học !',
-            'lessons.numeric'  => 'Tổng số buổi không hợp lệ !',
-            'lessons.min'      => 'Tổng số buổi tối thiểu phải từ 1 !',
+            'lessons.required'        => 'Hãy nhập tổng số buổi của khoá học !',
+            'lessons.numeric'         => 'Tổng số buổi không hợp lệ !',
+            'lessons.min'             => 'Tổng số buổi tối thiểu phải từ 1 !',
             'time_a_lessons.required' => 'Hãy nhập thời lượng 1 buổi học !',
             'time_a_lessons.numeric'  => 'Thời lượng buổi học không hợp lệ !',
             'time_a_lessons.min'      => 'Thời lượng buổi học phải tối thiểu 30 phút !',
@@ -364,10 +366,11 @@ class CourseService extends BaseService
     }
 
     // update display index
-    public function updateDisplay(object $request, $id){
+    public function updateDisplay(object $request, $id)
+    {
         $this->doValidate($request,
                           [
-                              'display'              => 'in:' . implode(',', $this->display),
+                              'display' => 'in:' . implode(',', $this->display),
                           ],
                           [
                               'display.in' => 'Trạng thái hiển thị không hợp lệ !',
@@ -378,7 +381,7 @@ class CourseService extends BaseService
             $course->update(['display' => $request->display]);
 
             return Course::find($id);
-        }catch (Exception $exception){
+        } catch (Exception $exception) {
             throw new BadRequestException(
                 ['message' => __("Update trạng thái hiển thị không thành công !")], new Exception()
             );
@@ -416,6 +419,28 @@ class CourseService extends BaseService
             );
         }
         parent::preDelete($id);
+    }
+
+    public function getCoursePlanOff(object $request, $id)
+    {
+        try {
+            $courseStudent = CourseStudent::find($id);
+            $course        = Course::findOrFail($courseStudent->course_id);
+            if ($course && $course->status == StatusConstant::HAPPENING && $course->display == StatusConstant::ACTIVE)
+                $entity = $this->queryHelper->buildQuery($this->model)
+                                            ->join('stages', 'courses.id', 'stages.course_id')
+                                            ->join('course_planes', 'stages.id', 'course_planes.stage_id')
+                                            ->where('stages.status', StatusConstant::ACTIVE)
+                                            ->where('course_planes.status', StatusConstant::ACTIVE)
+                                            ->where('course_planes.type', 0)
+                                            ->select('course_planes.*')
+                                            ->where('courses.id', $courseStudent->course_id)
+                                            ->get();
+
+            return $entity;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
 }
