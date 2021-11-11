@@ -116,7 +116,6 @@ class ScheduleService extends BaseService
                               'date'              => 'required|date',
                               'time_start'        => 'required',
                               'time_end'          => 'required|after:time_start',
-                              // 'status'            => 'in:' . implode(',', $this->arrayStatusChedule),
                               'link_room'         => 'required',
                               'course_plan_id'    => [
                                   'required',
@@ -135,7 +134,6 @@ class ScheduleService extends BaseService
                               'time_start.required'        => 'Hãy nhập thời gian bắt đầu cho lịch học !',
                               'time_end.after'             => 'Thời gian không hợp lệ !',
                               'time_end.required'          => 'Hãy nhập thời gian kết thúc cho lịch học !',
-                              // 'status.in'                  => 'Trạng thái lịch học không hợp lệ !',
                               'link_room.required'         => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
                               'course_plan_id.required'    => 'Hãy nhập buổi học !',
                               'course_plan_id.unique'      => 'Buổi học này đã được xếp lịch !',
@@ -210,8 +208,7 @@ class ScheduleService extends BaseService
                               'title'             => 'required|min:3',
                               'date'              => 'required|date',
                               'time_start'        => 'required',
-                              'time_end'          => 'require|after:time_start',
-                              // 'status'            => 'in:' . implode(',', $this->arrayStatusChedule),
+                              'time_end'          => 'required|after:time_start',
                               'link_room'         => 'required',
                               'course_plan_id'    => [
                                   'required',
@@ -231,7 +228,6 @@ class ScheduleService extends BaseService
                               'time_start.required'        => 'Hãy nhập thời gian bắt đầu cho lịch học !',
                               'time_end.after'             => 'Thời gian không hợp lệ !',
                               'time_end.required'          => 'Hãy nhập thời gian kết thúc cho lịch học !',
-                              // 'status.in'                  => 'Trạng thái lịch học không hợp lệ !',
                               'link_room.required'         => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
                               'course_plan_id.required'    => 'Hãy nhập buổi học !',
                               'course_plan_id.unique'      => 'Buổi học này đã được xếp lịch !',
