@@ -50,4 +50,8 @@ class Course extends Model
         );
     }
 
+    public function teacher(){
+        return $this->belongsTo(User::class,'created_by','id');
+    }
+
 }

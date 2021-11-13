@@ -61,14 +61,14 @@ class ScheduleService extends BaseService
         try {
             $date                 = $request->date ?? null;
             $user                 = Auth::user();
-            $arrayCourseStudentId = CourseStudent::where('user_id', $user['id'])
+            $arrayCourseStudentId = CourseStudent::where('user_id', 3)
                                                  ->where('status', StatusConstant::SCHEDULE)
                                                  ->pluck('id')->toArray();
             $schedule             = Schedule::whereIn('course_student_id', $arrayCourseStudentId)
                                             ->when($date, function ($q) use ($date) {
                                                 $q->where('date', $date);
                                             })
-                                            ->with(['course_student.users', 'course_student.courses'])
+                                            ->with(['course_student.courses.teacher'])
                                             ->get();
 
             return $schedule;
@@ -79,10 +79,15 @@ class ScheduleService extends BaseService
 
     public function getCalenderPt(object $request)
     {
+        $date = $request->date ?? null;
         $user = Auth::user();
         try {
-            $schedule = Schedule::leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
+            $schedule = Schedule::with(['course_student.courses','course_student.users'])
+                                ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
                                 ->leftJoin('courses', 'course_students.course_id', 'courses.id')
+                                ->when($date, function ($q) use ($date) {
+                                    $q->where('schedules.date', $date);
+                                })
                                 ->where('course_students.status', StatusConstant::SCHEDULE)
                                 ->where('courses.created_by', $user['id'])
                                 ->select('schedules.*')
