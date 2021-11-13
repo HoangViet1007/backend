@@ -6,13 +6,13 @@ use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
+use App\Models\Bill;
 use App\Models\Course;
 use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
-use App\Models\Bill;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -85,40 +85,41 @@ class CourseStudentService extends BaseService
     public function createCourseStudent(object $request)
     {
         $course_ids = Course::all()->pluck('id')->toArray();
-        $user= User::find(Auth::id());
+        $user       = User::find(Auth::id());
         $this->doValidate(
             $request,
             [
-                'course_id' => 'in:'. implode(',', $course_ids),
-                'money' => 'required|numeric|lt:' . $user->money,
+                'course_id' => 'in:' . implode(',', $course_ids),
+                'money'     => 'required|numeric|lt:' . $user->money,
             ],
             [
-                'course_id.in' => 'Không tồn tại khóa học!',
+                'course_id.in'   => 'Không tồn tại khóa học!',
                 'money.required' => 'Không có số tiền !',
-                'money.numeric' => 'Số tiền không hợp lệ !',
-                'money.lt' => 'Số tiền trong ví không đủ để mua khóa học !',
+                'money.numeric'  => 'Số tiền không hợp lệ !',
+                'money.lt'       => 'Số tiền trong ví không đủ để mua khóa học !',
             ]
         );
         $billData = [
             "code_bill" => date("YmdHis") . Auth::id(), // vnp_TxnRef
-            "time" => date('Y-m-d H:i:s'),
-            "money" => $request->money,
-            "status" => StatusConstant::WALLET,
+            "time"      => date('Y-m-d H:i:s'),
+            "money"     => $request->money,
+            "status"    => StatusConstant::WALLET,
             "course_id" => $request->course_id,
-            "user_id" => Auth::id()
+            "user_id"   => Auth::id()
         ];
-//             them vao bang hoc vien
+        //             them vao bang hoc vien
         $courseStudentData = [
-            "status" => StatusConstant::UNSCHEDULED,
-            "user_id" => Auth::id(),
+            "status"    => StatusConstant::UNSCHEDULED,
+            "user_id"   => Auth::id(),
             "course_id" => $request->course_id
         ];
         $user->update([
-            'money' => $user->money - $request->money,
-        ]);
+                          'money' => $user->money - $request->money,
+                      ]);
         CourseStudent::create($courseStudentData);
-        $bill = Bill::create($billData);
+        $bill    = Bill::create($billData);
         $billRel = Bill::with('course', 'user')->where('bills.id', $bill->id)->first();
+
         return $billRel;
 
     }
@@ -158,21 +159,18 @@ class CourseStudentService extends BaseService
         }
     }
 
-    public function getCourseForCustomer($id)
+    public function getCourseForCustomer()
     {
         $user_id = Auth::user();
         try {
-            if ($id == $user_id['id']) {
-                $data     = $this->queryHelper->buildQuery($this->model)
-                                              ->with(['users', 'courses'])
-                                              ->join('users', 'users.id', 'course_students.user_id')
-                                              ->join('courses', 'courses.id', 'course_students.course_id')
-                                              ->select('course_students.*')
-                                              ->where('user_id', '=', $id);
-                $response = $data->paginate(QueryHelper::limit());
+            $data     = $this->queryHelper->buildQuery($this->model)
+                                          ->with(['courses.teacher'])
+                                          ->select('course_students.*')
+                                          ->where('user_id', '=', $user_id['id']);
+            $response = $data->paginate(QueryHelper::limit());
 
-                return $response;
-            }
+            return $response;
+
         } catch (Exception $exception) {
             throw new BadRequestException(
                 ['message' => __("Không tồn tại khoá học !")], new Exception()
