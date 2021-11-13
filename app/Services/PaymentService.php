@@ -52,7 +52,7 @@ class PaymentService extends BaseService
         if ($request->course_id) {
             $vnp_Returnurl = "http://localhost:3000/nap-tien/thong-bao?course_id=$request->course_id";
         } else {
-            $vnp_Returnurl = "http://localhost:3000/nap-tien/thong-bao";
+            $vnp_Returnurl = "http://localhost:3000/khach-hang/nap-tien/thong-bao";
         }
         $vnp_TxnRef = date("YmdHis") . Auth::id(); //Mã đơn hàng. Trong thực tế Merchant cần insert đơn hàng vào DB và gửi mã này sang VNPAY
         $vnp_OrderInfo = $request->note;
