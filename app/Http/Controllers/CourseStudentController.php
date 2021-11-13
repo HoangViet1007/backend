@@ -26,9 +26,9 @@ class CourseStudentController extends Controller
         return response()->json($this->service->getAll());
     }
 
-    public function getCourseForCustomer($id): JsonResponse
+    public function getCourseForCustomer(): JsonResponse
     {
-        return response()->json($this->service->getCourseForCustomer($id));
+        return response()->json($this->service->getCourseForCustomer());
     }
 
     /**
