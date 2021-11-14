@@ -34,7 +34,7 @@ class ScheduleController extends Controller
     }
 
     // get schedule by customer
-    public function getScheduleByCustomer(Request $request, $id)
+    public function getScheduleByCustomer(Request $request, $id): JsonResponse
     {
         /* check course_student truyen len co phai cua no hay ko
          * */

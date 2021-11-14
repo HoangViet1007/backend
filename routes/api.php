@@ -102,6 +102,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
+    Route::get('get-course-pending','CourseController@getCoursePending');
     Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
     Route::put('/course/display/{id}','CourseController@updateDisplay');
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
@@ -132,6 +133,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('role','RoleController');
 
     // course student
+    Route::get('get-course_plan-by-course-student/{id}','CourseStudentController@getCoursePlanByCourseStudent');
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
     Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');
     Route::put('pt-through/{id}','CourseStudentController@ptThough');
