@@ -16,7 +16,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use phpseclib3\Crypt\EC\Formats\Keys\Common;
 
 /**
  * @Author apple
@@ -119,11 +118,11 @@ class CourseService extends BaseService
                                   ->with(['customerLevel', 'specializeDetails.user',
                                           'specializeDetails.specialize'])
                                   ->leftJoin('specialize_details', 'courses.specialize_detail_id',
-                                         'specialize_details.id')
+                                             'specialize_details.id')
                                   ->leftJoin('specializes', 'specialize_details.specialize_id',
-                                         'specializes.id')
+                                             'specializes.id')
                                   ->leftJoin('customer_levels', 'courses.customer_level_id',
-                                         'customer_levels.id')
+                                             'customer_levels.id')
                                   ->leftJoin('users', 'specialize_details.user_id', 'users.id')
                                   ->select('courses.*')
                                   ->when($specializes, function ($q) use ($specializes) {
@@ -199,6 +198,21 @@ class CourseService extends BaseService
                 ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
                 $e
             );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    // get course pending
+    public function getCoursePending()
+    {
+        $data = $this->queryHelper->buildQuery($this->model)
+                                  ->with(['stagesClient.course_planes_client'])
+                                  ->where('status', StatusConstant::PENDING);
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+
+            return $response;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }

@@ -38,7 +38,7 @@ class ScheduleService extends BaseService
             }
         }
         $data = $this->queryHelper->buildQuery($this->model)
-                                  ->with(['course_student.users', 'course_student.courses'])
+                                  ->with(['course_student.users', 'course_student.courses.teacher'])
                                   ->when($user_id, function ($q) use ($user_id) {
                                       $q->join('course_students', 'schedules.course_student_id', 'course_students.id')
                                         ->where('course_students.user_id', $user_id);

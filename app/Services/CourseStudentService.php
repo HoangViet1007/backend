@@ -47,6 +47,31 @@ class CourseStudentService extends BaseService
         }
     }
 
+    // lay bai hoc tung course student
+    public function getCoursePlanByCourseStudent($id)
+    {
+        // check xem course co phai cua user dang logjn hay ko
+        $user          = Auth::user();
+        $courseStudent = CourseStudent::find($id);
+
+        if (!($courseStudent->user_id == 3)) {
+            throw new BadRequestException(
+                ['message' => __("Bài học không tồn tại !")], new Exception()
+            );
+        }
+        $coursePlan = CourseStudent::join('courses', 'courses.id', 'course_students.course_id')
+                                   ->join('stages', 'stages.course_id', 'courses.id')
+                                   ->join('course_planes', 'course_planes.stage_id', 'stages.id')
+                                   ->where('courses.id', $courseStudent->course_id)
+                                   ->where('stages.status', StatusConstant::ACTIVE)
+                                   ->where('course_planes.status', StatusConstant::ACTIVE)
+                                   ->where('course_students.id', $id)
+                                   ->select('course_planes.*')
+                                   ->get();
+
+        return $coursePlan;
+    }
+
     public function customerCancel(object $request, $id)
     {
 
