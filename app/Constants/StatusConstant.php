@@ -17,12 +17,14 @@ class StatusConstant
     const HAPPENING = 'Happening';
     const PAUSE     = 'Pause';
 
+    // gửi yêu cầu
+    const REQUEST = 'Request';
+
     // course_student
     const CANCELED     = 'Canceled';
     const CANCELEDBYPT = 'CanceledByPt';
     const UNSCHEDULED  = 'Unscheduled';
     const SCHEDULE     = 'Schedule';
-    const SUGGESTION   = 'Suggestion';// gui yeu cau cho admin khi ket thuc khoa hoc
     const COMPLETE     = 'Complete';
 
     // status schedule hoan thanh và chua hoan thanh (complete)
@@ -48,13 +50,13 @@ class StatusConstant
             self::CANCELEDBYPT,
             self::UNSCHEDULED,
             self::SCHEDULE,
-            self::SUGGESTION,
             self::COMPLETE,
             self::RECHARGE,
             self::PAY,
             self::WALLET,
             self::DIRECT,
             self::COMPLETE,
-            self::UNFINISHED
+            self::UNFINISHED,
+            self::REQUEST
         ];
 }

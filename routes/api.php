@@ -102,7 +102,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
-    Route::get('get-course-pending','CourseController@getCoursePending');
+    Route::get('/request-course/{id}','CourseController@requestCourse');
+    Route::get('get-course-request','CourseController@getCourseRequest');
     Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
     Route::put('/course/display/{id}','CourseController@updateDisplay');
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');

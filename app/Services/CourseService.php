@@ -8,6 +8,7 @@ use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Course;
+use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
 use App\Models\SpecializeDetail;
 use App\Models\Stage;
@@ -15,6 +16,7 @@ use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 /**
@@ -23,7 +25,7 @@ use Illuminate\Validation\Rule;
  */
 class CourseService extends BaseService
 {
-    protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING, StatusConstant::PAUSE];
+    protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING, StatusConstant::PAUSE,StatusConstant::REQUEST];
     protected array $display = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
 
 
@@ -204,16 +206,63 @@ class CourseService extends BaseService
     }
 
     // get course pending
-    public function getCoursePending()
+    public function getCourseRequest()
     {
         $data = $this->queryHelper->buildQuery($this->model)
                                   ->with(['stagesClient.course_planes_client'])
-                                  ->where('status', StatusConstant::PENDING);
+                                  ->where('status', StatusConstant::REQUEST);
         try {
             $response = $data->paginate(QueryHelper::limit());
 
             return $response;
         } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function requestCourse(object $request, $id){
+        /* ckeck xem ton tai khoa hoc ko
+         * */
+
+        $course = Course::find($id);
+        $user = Auth::user();
+        if(empty($course) || $user['id'] == $course->created_by){
+            throw new BadRequestException(
+                ['message' => __("khoá học không tồn tại !")], new Exception()
+            );
+        }
+        if(!($course->status == StatusConstant::PENDING)){
+            throw new BadRequestException(
+                ['message' => __("Chỉ được gửi yêu cầu khi khoá học đang ở trạng thái chờ !")], new Exception()
+            );
+        }
+        if($this->checkCoursePlanCurrentCourse($course->id) == true){
+            $course->update(['status' => StatusConstant::REQUEST]);
+            return true ;
+        }
+        return false;
+    }
+
+    public function checkCoursePlanCurrentCourse($course_id){
+        //  xem co stage nao ko va stage co buoi hoc nao ko
+        // check stage nao cx phai có buoi hoc
+        $check = 0 ;
+        try{
+            $stageArray = Stage::where('course_id',$course_id)->pluck('id')->toArray();
+            if($stageArray){
+                foreach ($stageArray as $item){
+                    $countCoursePlan = CoursePlanes::where('stage_id',$item)->get()->count();
+                    if($countCoursePlan > 0){
+                        $check++;
+                    }
+                }
+                if($check >= count($stageArray)){
+                    return true;
+                }
+            }
+            return false;
+
+        }catch (Exception $e){
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
     }
@@ -335,7 +384,7 @@ class CourseService extends BaseService
             'price'                => 'required|numeric|min:1',
             'description'          => 'required|min:3',
             'content'              => 'required|min:3',
-            'status'               => 'in:' . implode(',', $this->status),
+            // 'status'               => 'in:' . implode(',', $this->status),
             'display'              => 'in:' . implode(',', $this->display),
             'specialize_detail_id' => 'required|in:' . implode(',', $specialize_detail_id),
             'customer_level_id'    => 'required|exists:customer_levels,id'
@@ -364,7 +413,7 @@ class CourseService extends BaseService
             'content.required' => 'Hãy nhập nội dung khoá học !',
             'content.min'      => 'Nội dung phải từ 3 kí tự !',
 
-            'status.in' => 'Trạng thái hoạt động không hợp lệ !',
+            // 'status.in' => 'Trạng thái hoạt động không hợp lệ !',
 
             'display.in' => 'Trạng thái hiển thị không hợp lệ !',
 
