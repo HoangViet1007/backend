@@ -38,7 +38,7 @@ class ScheduleService extends BaseService
             }
         }
         $data = $this->queryHelper->buildQuery($this->model)
-                                  ->with(['course_student.users', 'course_student.courses.teacher'])
+                                  ->with(['course_student.users', 'course_student.courses.teacher','course_planes.stage'])
                                   ->when($user_id, function ($q) use ($user_id) {
                                       $q->join('course_students', 'schedules.course_student_id', 'course_students.id')
                                         ->where('course_students.user_id', $user_id);
@@ -61,14 +61,14 @@ class ScheduleService extends BaseService
         try {
             $date                 = $request->date ?? null;
             $user                 = Auth::user();
-            $arrayCourseStudentId = CourseStudent::where('user_id', 3)
+            $arrayCourseStudentId = CourseStudent::where('user_id',$user['id'])
                                                  ->where('status', StatusConstant::SCHEDULE)
                                                  ->pluck('id')->toArray();
             $schedule             = Schedule::whereIn('course_student_id', $arrayCourseStudentId)
                                             ->when($date, function ($q) use ($date) {
                                                 $q->where('date', $date);
                                             })
-                                            ->with(['course_student.courses.teacher'])
+                                            ->with(['course_student.courses.teacher','course_planes.stage'])
                                             ->get();
 
             return $schedule;
@@ -82,7 +82,7 @@ class ScheduleService extends BaseService
         $date = $request->date ?? null;
         $user = Auth::user();
         try {
-            $schedule = Schedule::with(['course_student.courses','course_student.users'])
+            $schedule = Schedule::with(['course_student.courses','course_student.users','course_planes.stage'])
                                 ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
                                 ->leftJoin('courses', 'course_students.course_id', 'courses.id')
                                 ->when($date, function ($q) use ($date) {
