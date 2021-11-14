@@ -48,9 +48,9 @@ class CourseController extends Controller
         return response()->json($this->service->getCoursePlanOff($request, $id));
     }
 
-    public function getCoursePending(): JsonResponse
+    public function getCourseRequest(): JsonResponse
     {
-        return response()->json($this->service->getCoursePending());
+        return response()->json($this->service->getCourseRequest());
     }
 
     /**
@@ -108,6 +108,11 @@ class CourseController extends Controller
     public function updateDisplay(Request $request, $id): JsonResponse
     {
         return response()->json($this->service->updateDisplay($request, $id));
+    }
+
+    public function requestCourse(Request $request, $id)
+    {
+        return response()->json($this->service->requestCourse($request, $id));
     }
 
     /**

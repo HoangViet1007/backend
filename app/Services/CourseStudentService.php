@@ -91,10 +91,10 @@ class CourseStudentService extends BaseService
                                        'description' => $request->description,
                                        'status'      => StatusConstant::CANCELED
                                    ]);
-            // hoan lai tien 90% kho hoc
+            // hoan lai tien 95% kho hoc
             $courseId     = $courseStudent->course_id;
             $course       = Course::find($courseId);
-            $price_course = (int)$course->price * 0.9;
+            $price_course = (int)$course->price * 0.95;
             $user         = User::find($courseStudent->user_id)->update(['money' => $price_course]);
 
             // gửi email cho người dùng

@@ -15,6 +15,11 @@ class Schedule extends Model
 
     public function course_student()
     {
-        return $this->belongsTo(CourseStudent::class,'course_student_id','id');
+        return $this->belongsTo(CourseStudent::class, 'course_student_id', 'id');
+    }
+
+    public function course_planes()
+    {
+        return $this->belongsTo(CoursePlanes::class,'course_plan_id','id');
     }
 }
