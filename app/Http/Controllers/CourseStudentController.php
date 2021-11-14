@@ -31,6 +31,11 @@ class CourseStudentController extends Controller
         return response()->json($this->service->getCourseForCustomer());
     }
 
+    public function getCoursePlanByCourseStudent($id): JsonResponse
+    {
+        return response()->json($this->service->getCoursePlanByCourseStudent($id));
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -48,7 +53,7 @@ class CourseStudentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         return response()->json($this->service->createCourseStudent($request));
     }

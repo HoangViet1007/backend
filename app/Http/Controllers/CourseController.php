@@ -48,6 +48,11 @@ class CourseController extends Controller
         return response()->json($this->service->getCoursePlanOff($request, $id));
     }
 
+    public function getCoursePending(): JsonResponse
+    {
+        return response()->json($this->service->getCoursePending());
+    }
+
     /**
      * Store a newly created resource in storage.
      *
