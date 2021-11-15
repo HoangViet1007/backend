@@ -25,7 +25,7 @@ use Illuminate\Validation\Rule;
  */
 class CourseService extends BaseService
 {
-    protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING, StatusConstant::PAUSE,StatusConstant::REQUEST];
+    protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING, StatusConstant::PAUSE, StatusConstant::REQUEST];
     protected array $display = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
 
 
@@ -205,7 +205,7 @@ class CourseService extends BaseService
         }
     }
 
-    // get course pending
+    // get course request
     public function getCourseRequest()
     {
         $data = $this->queryHelper->buildQuery($this->model)
@@ -220,49 +220,75 @@ class CourseService extends BaseService
         }
     }
 
-    public function requestCourse(object $request, $id){
-        /* ckeck xem ton tai khoa hoc ko
-         * */
-
+    public function cancelRequestCourse(object $request, $id)
+    {
         $course = Course::find($id);
-        $user = Auth::user();
-        if(empty($course) || $user['id'] == $course->created_by){
+        $user   = Auth::user();
+        if (empty($course) || $user['id'] != $course->created_by) {
             throw new BadRequestException(
                 ['message' => __("khoá học không tồn tại !")], new Exception()
             );
         }
-        if(!($course->status == StatusConstant::PENDING)){
+        if (!($course->status == StatusConstant::REQUEST)) {
+            throw new BadRequestException(
+                ['message' => __("Chỉ huỷ yêu cầu khi khoá học đang ở trạng thái yêu cầu xét duyệt !")], new Exception()
+            );
+        }
+        $course->update(['status' => StatusConstant::PENDING]);
+
+        return $course;
+    }
+
+    public function requestCourse(object $request, $id)
+    {
+        /* ckeck xem ton tai khoa hoc ko
+         * */
+
+        $course = Course::find($id);
+        $user   = Auth::user();
+        if (empty($course) || $user['id'] != $course->created_by) {
+            throw new BadRequestException(
+                ['message' => __("khoá học không tồn tại !")], new Exception()
+            );
+        }
+        if (!($course->status == StatusConstant::PENDING)) {
             throw new BadRequestException(
                 ['message' => __("Chỉ được gửi yêu cầu khi khoá học đang ở trạng thái chờ !")], new Exception()
             );
         }
-        if($this->checkCoursePlanCurrentCourse($course->id) == true){
+        if ($this->checkCoursePlanCurrentCourse($course->id) == true) {
             $course->update(['status' => StatusConstant::REQUEST]);
-            return true ;
+
+            return true;
+        } else {
+            throw new BadRequestException(
+                ['message' => __("Hãy thêm đầy đủ giai đoạn và buổi học cho khoá học trước khi gửi yêu cầu xác nhận !")], new Exception()
+            );
         }
-        return false;
     }
 
-    public function checkCoursePlanCurrentCourse($course_id){
+    public function checkCoursePlanCurrentCourse($course_id)
+    {
         //  xem co stage nao ko va stage co buoi hoc nao ko
         // check stage nao cx phai có buoi hoc
-        $check = 0 ;
-        try{
-            $stageArray = Stage::where('course_id',$course_id)->pluck('id')->toArray();
-            if($stageArray){
-                foreach ($stageArray as $item){
-                    $countCoursePlan = CoursePlanes::where('stage_id',$item)->get()->count();
-                    if($countCoursePlan > 0){
+        $check = 0;
+        try {
+            $stageArray = Stage::where('course_id', $course_id)->pluck('id')->toArray();
+            if ($stageArray) {
+                foreach ($stageArray as $item) {
+                    $countCoursePlan = CoursePlanes::where('stage_id', $item)->get()->count();
+                    if ($countCoursePlan > 0) {
                         $check++;
                     }
                 }
-                if($check >= count($stageArray)){
+                if ($check >= count($stageArray)) {
                     return true;
                 }
             }
+
             return false;
 
-        }catch (Exception $e){
+        } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
     }

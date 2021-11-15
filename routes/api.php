@@ -102,6 +102,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
+    Route::get('/cancel-request-course/{id}','CourseController@cancelRequestCourse');
     Route::get('/request-course/{id}','CourseController@requestCourse');
     Route::get('get-course-request','CourseController@getCourseRequest');
     Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
