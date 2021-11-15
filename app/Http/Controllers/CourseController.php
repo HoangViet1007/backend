@@ -115,6 +115,11 @@ class CourseController extends Controller
         return response()->json($this->service->requestCourse($request, $id));
     }
 
+    public function cancelRequestCourse(Request $request, $id)
+    {
+       return response()->json($this->service->cancelRequestCourse($request, $id));
+    }
+
     /**
      * Remove the specified resource from storage.
      *

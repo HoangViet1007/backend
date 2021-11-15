@@ -59,17 +59,21 @@ class CourseStudentService extends BaseService
                 ['message' => __("Bài học không tồn tại !")], new Exception()
             );
         }
-        $coursePlan = CourseStudent::join('courses', 'courses.id', 'course_students.course_id')
-                                   ->join('stages', 'stages.course_id', 'courses.id')
-                                   ->join('course_planes', 'course_planes.stage_id', 'stages.id')
-                                   ->where('courses.id', $courseStudent->course_id)
-                                   ->where('stages.status', StatusConstant::ACTIVE)
-                                   ->where('course_planes.status', StatusConstant::ACTIVE)
-                                   ->where('course_students.id', $id)
-                                   ->select('course_planes.*')
-                                   ->get();
 
-        return $coursePlan;
+        $stageArray = Stage::where('course_id', $courseStudent->course_id)->pluck('id')->toArray();
+        if($stageArray){
+            $coursePlan = CoursePlanes::whereIn('stage_id', $stageArray)
+                                      ->with(['schedules' => function ($q) use ($id) {
+                                          $q->where('schedules.course_student_id', $id);
+                                      }])
+                                      ->select('course_planes.*')->get();
+            return $coursePlan;
+
+        }else{
+            throw new BadRequestException(
+                ['message' => __("Bài học không tồn tại !")], new Exception()
+            );
+        }
     }
 
     public function customerCancel(object $request, $id)
