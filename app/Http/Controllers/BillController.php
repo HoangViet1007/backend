@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\SystemException;
 use Illuminate\Http\Request;
 use App\Services\BaseService;
-use App\Services\PaymentService;
+use App\Services\BillService;
 
-class PaymentController extends Controller
+class BillController extends Controller
 {
-
     public BaseService $service;
 
     public function __construct()
     {
-        $this->service = new PaymentService();
+        $this->service = new BillService();
     }
 
     /**
@@ -24,22 +22,12 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        return response()->json($this->service->getPaymentByAdmin());
+        return response()->json($this->service->getBillByAdmin());
     }
 
-    public function listPaymentByCustomer()
+    public function listBillByCustomer()
     {
-        return response()->json($this->service->getPaymentByCustomer());
-    }
-
-    public function createPayment(Request $request)
-    {
-        return $this->service->createPayment($request);
-    }
-
-    public function returnPayment(Request $request)
-    {
-        return response()->json($this->service->returnPayment($request));
+        return response()->json($this->service->getBillByCustomer());
     }
 
     /**
@@ -55,7 +43,7 @@ class PaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -66,7 +54,7 @@ class PaymentController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -77,7 +65,7 @@ class PaymentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -88,8 +76,8 @@ class PaymentController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -100,7 +88,7 @@ class PaymentController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
