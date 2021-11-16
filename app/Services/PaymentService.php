@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\Bill;
@@ -24,20 +26,52 @@ class PaymentService extends BaseService
 
     protected array $status = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
 
+    public function getPaymentByAdmin()
+    {
+        $this->preGetAll();
+        $data = $this->queryHelper->buildQuery($this->model)->with('bill.course', 'user')
+            ->join('users', 'payments.user_id', 'users.id')
+            ->select('payments.*', 'users.name');
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function getPaymentByCustomer()
+    {
+        $this->preGetAll();
+        $id = $this->currentUser()->id ?? null;
+        $data = $this->queryHelper->buildQuery($this->model)->with('bill.course', 'user')
+            ->join('users', 'payments.user_id', 'users.id')
+            ->select('payments.*', 'users.name')
+            ->where('user_id', $id);
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
     public function createPayment(object $request)
     {
         $course_ids = Course::all()->pluck('id')->toArray();
         $this->doValidate(
             $request,
             [
-                'course_id' => 'in:'. implode(',', $course_ids),
-                'money' => 'required|numeric|min:0|max:50000000',
+                'course_id' => 'in:' . implode(',', $course_ids),
+                'money' => 'required|numeric|min:5000|max:50000000',
             ],
             [
                 'course_id.in' => 'Không tồn tại khóa học!',
                 'money.required' => 'Không có số tiền !',
                 'money.numeric' => 'Số tiền không hợp lệ !',
-                'money.min' => 'Số tiền không hợp lệ!',
+                'money.min' => 'Số tiền tối thiểu là 5000 đồng!',
                 'money.max' => 'Số tiền không được quá 50 triệu đồng !',
             ]
         );
@@ -108,14 +142,14 @@ class PaymentService extends BaseService
         $this->doValidate(
             $request,
             [
-                'course_id' => 'in:'. implode(',', $course_ids),
-                'money' => 'required|numeric|min:0|max:50000000',
+                'course_id' => 'in:' . implode(',', $course_ids),
+                'money' => 'required|numeric|min:500000|max:5000000000',
             ],
             [
                 'course_id.in' => 'Không tồn tại khóa học!',
                 'money.required' => 'Không có số tiền !',
                 'money.numeric' => 'Số tiền không hợp lệ !',
-                'money.min' => 'Số tiền không hợp lệ!',
+                'money.min' => 'Số tiền tối thiểu là 5000 đồng !',
                 'money.max' => 'Số tiền không được quá 50 triệu đồng !',
             ]
         );
