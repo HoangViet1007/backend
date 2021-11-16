@@ -32,7 +32,6 @@ class SpecializeService extends BaseService
         $data = $this->queryHelper->buildQuery($this->model)->with('specializeDetail.coursesClient');
         try {
             $response = $data->get();
-
             return $response;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);

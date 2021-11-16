@@ -145,7 +145,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // thanh toan
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
+    Route::get('khach-hang/payment', 'PaymentController@listPaymentByCustomer');
     Route::resource('payment', 'PaymentController');
+
+    // hoa don
+    Route::get('hoa-don', 'BillController@listBillByCustomer');
+    Route::resource('bill', 'BillController');
 
     //schedule
     Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
