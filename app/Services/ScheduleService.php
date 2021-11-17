@@ -280,7 +280,7 @@ class ScheduleService extends BaseService
                 $time_end   = strtotime($item->date . ' ' . $item->time_end);
                 $time_check = strtotime($date . $timeCheck);
 
-                if ($time_check >= $time_start && $time_check <= $time_end) {
+                if (($time_check >= $time_start && $time_check <= $time_end && $item->status == StatusConstant::UNFINISHED)) {
                     return false;
                 } else {
                     return true;

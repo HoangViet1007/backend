@@ -54,11 +54,13 @@ class CourseStudentService extends BaseService
         $user          = Auth::user();
         $courseStudent = CourseStudent::find($id);
 
-        if (!($courseStudent->user_id == 3)) {
-            throw new BadRequestException(
-                ['message' => __("Bài học không tồn tại !")], new Exception()
-            );
-        }
+       if($courseStudent){
+           if (!($courseStudent->user_id == $user['id'])) {
+               throw new BadRequestException(
+                   ['message' => __("Bài học không tồn tại !")], new Exception()
+               );
+           }
+       }
 
         $stageArray = Stage::where('course_id', $courseStudent->course_id)->pluck('id')->toArray();
         if($stageArray){
