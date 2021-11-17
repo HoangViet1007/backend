@@ -210,7 +210,7 @@ class CourseService extends BaseService
     {
         $data = $this->queryHelper->buildQuery($this->model)
                                   ->with(['stagesClient.course_planes_client'])
-                                  ->where('status', StatusConstant::REQUEST);
+                                  ->where('status', '!=',StatusConstant::PENDING);
         try {
             $response = $data->paginate(QueryHelper::limit());
 
