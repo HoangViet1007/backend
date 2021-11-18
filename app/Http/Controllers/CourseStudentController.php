@@ -111,6 +111,24 @@ class CourseStudentController extends Controller
         return response()->json($this->service->ptThough($request, $id));
     }
 
+    // sent request customer
+    public function sentRequestCustomer(Request $request, $id)
+    {
+        return response()->json($this->service->sentRequestCustomer($request,$id));
+    }
+
+    // userAgreesCourseStudent
+    public function userAgreesCourseStudent(Request $request, $id)
+    {
+        return response()->json($this->service->userAgreesCourseStudent($request,$id));
+    }
+
+    // userDisAgreesCourseStudent
+    public function userDisAgreesCourseStudent(Request $request, $id)
+    {
+        return response()->json($this->service->userDisAgreesCourseStudent($request,$id));
+    }
+
     /**
      * Remove the specified resource from storage.
      *

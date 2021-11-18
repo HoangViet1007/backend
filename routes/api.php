@@ -135,6 +135,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('role','RoleController');
 
     // course student
+    Route::get('sent-request-customer/{id}','CourseStudentController@sentRequestCustomer');
+    Route::get('user-agrees-course-student/{id}','CourseStudentController@userAgreesCourseStudent');
+    Route::get('user-dis-agrees-course-student/{id}','CourseStudentController@userDisAgreesCourseStudent');
     Route::get('get-course_plan-by-course-student/{id}','CourseStudentController@getCoursePlanByCourseStudent');
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
     Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');

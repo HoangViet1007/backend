@@ -12,7 +12,7 @@ class CourseStudent extends Model
 
     protected $table    = 'course_students';
     protected $guarded  = [];
-    protected $fillable = ['status', 'description', 'user_id', 'course_id'];
+    protected $fillable = ['status','user_consent', 'description', 'user_id', 'course_id'];
 
     public function users()
     {
