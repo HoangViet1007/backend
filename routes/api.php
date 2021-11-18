@@ -39,11 +39,18 @@ Route::get('/send-email-cancel-course','StageController@sendEmailCancelStudent')
 // PT không thể dạy khóa học đấy
 Route::get('/send-email-pt-cant-teach','StageController@sendEmailStudent');
 // xác thực email
-Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')->middleware('auth:api')->name('verification.send');;
+
+Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')
+    ->middleware('auth:api')
+    ->name('verification.send');
 
 // check verify email
-Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')->middleware('auth:api')->name('verification.verify');;
+Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')
+    ->middleware('auth:api')
+    ->name('verification.verify');
 // api clien
+
+Route::get('/check-add-user-verify' ,'EmailVerificationController@addUserVerify');
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
     Route::post('user_pt', 'UserController@addUserHasRolePt');
