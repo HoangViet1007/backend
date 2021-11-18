@@ -29,7 +29,7 @@ class CourseStudentService extends BaseService
         $this->model = new CourseStudent();
     }
 
-    public function getAll(): LengthAwarePaginator
+    public function getAllCourseStidentByPt()
     {
         $userIdLogin = Auth::user();
         $data        = $this->queryHelper->buildQuery($this->model)
@@ -39,7 +39,7 @@ class CourseStudentService extends BaseService
                                          ->where('courses.created_by', '=', $userIdLogin['id'])
                                          ->select('course_students.*');
         try {
-            $response = $data->paginate(QueryHelper::limit());
+            $response = $data->get();
 
             return $response;
         } catch (Exception $e) {
@@ -198,7 +198,7 @@ class CourseStudentService extends BaseService
                                           ->with(['courses.teacher'])
                                           ->select('course_students.*')
                                           ->where('user_id', '=', $user_id['id']);
-            $response = $data->paginate(QueryHelper::limit());
+            $response = $data->get();
 
             return $response;
 
@@ -244,8 +244,7 @@ class CourseStudentService extends BaseService
             );
         }
 
-        // duyet khoa hoc mot cach tuan tu (dk status = unchedule)
-        /*
+        /* check duyet khoa hoc khi co su dong ý cu nguoi dung
          * */
 
         // update duyet dang ki
