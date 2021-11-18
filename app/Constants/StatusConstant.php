@@ -27,6 +27,12 @@ class StatusConstant
     const SCHEDULE     = 'Schedule';
     const COMPLETE     = 'Complete';
 
+    // user_consent in course_student
+    const UNSENT        = 'Unsent'; // chua gui yeu cau cho nguoi dung
+    const SENT          = 'Sent'; // da gui yeu cau cho nguoi dung
+    const USERAGREES    = 'UserAgrees'; // nguoi dung dong y
+    const USERDISAGREES = 'UserDisAgrees'; // nguoi dung khong dong y
+
     // status schedule hoan thanh và chua hoan thanh (complete)
     const UNFINISHED = 'unfinished';
     // payments

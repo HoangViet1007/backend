@@ -89,14 +89,14 @@ class CourseService extends BaseService
                                      ->select('courses.*')
                                      ->where('users.id', self::currentUser()->id);
         try {
-            $response = $data->paginate(QueryHelper::limit());
+            $response = $data->get();
 
-            $response->getCollection()->transform(function ($value) {
-                $value->total_stages = count($value->stages);
-                unset($value->stages);
-
-                return $value;
-            });
+            // $response->getCollection()->transform(function ($value) {
+            //     $value->total_stages = count($value->stages);
+            //     unset($value->stages);
+            //
+            //     return $value;
+            // });
 
             return $response;
         } catch (Exception $e) {
@@ -212,7 +212,7 @@ class CourseService extends BaseService
                                   ->with(['stagesClient.course_planes_client'])
                                   ->where('status', '!=',StatusConstant::PENDING);
         try {
-            $response = $data->paginate(QueryHelper::limit());
+            $response = $data->get();
 
             return $response;
         } catch (Exception $e) {

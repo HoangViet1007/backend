@@ -23,7 +23,7 @@ class CourseStudentController extends Controller
      */
     public function index(): JsonResponse
     {
-        return response()->json($this->service->getAll());
+        return response()->json($this->service->getAllCourseStidentByPt());
     }
 
     public function getCourseForCustomer(): JsonResponse
