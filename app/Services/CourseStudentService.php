@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
-use App\Helpers\QueryHelper;
 use App\Models\Bill;
 use App\Models\Course;
 use App\Models\CoursePlanes;
@@ -14,7 +13,6 @@ use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
 use Exception;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -54,24 +52,25 @@ class CourseStudentService extends BaseService
         $user          = Auth::user();
         $courseStudent = CourseStudent::find($id);
 
-       if($courseStudent){
-           if (!($courseStudent->user_id == $user['id'])) {
-               throw new BadRequestException(
-                   ['message' => __("Bài học không tồn tại !")], new Exception()
-               );
-           }
-       }
+        if ($courseStudent) {
+            if (!($courseStudent->user_id == $user['id'])) {
+                throw new BadRequestException(
+                    ['message' => __("Bài học không tồn tại !")], new Exception()
+                );
+            }
+        }
 
         $stageArray = Stage::where('course_id', $courseStudent->course_id)->pluck('id')->toArray();
-        if($stageArray){
+        if ($stageArray) {
             $coursePlan = CoursePlanes::whereIn('stage_id', $stageArray)
                                       ->with(['schedules' => function ($q) use ($id) {
                                           $q->where('schedules.course_student_id', $id);
                                       }])
                                       ->select('course_planes.*')->get();
+
             return $coursePlan;
 
-        }else{
+        } else {
             throw new BadRequestException(
                 ['message' => __("Bài học không tồn tại !")], new Exception()
             );
@@ -190,12 +189,66 @@ class CourseStudentService extends BaseService
         }
     }
 
+    // sent request customer (guiw yeu cau xac nhan dong ys lich hoc)
+    public function sentRequestCustomer(object $request, $id)
+    {
+        $course_student = CourseStudent::find($id);
+        if(!$course_student){
+            throw new BadRequestException(
+                ['message' => __("Học viên này không tồn tại !")], new Exception()
+            );
+        }
+        if(!($course_student->status == StatusConstant::UNSCHEDULED)){
+            throw new BadRequestException(
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")], new Exception()
+            );
+        }
+        $course_student->update(['user_consent' => StatusConstant::SENT]);
+        return true ;
+    }
+
+    // customer ok
+    public function userAgreesCourseStudent(object $request, $id)
+    {
+        $course_student = CourseStudent::find($id);
+        if(!$course_student){
+            throw new BadRequestException(
+                ['message' => __("Học viên này không tồn tại !")], new Exception()
+            );
+        }
+        if(!($course_student->status == StatusConstant::UNSCHEDULED)){
+            throw new BadRequestException(
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")], new Exception()
+            );
+        }
+        $course_student->update(['user_consent' => StatusConstant::USERAGREES]);
+        return true ;
+    }
+
+    //customer ko ok
+    public function userDisAgreesCourseStudent(object $request, $id)
+    {
+        $course_student = CourseStudent::find($id);
+        if(!$course_student){
+            throw new BadRequestException(
+                ['message' => __("Học viên này không tồn tại !")], new Exception()
+            );
+        }
+        if(!($course_student->status == StatusConstant::UNSCHEDULED)){
+            throw new BadRequestException(
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")], new Exception()
+            );
+        }
+        $course_student->update(['user_consent' => StatusConstant::USERDISAGREES]);
+        return true ;
+    }
+
     public function getCourseForCustomer()
     {
         $user_id = Auth::user();
         try {
             $data     = $this->queryHelper->buildQuery($this->model)
-                                          ->with(['courses.teacher'])
+                                          ->with(['courses.teacher','schedules'])
                                           ->select('course_students.*')
                                           ->where('user_id', '=', $user_id['id']);
             $response = $data->get();
