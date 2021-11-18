@@ -298,8 +298,14 @@ class CourseStudentService extends BaseService
         }
 
         /* check duyet khoa hoc khi co su dong ý cu nguoi dung
+         * user_consent = UserAgrees
          * */
-
+        if(!($course_student->user_consent == StatusConstant::USERAGREES)){
+            throw new BadRequestException(
+                ['message' => __("Không thể duyệt khoá học khi chưa có sự đồng ý từ phía người dùng !")],
+                new Exception()
+            );
+        }
         // update duyet dang ki
         $course_student->update(['status' => StatusConstant::SCHEDULE]);
 
