@@ -209,8 +209,21 @@ class CourseService extends BaseService
     public function getCourseRequest()
     {
         $data = $this->queryHelper->buildQuery($this->model)
-                                  ->with(['stagesClient.course_planes_client'])
-                                  ->where('status', '!=',StatusConstant::PENDING);
+            // ->with(['stagesClient.course_planes_client'])
+            // ->join('stages', 'stages.course_id', 'courses.id')
+            // ->join('course_planes', 'course_planes.stage_id', 'stages.id')
+            // ->where('courses.status', '!=', StatusConstant::PENDING)
+                                  ->with(['teacher','customerLevel',  'specializeDetails',
+                                         'specializeDetails.specialize', 'stagesClient.course_planes_client'])
+                                  ->join('specialize_details', 'courses.specialize_detail_id',
+                                         'specialize_details.id')
+                                  ->join('specializes', 'specialize_details.specialize_id',
+                                         'specializes.id')
+                                  ->join('customer_levels', 'courses.customer_level_id',
+                                         'customer_levels.id')
+                                  ->join('users', 'specialize_details.user_id', 'users.id')
+                                  ->where('courses.status', '!=', StatusConstant::PENDING)
+                                  ->select('courses.*');
         try {
             $response = $data->get();
 
@@ -220,6 +233,7 @@ class CourseService extends BaseService
         }
     }
 
+    // admin huy khoa hoc
     public function cancelRequestCourse(object $request, $id)
     {
         $course = Course::find($id);
@@ -262,7 +276,8 @@ class CourseService extends BaseService
             return true;
         } else {
             throw new BadRequestException(
-                ['message' => __("Hãy thêm đầy đủ giai đoạn và buổi học cho khoá học trước khi gửi yêu cầu xác nhận !")], new Exception()
+                ['message' => __("Hãy thêm đầy đủ giai đoạn và buổi học cho khoá học trước khi gửi yêu cầu xác nhận !")],
+                new Exception()
             );
         }
     }
