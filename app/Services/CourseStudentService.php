@@ -193,73 +193,81 @@ class CourseStudentService extends BaseService
     public function sentRequestCustomer(object $request, $id)
     {
         $course_student = CourseStudent::find($id);
-        if(!$course_student){
+        if (!$course_student) {
             throw new BadRequestException(
                 ['message' => __("Học viên này không tồn tại !")], new Exception()
             );
         }
-        if(!($course_student->status == StatusConstant::UNSCHEDULED)){
+        if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
             throw new BadRequestException(
-                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")], new Exception()
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")],
+                new Exception()
             );
         }
         $course_student->update(['user_consent' => StatusConstant::SENT]);
-        return true ;
+
+        return true;
     }
 
     // customer ok
     public function userAgreesCourseStudent(object $request, $id)
     {
         $course_student = CourseStudent::find($id);
-        if(!$course_student){
+        if (!$course_student) {
             throw new BadRequestException(
                 ['message' => __("Học viên này không tồn tại !")], new Exception()
             );
         }
-        if(!($course_student->status == StatusConstant::UNSCHEDULED)){
+        if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
             throw new BadRequestException(
-                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")], new Exception()
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")],
+                new Exception()
             );
         }
         $course_student->update(['user_consent' => StatusConstant::USERAGREES]);
-        return true ;
+
+        return true;
     }
 
     //customer ko ok
     public function userDisAgreesCourseStudent(object $request, $id)
     {
         $course_student = CourseStudent::find($id);
-        if(!$course_student){
+        if (!$course_student) {
             throw new BadRequestException(
                 ['message' => __("Học viên này không tồn tại !")], new Exception()
             );
         }
-        if(!($course_student->status == StatusConstant::UNSCHEDULED)){
+        if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
             throw new BadRequestException(
-                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")], new Exception()
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")],
+                new Exception()
             );
         }
         $course_student->update(['user_consent' => StatusConstant::USERDISAGREES]);
-        return true ;
+
+        return true;
     }
 
     public function getCourseForCustomer()
     {
         $user_id = Auth::user();
-        try {
+        // try {
             $data     = $this->queryHelper->buildQuery($this->model)
-                                          ->with(['courses.teacher','schedules'])
+                                          ->with(['courses.teacher', 'schedules'])
+                                          ->join('courses', 'courses.id', 'course_students.course_id')
+                                          ->join('users','users.id','courses.created_by')
                                           ->select('course_students.*')
-                                          ->where('user_id', '=', $user_id['id']);
+                                          ->where('course_students.user_id', '=', 3);
             $response = $data->get();
 
             return $response;
 
-        } catch (Exception $exception) {
-            throw new BadRequestException(
-                ['message' => __("Không tồn tại khoá học !")], new Exception()
-            );
-        }
+        // } catch (Exception $exception) {
+        //     throw new BadRequestException(
+        //         ['message' => __("Không tồn tại khoá học !")], new Exception()
+        //     );
+        // }
     }
 
     // duyet dang ki
@@ -300,7 +308,7 @@ class CourseStudentService extends BaseService
         /* check duyet khoa hoc khi co su dong ý cu nguoi dung
          * user_consent = UserAgrees
          * */
-        if(!($course_student->user_consent == StatusConstant::USERAGREES)){
+        if (!($course_student->user_consent == StatusConstant::USERAGREES)) {
             throw new BadRequestException(
                 ['message' => __("Không thể duyệt khoá học khi chưa có sự đồng ý từ phía người dùng !")],
                 new Exception()
