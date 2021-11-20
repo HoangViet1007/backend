@@ -156,6 +156,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('bill', 'BillController');
 
     //schedule
+    Route::put('not-engaged/{id}','ScheduleController@notEngaged');
+    Route::put('engaged/{id}','ScheduleController@engaged');
+    Route::put('complanin/{id}', 'ScheduleController@complanin');
     Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
     Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
     Route::get('get-schedule-by-customer/{id}','ScheduleController@getScheduleByCustomer');

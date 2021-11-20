@@ -119,6 +119,22 @@ class ScheduleController extends Controller
         return response()->json($this->service->updateStatusScheduleComplete($id, $request));
     }
 
+    public function notEngaged($id, Request $request): JsonResponse
+    {
+        return response()->json($this->service->notEngaged($id, $request));
+    }
+
+    public function engaged($id, Request $request): JsonResponse
+    {
+        return response()->json($this->service->engaged($id, $request));
+    }
+
+    // khieu nai
+    public function complanin($id, Request $request)
+    {
+        return response()->json($this->service->complanin($id, $request));
+    }
+
     /**
      * Remove the specified resource from storage.
      *

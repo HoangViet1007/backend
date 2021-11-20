@@ -180,7 +180,7 @@ class PaymentService extends BaseService
             //                dd($returnData, $billData);
             $bill = Bill::create($billData);
             $returnData['bill_id'] = $bill->id;
-            $returnData['note'] = "Thanh toan khoa hoc";
+            $returnData['note'] = StatusConstant::COURSEPAYMENT;
 
         } else {
             // cong tien user
@@ -189,7 +189,7 @@ class PaymentService extends BaseService
                 'money' => $user->money + $request->money / 100
             ];
             $user->update($money);
-            $returnData['note'] = "Nap tien";
+            $returnData['note'] = StatusConstant::RECHARGE;
         }
         $payment = Payment::create($returnData);
         $paymentRel = Payment::with('bill.course', 'user')->where('payments.id', $payment->id)->first();

@@ -35,13 +35,23 @@ class StatusConstant
 
     // status schedule hoan thanh và chua hoan thanh (complete)
     const UNFINISHED = 'unfinished';
+    const HAPPENNING = 'happenning';
+
+    // complain schedules (khiếu nại và không khiếu nại - complain và no_complaints)
+    const COMPLAIN = 'Complain';
+    const NOCOMPLAINTS = 'NoComplaints';
+
+    // participation schedules (tham gia và không tham gia - join và no_join)
+    const JOIN = 'Join';
+    const NOJOIN = 'NoJoin';
+
     // payments
-    const RECHARGE = 'Nap tien';
-    const PAY      = 'Thanh toan khoa hoc';
+    const RECHARGE = 'Rechage'; // nạp tiền
+    const COURSEPAYMENT      = 'CoursePayment'; // thanh toán khóa học
 
     // bills
-    const WALLET = 'Thanh toan bang vi';
-    const DIRECT = 'Thanh toan truc tiep';
+    const WALLET = 'Wallet'; // mua khoa hoc bang vi
+    const DIRECT = 'Direct'; // mua khoa hoc thanh toan truc tiep bang vnpay
 
     const All
         = [
@@ -58,11 +68,16 @@ class StatusConstant
             self::SCHEDULE,
             self::COMPLETE,
             self::RECHARGE,
-            self::PAY,
+            self::COURSEPAYMENT,
             self::WALLET,
             self::DIRECT,
             self::COMPLETE,
             self::UNFINISHED,
-            self::REQUEST
+            self::REQUEST,
+            self::HAPPENNING,
+            self::COMPLAIN,
+            self::NOCOMPLAINTS,
+            self::JOIN,
+            self::NOJOIN
         ];
 }
