@@ -4,14 +4,13 @@ namespace App\Services;
 
 use App\Constants\S3Constant;
 use App\Constants\StatusConstant;
+use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
-use App\Models\Course;
 use App\Models\CoursePlanes;
-use Exception;
-use Illuminate\Support\Facades\Storage;
-use Aws\S3\S3Client;
-use Aws\Exception\AwsException;
 use App\Models\Stage;
+use Exception;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class CoursePlaneService extends BaseService
@@ -34,29 +33,29 @@ class CoursePlaneService extends BaseService
             ],
             'content'     => 'required',
             'descreption' => 'required',
-            'video_link' => 'file|mimes:mp4|max:1048576',
-            'stage_id' => 'required|exists:stages,id',
-            'status' => 'required|in:' . implode(',', $this->status),
-            'image' => 'required',
-            'type' => 'required|in:' . implode(',', config('constant.type'))
+            'video_link'  => 'file|mimes:mp4|max:1048576',
+            'stage_id'    => 'required|exists:stages,id',
+            'status'      => 'required|in:' . implode(',', $this->status),
+            'image'       => 'required',
+            'type'        => 'required|in:' . implode(',', config('constant.type'))
 
 
         ];
         $messages = [
-            'name.required' => 'Hãy nhập tên kế hoạch khóa học !',
-            'name.unique' => 'Tên kế hoạch khóa học đã tồn tại !',
-            'content.required' => 'Hãy nhập mô tả cho kế hoạch khóa học !',
+            'name.required'        => 'Hãy nhập tên kế hoạch khóa học !',
+            'name.unique'          => 'Tên kế hoạch khóa học đã tồn tại !',
+            'content.required'     => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
-            'video_link.file' => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
-            'video_link.mimes' => 'Xin mời bạn nhập video !',
-            'video_link.max' => 'Video nhập quá dung lượng !',
-            'stage_id.required' => 'Hãy chọn giai đoạn của khóa học  !',
-            'stage_id.exists' => 'Giai đoạn của khóa học không tồn tại !',
-            'status.required' => 'Hãy chọn trạng thái hoạt động !',
-            'status.in' => 'Trạng thái hoạt động không hợp lệ !',
-            'image.required' => 'Xin mời bạn nhập ảnh',
-            'type.required' => 'Hãy nhập kiểu học cho kế hoạch khóa học',
-            'type.in' => 'Kiểu học không hợp lệ !'
+            'video_link.file'      => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
+            'video_link.mimes'     => 'Xin mời bạn nhập video !',
+            'video_link.max'       => 'Video nhập quá dung lượng !',
+            'stage_id.required'    => 'Hãy chọn giai đoạn của khóa học  !',
+            'stage_id.exists'      => 'Giai đoạn của khóa học không tồn tại !',
+            'status.required'      => 'Hãy chọn trạng thái hoạt động !',
+            'status.in'            => 'Trạng thái hoạt động không hợp lệ !',
+            'image.required'       => 'Xin mời bạn nhập ảnh',
+            'type.required'        => 'Hãy nhập kiểu học cho kế hoạch khóa học',
+            'type.in'              => 'Kiểu học không hợp lệ !'
 
         ];
 
@@ -64,40 +63,41 @@ class CoursePlaneService extends BaseService
     }
 
 
-    public function updateRequestValidate(int|string $id, object $request, array $rules = [], array $messages = []): bool|array
+    public function updateRequestValidate(int|string $id, object $request, array $rules = [],
+                                          array      $messages = []): bool|array
     {
-        $rules = [
-            'name' => [
+        $rules    = [
+            'name'        => [
                 'required',
                 Rule::unique('course_planes',)->where(function ($query) use ($request, $id) {
                     return $query->where('stage_id', $request->stage_id)
-                        ->where('id', '!=', $id);
+                                 ->where('id', '!=', $id);
                 }),
             ],
-            'content' => 'required',
+            'content'     => 'required',
             'descreption' => 'required',
-            'video_link' => 'file|mimes:mp4|max:1048576',
-            'stage_id' => 'required|exists:stages,id',
-            'status' => 'required|in:' . implode(',', $this->status),
-            'image' => 'required',
-            'type' => 'required|in:' . implode(',', config('constant.type')),
+            'video_link'  => 'file|mimes:mp4|max:1048576',
+            'stage_id'    => 'required|exists:stages,id',
+            'status'      => 'required|in:' . implode(',', $this->status),
+            'image'       => 'required',
+            'type'        => 'required|in:' . implode(',', config('constant.type')),
 
         ];
         $messages = [
-            'name.required' => 'Hãy nhập tên kế hoạch khóa học !',
-            'name.unique' => 'Tên kế hoạch khóa học đã tồn tại !',
-            'content.required' => 'Hãy nhập mô tả cho kế hoạch khóa học !',
+            'name.required'        => 'Hãy nhập tên kế hoạch khóa học !',
+            'name.unique'          => 'Tên kế hoạch khóa học đã tồn tại !',
+            'content.required'     => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
-            'video_link.file' => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
-            'video_link.mimes' => 'Xin mời bạn nhập video !',
-            'video_link.max' => 'Video nhập quá dung lượng !',
-            'stage_id.required' => 'Hãy chọn giai đoạn của khóa học  !',
-            'stage_id.exists' => 'Giai đoạn của khóa học không tồn tại !',
-            'status.required' => 'Hãy chọn trạng thái hoạt động !',
-            'status.in' => 'Trạng thái hoạt động không hợp lệ !',
-            'image.required' => 'Xin mời bạn nhập ảnh',
-            'type.required' => 'Hãy nhập kiểu học cho kế hoạch khóa học',
-            'type.in' => 'Kiểu học không hợp lệ !'
+            'video_link.file'      => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
+            'video_link.mimes'     => 'Xin mời bạn nhập video !',
+            'video_link.max'       => 'Video nhập quá dung lượng !',
+            'stage_id.required'    => 'Hãy chọn giai đoạn của khóa học  !',
+            'stage_id.exists'      => 'Giai đoạn của khóa học không tồn tại !',
+            'status.required'      => 'Hãy chọn trạng thái hoạt động !',
+            'status.in'            => 'Trạng thái hoạt động không hợp lệ !',
+            'image.required'       => 'Xin mời bạn nhập ảnh',
+            'type.required'        => 'Hãy nhập kiểu học cho kế hoạch khóa học',
+            'type.in'              => 'Kiểu học không hợp lệ !'
         ];
 
 
@@ -109,8 +109,8 @@ class CoursePlaneService extends BaseService
         try {
             $userID = self::currentUser()->id;
 
-            $response = Stage::where('id', $id)->with('course','course_planes')->get();
-            $idUser = '';
+            $response = Stage::where('id', $id)->with('course', 'course_planes')->get();
+            $idUser   = '';
             foreach ($response as $podcast) {
                 if ($podcast->course != null) {
                     $idUser = $podcast->course->created_by;
@@ -119,7 +119,7 @@ class CoursePlaneService extends BaseService
 
             if ($userID == $idUser) {
                 return $response;
-            }else{
+            } else {
                 return [];
             }
 
@@ -149,11 +149,22 @@ class CoursePlaneService extends BaseService
 
         $url = '';
         if ($item) {
+            // check xem co ai dang hoc khoa hoc ma buoi hoc nay dc asssign hay ko
+            $stage_id      = $item->stage_id;
+            $course_id     = Stage::find($stage_id)->course_id;
+            $courseService = new CourseService();
+            if ($courseService->countUserLearning($course_id) > 0) {
+                throw new BadRequestException(
+                    ['message' => "Xoá giai đoạn khoá học không thành công !"], new Exception()
+                );
+            }
+            // update
             $result = str_replace(env('S3_URL'), '', $item->video_link);
             Storage::disk('s3')->delete($result);
             if (!empty($request->file('video_link')) || $request->file('video_link') != "") {
-                $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
-                $url = S3Constant::LINK_S3 . $path;
+                $path                = Storage::disk('s3')
+                                              ->put('images/originals', $request->file('video_link'), 'public');
+                $url                 = S3Constant::LINK_S3 . $path;
                 $request->video_link = $url;
             } else {
                 $request->video_link = $item->video_link;
@@ -163,11 +174,31 @@ class CoursePlaneService extends BaseService
 
     }
 
+    public function postUpdate(int|string $id, object $request, Model $model)
+    {
+        $item          = $this->get($id);
+        $stage_id      = $item->stage_id;
+        $course_id     = Stage::find($stage_id)->course_id;
+        $courseService = new CourseService();
+        $courseService->updateStatusCoursePending($course_id);
+        parent::postUpdate($id, $request, $model);
+    }
+
 
     public function preDelete($id)
     {
+        // check khi xoa buoi hoc co ai dang hoc k
         $item = $this->get($id);
         if ($item) {
+            $stage_id      = $item->stage_id;
+            $course_id     = Stage::find($stage_id)->course_id;
+            $courseService = new CourseService();
+            if ($courseService->countUserLearning($course_id) > 0) {
+                throw new BadRequestException(
+                    ['message' => __("Xoá buổi học không thành công !")], new Exception()
+                );
+            }
+
             $result = str_replace(S3Constant::LINK_S3, '', $item->video_link);
             Storage::disk('s3')->delete($result);
         }

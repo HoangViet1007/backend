@@ -272,7 +272,7 @@ class CourseStudentService extends BaseService
                                           ->join('courses', 'courses.id', 'course_students.course_id')
                                           ->join('users','users.id','courses.created_by')
                                           ->select('course_students.*')
-                                          ->where('course_students.user_id', '=', $user_id['id']);
+                                          ->where('course_students.user_id', '=', 3);
             $response = $data->get();
 
             return $response;
