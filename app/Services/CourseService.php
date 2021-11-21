@@ -44,7 +44,8 @@ class CourseService extends BaseService
     public function getAll(): LengthAwarePaginator
     {
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->with('customerLevel', 'stages', 'specializeDetails.user',
+        $data = $this->queryHelper->buildQuery($this->model)
+                                  ->with('customerLevel', 'stages', 'specializeDetails.user',
                                                                    'specializeDetails.specialize')
                                   ->join('specialize_details', 'courses.specialize_detail_id',
                                          'specialize_details.id')
@@ -213,8 +214,8 @@ class CourseService extends BaseService
             // ->join('stages', 'stages.course_id', 'courses.id')
             // ->join('course_planes', 'course_planes.stage_id', 'stages.id')
             // ->where('courses.status', '!=', StatusConstant::PENDING)
-                                  ->with(['teacher','customerLevel',  'specializeDetails',
-                                         'specializeDetails.specialize', 'stagesClient.course_planes_client'])
+                                  ->with(['teacher', 'customerLevel', 'specializeDetails',
+                                          'specializeDetails.specialize', 'stagesClient.course_planes_client'])
                                   ->join('specialize_details', 'courses.specialize_detail_id',
                                          'specialize_details.id')
                                   ->join('specializes', 'specialize_details.specialize_id',
@@ -394,6 +395,8 @@ class CourseService extends BaseService
             );
         }
 
+        // check xem khoá học có đang ở trạng thái pending hay ko .
+
         if ($request instanceof Request) {
             $request->merge([
                                 'created_by' => $this->currentUser()->id ?? null,
@@ -522,6 +525,10 @@ class CourseService extends BaseService
                 ['message' => __("Xoá khoá học không thành công !")], new Exception()
             );
         }
+
+        // check xem co ai dang hoc ko
+
+
         parent::preDelete($id);
     }
 

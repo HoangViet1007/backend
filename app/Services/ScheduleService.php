@@ -345,12 +345,13 @@ class ScheduleService extends BaseService
 
         $schedule = Schedule::find($id);
         $course_student = CourseStudent::find($schedule->course_student_id);
-        if (!($schedule->status == StatusConstant::UNFINISHED || $course_student->status == StatusConstant::COMPLETE)) {
+        if (!($schedule->status == StatusConstant::UNFINISHED || $course_student->status == StatusConstant::COMPLETE || $course_student->status == StatusConstant::UNSCHEDULED)) {
             throw new BadRequestException(
                 ['message' => __("Xoá lịch học không thành công !")],
                 new Exception()
             );
         }
+
     }
 
     // update status schedule complete

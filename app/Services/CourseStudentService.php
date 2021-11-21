@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Mail\CancelCourse;
 use App\Models\Bill;
 use App\Models\Course;
 use App\Models\CoursePlanes;
@@ -14,6 +15,7 @@ use App\Models\Stage;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * @Author apple
@@ -103,6 +105,7 @@ class CourseStudentService extends BaseService
             $user         = User::find($courseStudent->user_id)->update(['money' => $price_course]);
 
             // gửi email cho người dùng
+            // email
 
             return CourseStudent::find($id);
         } else {
@@ -173,13 +176,14 @@ class CourseStudentService extends BaseService
                                        'status'      => StatusConstant::CANCELEDBYPT
                                    ]);
 
-            // hoan lai tien 90% kho hoc
+            // hoan lai tien 100 kho hoc
             $courseId     = $courseStudent->course_id;
             $course       = Course::find($courseId);
             $price_course = (int)$course->price;
             $user         = User::find($courseStudent->user_id)->update(['money' => $price_course]);
 
             // gửi email cho người dùng
+            // truyền vào email người nhận , tên học viên , tên khoá học .
 
             return CourseStudent::find($id);
         } else {
@@ -204,6 +208,16 @@ class CourseStudentService extends BaseService
                 new Exception()
             );
         }
+
+        /* phai them du so buo thi moi gui dc yêu cầu cho người dùng
+         * */
+        if (!($this->getCountScheduleForCourseStudent($id) == $this->getCountCoursePlanOff($course_student->course_id))) {
+            throw new BadRequestException(
+                ['message' => __("Gửi yêu cầu cho người dùng thất bại, hãy thêm lịch cho đủ số buổi học trực tuyến !")],
+                new Exception()
+            );
+        }
+
         $course_student->update(['user_consent' => StatusConstant::SENT]);
 
         return true;
@@ -252,22 +266,22 @@ class CourseStudentService extends BaseService
     public function getCourseForCustomer()
     {
         $user_id = Auth::user();
-        // try {
+        try {
             $data     = $this->queryHelper->buildQuery($this->model)
                                           ->with(['courses.teacher', 'schedules'])
                                           ->join('courses', 'courses.id', 'course_students.course_id')
                                           ->join('users','users.id','courses.created_by')
                                           ->select('course_students.*')
-                                          ->where('course_students.user_id', '=', 3);
+                                          ->where('course_students.user_id', '=', $user_id['id']);
             $response = $data->get();
 
             return $response;
 
-        // } catch (Exception $exception) {
-        //     throw new BadRequestException(
-        //         ['message' => __("Không tồn tại khoá học !")], new Exception()
-        //     );
-        // }
+        } catch (Exception $exception) {
+            throw new BadRequestException(
+                ['message' => __("Không tồn tại khoá học !")], new Exception()
+            );
+        }
     }
 
     // duyet dang ki
@@ -316,6 +330,8 @@ class CourseStudentService extends BaseService
         }
         // update duyet dang ki
         $course_student->update(['status' => StatusConstant::SCHEDULE]);
+        // gửi mail
+
 
         return true;
     }
