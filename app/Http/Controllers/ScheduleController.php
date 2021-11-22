@@ -39,7 +39,7 @@ class ScheduleController extends Controller
         /* check course_student truyen len co phai cua no hay ko
          * */
         $course_student = CourseStudent::find($id);
-        $user_id        = $course_student->user_id;
+        $user_id = $course_student->user_id;
 
         return response()->json($this->service->getScheduleByCourseStudent($request, $id, $user_id));
     }
@@ -104,7 +104,7 @@ class ScheduleController extends Controller
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param int                      $id
+     * @param int $id
      *
      * @return \Illuminate\Http\Response
      */
@@ -130,9 +130,25 @@ class ScheduleController extends Controller
     }
 
     // khieu nai
-    public function complanin($id, Request $request)
+    public function complanin($id, Request $request): JsonResponse
     {
         return response()->json($this->service->complanin($id, $request));
+    }
+
+    /*
+     * bat dau buoi hoc
+     * chuyển status thành đang diễn gia buổi học (HAPPENNING)
+     * câp nhập thời gian bắt đầu thực tế (actual_start_time)
+     * check xem customer xac nhan hay chua
+     * */
+    public function startSchedule($id, Request $request): JsonResponse
+    {
+        return response()->json($this->service->startSchedule($id, $request));
+    }
+
+    public function endSchedule($id, Request $request): JsonResponse
+    {
+        return response()->json($this->service->endSchedule($id, $request));
     }
 
     /**
