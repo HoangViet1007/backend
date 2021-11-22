@@ -339,6 +339,19 @@ class ScheduleService extends BaseService
         }
     }
 
+    // check xem có phải khóa học của customer không
+    public function checkScheduleCurrentCustomer($schedule)
+    {
+        $scheduleData = Schedule::find($schedule);
+        if ($scheduleData) {
+            $data = Schedule::join('course_students', 'schedules.course_student_id', 'course_students.id')
+                ->where('schedules.id', $schedule)
+                ->first();
+                
+            return $data->user_id;
+        }
+    }
+
     public function preDelete(int|string $id)
     {
         /* check schedule nay cos phai cua user dang login hay ko
@@ -346,7 +359,7 @@ class ScheduleService extends BaseService
          * */
         $user = Auth::user();
         $userId = $user['id'];
-        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+        if (!($userId == $this->checkScheduleCurrentCustomer($id))) {
             throw new BadRequestException(
                 ['message' => __("Lịch học không tồn tại !")],
                 new Exception()
@@ -371,7 +384,7 @@ class ScheduleService extends BaseService
          * */
         $user = Auth::user();
         $userId = $user['id'];
-        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+        if (!($userId == $this->checkScheduleCurrentCustomer($id))) {
             throw new BadRequestException(
                 ['message' => __("Lịch học không tồn tại !")],
                 new Exception()
@@ -539,7 +552,7 @@ class ScheduleService extends BaseService
     {
         $user = Auth::user();
         $userId = $user['id'];
-        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+        if (!($userId == $this->checkScheduleCurrentCustomer($id))) {
             throw new BadRequestException(
                 ['message' => __("Lịch học không tồn tại !")],
                 new Exception()
@@ -568,6 +581,59 @@ class ScheduleService extends BaseService
         ]);
         return $schedule;
     }
+
+    // bắt dầu buổi học
+    public function startSchedule($id, object $request)
+    {
+        $user = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+
+        $schedule = Schedule::find($id);
+        if ($schedule->participation != StatusConstant::JOIN) {
+            throw new BadRequestException(
+                ['message' => __("Học viên chưa xác nhận tham gia !")],
+                new Exception()
+            );
+        }
+
+        $schedule->update([
+            'status' => StatusConstant::HAPPENNING,
+            'actual_start_time' => date('Y-m-d H:i:s')
+        ]);
+        return $schedule;
+
+    }
+
+    // check nếu không tham gia thì hiện chữ: Đã hoàn thành
+
+    // kết thúc buổi học -> hiện thị button upload record
+    // nếu có link record hiện thị button sửa record
+    public function endSchedule($id, object $request)
+    {
+        $user = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+
+        $schedule = Schedule::find($id);
+        $schedule->update([
+            'status' => StatusConstant::COMPLETE,
+            'actual_end_time' => date('Y-m-d H:i:s')
+        ]);
+        return $schedule;
+    }
+
+
 
 
 }
