@@ -351,6 +351,37 @@ class UserService extends BaseService
             $user = Auth::user();
             if (Hash::check($request->old_password, $user['password'])) {
                 // đổi mk
+                $userChangePass = User::find($user['id']);
+                $userChangePass->password = Hash::make($request->new_password);
+                $userChangePass->save();
+
+                return true;
+            } else {
+                throw new HttpException(500, 'Mật khẩu cũ không đúng !');
+            }
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
+    public function getPassword(Request $request){
+        $this->doValidate($request,
+            [
+                'email'  => 'required|email',
+            ],
+            [
+                'email.required'      => 'Xin mời bạn nhập email !',
+                'email.email'      => 'Xin mời bạn nhập email đúng định dạng !',
+
+            ]
+        );
+
+        try {
+            $email = $request['email'];
+            $user = User::where('email',$email)->first();
+            dd($user->hasVerifiedEmail());
+            if (Hash::check($request->old_password, $user['password'])) {
+                // đổi mk
                 $userChangePass           = User::find($user['id']);
                 $userChangePass->password = Hash::make($request->new_password);
                 $userChangePass->save();

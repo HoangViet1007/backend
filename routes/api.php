@@ -58,6 +58,10 @@ Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')
 // api clien
 
 Route::get('/check-add-user-verify' ,'EmailVerificationController@addUserVerify');
+
+
+Route::post('/get-password','UserController@getPassword');
+
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
     Route::post('user_pt', 'UserController@addUserHasRolePt');
