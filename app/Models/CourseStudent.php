@@ -14,7 +14,7 @@ class CourseStudent extends Model
     protected $guarded  = [];
     protected $fillable = ['status','user_consent', 'description', 'user_id', 'course_id'];
 
-    public function users()
+        public function users()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
