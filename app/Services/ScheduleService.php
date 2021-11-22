@@ -429,7 +429,7 @@ class ScheduleService extends BaseService
             });
 
             return $response;
-            
+
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
