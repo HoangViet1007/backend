@@ -14,14 +14,19 @@ class CourseStudent extends Model
     protected $guarded  = [];
     protected $fillable = ['status', 'description', 'user_id', 'course_id'];
 
-    public function users()
+        public function users()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function courses()
     {
-        return $this->belongsTo(Course::class,'course_id','id');
+        return $this->belongsTo(Course::class, 'course_id', 'id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class,'course_student_id','id');
     }
 
 }

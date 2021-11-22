@@ -5,13 +5,22 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Mail\CancelCourse;
+use App\Mail\Schedule\AcceptComlaintCustorm;
+use App\Mail\Schedule\AcceptComlaintPT;
+use App\Mail\Schedule\ScheduleDontComplainCustorm;
+use App\Mail\Schedule\ScheduleDontComplainPT;
+use App\Mail\Schedule\SendLinkRecordCustorm;
+use App\Mail\Schedule\SendLinkRecordPT;
 use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 /**
@@ -38,13 +47,13 @@ class ScheduleService extends BaseService
             }
         }
         $data = $this->queryHelper->buildQuery($this->model)
-                                  ->with(['course_student.users', 'course_student.courses'])
-                                  ->when($user_id, function ($q) use ($user_id) {
-                                      $q->join('course_students', 'schedules.course_student_id', 'course_students.id')
-                                        ->where('course_students.user_id', $user_id);
-                                  })
-                                  ->select('schedules.*')
-                                  ->where('course_student_id', $id);
+            ->with(['course_student.users', 'course_student.courses.teacher', 'course_planes.stage'])
+            ->when($user_id, function ($q) use ($user_id) {
+                $q->join('course_students', 'schedules.course_student_id', 'course_students.id')
+                    ->where('course_students.user_id', $user_id);
+            })
+            ->select('schedules.*')
+            ->where('course_student_id', $id);
         try {
             $response = $data->get();
             $this->postGetAll($response);
@@ -59,17 +68,17 @@ class ScheduleService extends BaseService
     public function getCalenderCustomer(object $request)
     {
         try {
-            $date                 = $request->date ?? null;
-            $user                 = Auth::user();
+            $date = $request->date ?? null;
+            $user = Auth::user();
             $arrayCourseStudentId = CourseStudent::where('user_id', $user['id'])
-                                                 ->where('status', StatusConstant::SCHEDULE)
-                                                 ->pluck('id')->toArray();
-            $schedule             = Schedule::whereIn('course_student_id', $arrayCourseStudentId)
-                                            ->when($date, function ($q) use ($date) {
-                                                $q->where('date', $date);
-                                            })
-                                            ->with(['course_student.users', 'course_student.courses'])
-                                            ->get();
+                ->where('status', StatusConstant::SCHEDULE)
+                ->pluck('id')->toArray();
+            $schedule = Schedule::whereIn('course_student_id', $arrayCourseStudentId)
+                ->when($date, function ($q) use ($date) {
+                    $q->where('date', $date);
+                })
+                ->with(['course_student.courses.teacher', 'course_planes.stage'])
+                ->get();
 
             return $schedule;
         } catch (Exception $e) {
@@ -79,14 +88,19 @@ class ScheduleService extends BaseService
 
     public function getCalenderPt(object $request)
     {
+        $date = $request->date ?? null;
         $user = Auth::user();
         try {
-            $schedule = Schedule::leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
-                                ->leftJoin('courses', 'course_students.course_id', 'courses.id')
-                                ->where('course_students.status', StatusConstant::SCHEDULE)
-                                ->where('courses.created_by', $user['id'])
-                                ->select('schedules.*')
-                                ->get();
+            $schedule = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage'])
+                ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
+                ->leftJoin('courses', 'course_students.course_id', 'courses.id')
+                ->when($date, function ($q) use ($date) {
+                    $q->where('schedules.date', $date);
+                })
+                ->where('course_students.status', StatusConstant::SCHEDULE)
+                ->where('courses.created_by', $user['id'])
+                ->select('schedules.*')
+                ->get();
 
             return $schedule;
         } catch (Exception $e) {
@@ -102,7 +116,7 @@ class ScheduleService extends BaseService
             );
         }
         $course_student_id = $request->course_student_id ?? null;
-        $course_student    = CourseStudent::find($course_student_id);
+        $course_student = CourseStudent::find($course_student_id);
 
         $course_student_service = new CourseStudentService();
 
@@ -111,37 +125,35 @@ class ScheduleService extends BaseService
          * */
         $arrayCoursePlanOff = $this->arrayCoursePlanOff($course_student->course_id);
         $this->doValidate($request,
-                          [
-                              'title'             => 'required|min:3',
-                              'date'              => 'required|date',
-                              'time_start'        => 'required',
-                              'time_end'          => 'required|after:time_start',
-                              // 'status'            => 'in:' . implode(',', $this->arrayStatusChedule),
-                              'link_room'         => 'required',
-                              'course_plan_id'    => [
-                                  'required',
-                                  Rule::unique('schedules',)->where(function ($query) use ($course_student_id) {
-                                      return $query->where('course_student_id', '=', $course_student_id);
-                                  }),
-                                  'in:' . implode(',', $arrayCoursePlanOff),
-                              ],
-                              'course_student_id' => 'required'
-                          ],
-                          [
-                              'title.required'             => 'Hãy nhập tiêu đề cho lịch học !',
-                              'title.min'                  => 'Tiêu đề phải tối thiểu 3 kí tự !',
-                              'date.required'              => 'Hãy nhập ngày tháng cho lịch học !',
-                              'date.date'                  => 'Định dạng ngày tháng không hợp lệ !',
-                              'time_start.required'        => 'Hãy nhập thời gian bắt đầu cho lịch học !',
-                              'time_end.after'             => 'Thời gian không hợp lệ !',
-                              'time_end.required'          => 'Hãy nhập thời gian kết thúc cho lịch học !',
-                              // 'status.in'                  => 'Trạng thái lịch học không hợp lệ !',
-                              'link_room.required'         => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
-                              'course_plan_id.required'    => 'Hãy nhập buổi học !',
-                              'course_plan_id.unique'      => 'Buổi học này đã được xếp lịch !',
-                              'course_plan_id.in'          => 'Buổi học này không tồn tại !',
-                              'course_student_id.required' => 'Hãy nhập học viên tham gia lịch học !'
-                          ]
+            [
+                'title' => 'required|min:3',
+                'date' => 'required|date',
+                'time_start' => 'required',
+                'time_end' => 'required|after:time_start',
+                'link_room' => 'required',
+                'course_plan_id' => [
+                    'required',
+                    Rule::unique('schedules',)->where(function ($query) use ($course_student_id) {
+                        return $query->where('course_student_id', '=', $course_student_id);
+                    }),
+                    'in:' . implode(',', $arrayCoursePlanOff),
+                ],
+                'course_student_id' => 'required'
+            ],
+            [
+                'title.required' => 'Hãy nhập tiêu đề cho lịch học !',
+                'title.min' => 'Tiêu đề phải tối thiểu 3 kí tự !',
+                'date.required' => 'Hãy nhập ngày tháng cho lịch học !',
+                'date.date' => 'Định dạng ngày tháng không hợp lệ !',
+                'time_start.required' => 'Hãy nhập thời gian bắt đầu cho lịch học !',
+                'time_end.after' => 'Thời gian không hợp lệ !',
+                'time_end.required' => 'Hãy nhập thời gian kết thúc cho lịch học !',
+                'link_room.required' => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
+                'course_plan_id.required' => 'Hãy nhập buổi học !',
+                'course_plan_id.unique' => 'Buổi học này đã được xếp lịch !',
+                'course_plan_id.in' => 'Buổi học này không tồn tại !',
+                'course_student_id.required' => 'Hãy nhập học viên tham gia lịch học !'
+            ]
         );
 
         // check
@@ -169,8 +181,8 @@ class ScheduleService extends BaseService
         // handle request
         if ($request instanceof Request) {
             $request->merge([
-                                'status' => StatusConstant::UNFINISHED,
-                            ]);
+                'status' => StatusConstant::UNFINISHED,
+            ]);
         } else {
             $request->status = StatusConstant::UNFINISHED;
         }
@@ -181,7 +193,7 @@ class ScheduleService extends BaseService
         /* check xem $id_schedule co phai cua user dang login hay ko
          * -> check id user dang login = created_by của khoá học mà lịch daỵ đó asign
          * */
-        $user   = Auth::user();
+        $user = Auth::user();
         $userId = $user['id'];
         if (!($userId == $this->checkScheduleCurrentUser($id))) {
             throw new BadRequestException(
@@ -197,7 +209,7 @@ class ScheduleService extends BaseService
         }
 
         $course_student_id = $request->course_student_id ?? null;
-        $course_student    = CourseStudent::find($course_student_id);
+        $course_student = CourseStudent::find($course_student_id);
 
         $course_student_service = new CourseStudentService();
 
@@ -206,38 +218,36 @@ class ScheduleService extends BaseService
          * */
         $arrayCoursePlanOff = $this->arrayCoursePlanOff($course_student->course_id);
         $this->doValidate($request,
-                          [
-                              'title'             => 'required|min:3',
-                              'date'              => 'required|date',
-                              'time_start'        => 'required',
-                              'time_end'          => 'require|after:time_start',
-                              // 'status'            => 'in:' . implode(',', $this->arrayStatusChedule),
-                              'link_room'         => 'required',
-                              'course_plan_id'    => [
-                                  'required',
-                                  Rule::unique('schedules',)->where(function ($query) use ($course_student_id, $id) {
-                                      return $query->where('course_student_id', '=', $course_student_id)
-                                                   ->where('id', '!=', $id);
-                                  }),
-                                  'in:' . implode(',', $arrayCoursePlanOff),
-                              ],
-                              'course_student_id' => 'required'
-                          ],
-                          [
-                              'title.required'             => 'Hãy nhập tiêu đề cho lịch học !',
-                              'title.min'                  => 'Tiêu đề phải tối thiểu 3 kí tự !',
-                              'date.required'              => 'Hãy nhập ngày tháng cho lịch học !',
-                              'date.date'                  => 'Định dạng ngày tháng không hợp lệ !',
-                              'time_start.required'        => 'Hãy nhập thời gian bắt đầu cho lịch học !',
-                              'time_end.after'             => 'Thời gian không hợp lệ !',
-                              'time_end.required'          => 'Hãy nhập thời gian kết thúc cho lịch học !',
-                              // 'status.in'                  => 'Trạng thái lịch học không hợp lệ !',
-                              'link_room.required'         => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
-                              'course_plan_id.required'    => 'Hãy nhập buổi học !',
-                              'course_plan_id.unique'      => 'Buổi học này đã được xếp lịch !',
-                              'course_plan_id.in'          => 'Buổi học này không tồn tại !',
-                              'course_student_id.required' => 'Hãy nhập học viên tham gia lịch học !'
-                          ]
+            [
+                'title' => 'required|min:3',
+                'date' => 'required|date',
+                'time_start' => 'required',
+                'time_end' => 'required|after:time_start',
+                'link_room' => 'required',
+                'course_plan_id' => [
+                    'required',
+                    Rule::unique('schedules',)->where(function ($query) use ($course_student_id, $id) {
+                        return $query->where('course_student_id', '=', $course_student_id)
+                            ->where('id', '!=', $id);
+                    }),
+                    'in:' . implode(',', $arrayCoursePlanOff),
+                ],
+                'course_student_id' => 'required'
+            ],
+            [
+                'title.required' => 'Hãy nhập tiêu đề cho lịch học !',
+                'title.min' => 'Tiêu đề phải tối thiểu 3 kí tự !',
+                'date.required' => 'Hãy nhập ngày tháng cho lịch học !',
+                'date.date' => 'Định dạng ngày tháng không hợp lệ !',
+                'time_start.required' => 'Hãy nhập thời gian bắt đầu cho lịch học !',
+                'time_end.after' => 'Thời gian không hợp lệ !',
+                'time_end.required' => 'Hãy nhập thời gian kết thúc cho lịch học !',
+                'link_room.required' => 'Hãy nhập đường dẫn trực tuyến cho lịch học !',
+                'course_plan_id.required' => 'Hãy nhập buổi học !',
+                'course_plan_id.unique' => 'Buổi học này đã được xếp lịch !',
+                'course_plan_id.in' => 'Buổi học này không tồn tại !',
+                'course_student_id.required' => 'Hãy nhập học viên tham gia lịch học !'
+            ]
         );
 
         // check
@@ -251,8 +261,8 @@ class ScheduleService extends BaseService
         // handle request
         if ($request instanceof Request) {
             $request->merge([
-                                'status' => StatusConstant::UNFINISHED,
-                            ]);
+                'status' => StatusConstant::UNFINISHED,
+            ]);
         } else {
             $request->status = StatusConstant::UNFINISHED;
         }
@@ -266,20 +276,20 @@ class ScheduleService extends BaseService
          * check time_start || time_end người dùng truyền vào có nằm trong khoảng time ko
          * */
         $timeCheck = date('H:i:s', strtotime($timeCheck));
-        $date      = $this->convertDate($date);
-        $data      = Schedule::where('date', '=', $date)
-                             ->when($schedule_id, function ($q) use ($schedule_id) {
-                                 // khi sua thi ko check gio cua ban ghi dang sua
-                                 $q->where('id', '!=', $schedule_id);
-                             })
-                             ->get();
+        $date = $this->convertDate($date);
+        $data = Schedule::where('date', '=', $date)
+            ->when($schedule_id, function ($q) use ($schedule_id) {
+                // khi sua thi ko check gio cua ban ghi dang sua
+                $q->where('id', '!=', $schedule_id);
+            })
+            ->get();
         if (count($data) > 0) {
             foreach ($data as $item) {
                 $time_start = strtotime($item->date . ' ' . $item->time_start);
-                $time_end   = strtotime($item->date . ' ' . $item->time_end);
+                $time_end = strtotime($item->date . ' ' . $item->time_end);
                 $time_check = strtotime($date . $timeCheck);
 
-                if ($time_check >= $time_start && $time_check <= $time_end) {
+                if (($time_check >= $time_start && $time_check <= $time_end && $item->status == StatusConstant::UNFINISHED)) {
                     return false;
                 } else {
                     return true;
@@ -308,9 +318,9 @@ class ScheduleService extends BaseService
 
     public function arrayCoursePlanOff($course_id)
     {
-        $stageId     = Stage::where('course_id', $course_id)->pluck('id')->toArray();
+        $stageId = Stage::where('course_id', $course_id)->pluck('id')->toArray();
         $course_plan = CoursePlanes::whereIn('stage_id', $stageId)->where('type', 0)
-                                   ->where('status', StatusConstant::ACTIVE)->pluck('id')->toArray();
+            ->where('status', StatusConstant::ACTIVE)->pluck('id')->toArray();
 
         return $course_plan;
     }
@@ -320,9 +330,9 @@ class ScheduleService extends BaseService
         $scheduleData = Schedule::find($schedule);
         if ($scheduleData) {
             $data = Schedule::join('course_students', 'schedules.course_student_id', 'course_students.id')
-                            ->join('courses', 'course_students.course_id', 'courses.id')
-                            ->where('schedules.id', $schedule)
-                            ->first();
+                ->join('courses', 'course_students.course_id', 'courses.id')
+                ->where('schedules.id', $schedule)
+                ->first();
 
             return $data->created_by;
         }
@@ -333,7 +343,7 @@ class ScheduleService extends BaseService
         /* check schedule nay cos phai cua user dang login hay ko
          * khi schedule cos status = unfinished moi dc xoa || kho hoc nay dax ket thuc (status course_sudent = complete)
          * */
-        $user   = Auth::user();
+        $user = Auth::user();
         $userId = $user['id'];
         if (!($userId == $this->checkScheduleCurrentUser($id))) {
             throw new BadRequestException(
@@ -342,7 +352,7 @@ class ScheduleService extends BaseService
             );
         }
 
-        $schedule       = Schedule::find($id);
+        $schedule = Schedule::find($id);
         $course_student = CourseStudent::find($schedule->course_student_id);
         if (!($schedule->status == StatusConstant::UNFINISHED || $course_student->status == StatusConstant::COMPLETE)) {
             throw new BadRequestException(
@@ -357,7 +367,7 @@ class ScheduleService extends BaseService
     {
         /* check xem schedule co phai cua user dang login hay ko
          * */
-        $user   = Auth::user();
+        $user = Auth::user();
         $userId = $user['id'];
         if (!($userId == $this->checkScheduleCurrentUser($id))) {
             throw new BadRequestException(
@@ -372,4 +382,80 @@ class ScheduleService extends BaseService
         $schedule->update(['status' => StatusConstant::COMPLETE]);
     }
 
+
+    public function listComplain()
+    {
+        return Schedule::where('complain', StatusConstant::NOCOMPLAINTS)->get();
+    }
+
+
+    public function changeComplain($request)
+    {
+
+        $data = Schedule::find($request['schedule_id']);
+
+        // info PT
+        $dataCourse = CoursePlanes::where('id', $data['course_plan_id'])->with(['stage'])->first();
+
+        $dataPt = Stage::where('id', $dataCourse->stage->id)->with('course')->first();
+        // tên giai đoạn
+        $name_cousre_plane = $data->title;
+
+        $id_pt = $dataPt->course->created_by;
+
+        $info_pt = User::where('id', $id_pt)->first();
+
+        $name_pt = $info_pt->name;
+        $email_pt = $info_pt->email;
+        $date_complain = $data->date;
+
+        // info Student
+
+        $dataCustorm = CourseStudent::where('id', $data['course_student_id'])->with(['users'])->first();
+
+        $email_custorm = $dataCustorm->users->email;
+        $name_custorm = $dataCustorm->users->name;
+
+        if (!empty($request['complain']) && $data) {
+
+            switch ($request['complain']) {
+                // complain dont success
+                case 'nocomplain' :
+
+                    // send email pt
+                    Mail::to($email_pt)->send(new ScheduleDontComplainPT($name_cousre_plane, $name_pt, $date_complain));
+                    // send email custorm
+                    Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+
+                    $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
+
+                    break;
+
+                case 'complain' :
+
+                    // send email pt accept complaints
+
+                    Mail::to('ngohongnguyen016774@gmail.com')->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
+
+                    // send email custorm
+                    Mail::to('ngohongnguyen016774@gmail.com')->send(new AcceptComlaintCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+
+
+                    $data->update(['status' => StatusConstant::UNFINISHED]);
+
+                    break;
+
+                case 'send_link_record' :
+
+                    Mail::to($email_pt)->send(new SendLinkRecordPT());
+
+                    Mail::to($email_custorm)->send(new SendLinkRecordCustorm());
+
+                    break;
+
+                default :
+                    break;
+            }
+        }
+    }
 }

@@ -26,9 +26,14 @@ class CourseStudentController extends Controller
         return response()->json($this->service->getAll());
     }
 
-    public function getCourseForCustomer($id): JsonResponse
+    public function getCourseForCustomer(): JsonResponse
     {
-        return response()->json($this->service->getCourseForCustomer($id));
+        return response()->json($this->service->getCourseForCustomer());
+    }
+
+    public function getCoursePlanByCourseStudent($id): JsonResponse
+    {
+        return response()->json($this->service->getCoursePlanByCourseStudent($id));
     }
 
     /**
@@ -48,7 +53,7 @@ class CourseStudentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         return response()->json($this->service->createCourseStudent($request));
     }

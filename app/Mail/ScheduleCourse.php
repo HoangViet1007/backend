@@ -32,7 +32,7 @@ class ScheduleCourse extends Mailable
     // link room
     protected $link_room;
 
-    public function __construct($name_student,$date_study,$name_couser,$time_hour,$name_pt,$phone_pt,$link_room)
+    public function __construct($name_student,$date_study, $name_couser, $time_hour, $name_pt, $phone_pt,  $link_room)
     {
         $this->name_student = $name_student;
         $this->date_study = $date_study;
@@ -51,15 +51,15 @@ class ScheduleCourse extends Mailable
     public function build()
     {
         return $this->view('send_email.scheduleCourse')
-            ->subject('Email thông báo lịch học')
+            ->subject('Email thông báo lịch học khóa học ' . $this->name_couser)
             ->with([
                 'name_student' => $this->name_student,
-                'date_study' => $this->date_study,
                 'name_couser' => $this->name_couser,
                 'time_hour' => $this->time_hour,
                 'name_pt' => $this->name_pt,
                 'phone_pt' => $this->phone_pt,
-                'link_room' => $this->link_room,
+                'date_study' => $this->date_study,
+                'link_room' => $this->link_room
             ]);
     }
 }

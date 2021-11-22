@@ -48,6 +48,11 @@ class CourseController extends Controller
         return response()->json($this->service->getCoursePlanOff($request, $id));
     }
 
+    public function getCourseRequest(): JsonResponse
+    {
+        return response()->json($this->service->getCourseRequest());
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -103,6 +108,16 @@ class CourseController extends Controller
     public function updateDisplay(Request $request, $id): JsonResponse
     {
         return response()->json($this->service->updateDisplay($request, $id));
+    }
+
+    public function requestCourse(Request $request, $id)
+    {
+        return response()->json($this->service->requestCourse($request, $id));
+    }
+
+    public function cancelRequestCourse(Request $request, $id)
+    {
+       return response()->json($this->service->cancelRequestCourse($request, $id));
     }
 
     /**

@@ -37,8 +37,15 @@ Route::get('/send-email-student','StageController@sendEmailStudent');
 // hủy khóa học
 Route::get('/send-email-cancel-course','StageController@sendEmailCancelStudent');
 // PT không thể dạy khóa học đấy
-Route::get('/send-email-pt-cant-teach','StageController@sendEmailStudent');
-// xác thực email
+Route::get('/send-email-pt-cant-teach','StageController@ptCantTeach');
+
+// Học viên xin nghỉ buổi học
+Route::get('/send-email-custorm-dont-study','StageController@CustormCancel');
+//SuccessfulCourseBrowsing
+// PT duyệt học viên
+Route::get('/send-email-successful-course-browsing','StageController@SuccessfulCourseBrowsing');
+
+// xác thực email CustormCancel
 
 Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')
     ->middleware('auth:api')
@@ -109,6 +116,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('user', 'UserController');
 
     // course
+    Route::get('/cancel-request-course/{id}','CourseController@cancelRequestCourse');
+    Route::get('/request-course/{id}','CourseController@requestCourse');
+    Route::get('get-course-request','CourseController@getCourseRequest');
     Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
     Route::put('/course/display/{id}','CourseController@updateDisplay');
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
@@ -139,8 +149,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('role','RoleController');
 
     // course student
+    Route::get('get-course_plan-by-course-student/{id}','CourseStudentController@getCoursePlanByCourseStudent');
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
-    Route::get('course_student/customer/{id}','CourseStudentController@getCourseForCustomer');
+    Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');
     Route::put('pt-through/{id}','CourseStudentController@ptThough');
     Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
     Route::resource('course_student','CourseStudentController');
@@ -148,7 +159,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // thanh toan
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
+    Route::get('khach-hang/payment', 'PaymentController@listPaymentByCustomer');
     Route::resource('payment', 'PaymentController');
+
+    // hoa don
+    Route::get('hoa-don', 'BillController@listBillByCustomer');
+    Route::resource('bill', 'BillController');
 
     //schedule
     Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
@@ -157,5 +173,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('get-calender-work-customer','ScheduleController@getCalenderCustomer');
     Route::get('get-calender-work-pt','ScheduleController@getCalenderPt');
     Route::resource('schedule','ScheduleController');
+
+    // complain in admin
+
+    Route::get('list-complain','ScheduleAdminController@listComplain');
+    Route::put('change-complain','ScheduleAdminController@changeComplain');
 });
 

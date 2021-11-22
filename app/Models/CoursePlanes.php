@@ -11,11 +11,11 @@ class CoursePlanes extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $table = 'course_planes';
+    protected $table      = 'course_planes';
     protected $primaryKey = 'id';
-    protected $guarded = [];
+    protected $guarded    = [];
 
-    protected $fillable = ['name', 'content', 'descreption', 'video_link', 'stage_id', 'status','image','type'];
+    protected $fillable = ['name', 'content', 'descreption', 'video_link', 'stage_id', 'status', 'image', 'type'];
 
 
     public function stage()
@@ -25,7 +25,7 @@ class CoursePlanes extends Model
 
     public function cousre()
     {
-        return $this->hasManyThrough(
+        return $this->hasOneThrough(
             Course::class,
             Stage::class,
             'course_id',
@@ -33,5 +33,10 @@ class CoursePlanes extends Model
             'stage_id',
             'id'
         );
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class,'course_plan_id','id');
     }
 }

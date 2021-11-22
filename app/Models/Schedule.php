@@ -11,10 +11,15 @@ class Schedule extends Model
 
     protected $table    = 'schedules';
     protected $guarded  = [];
-    protected $fillable = ['title', 'date', 'time_start', 'time_end', 'status', 'link_room', 'link_record', 'course_plan_id', 'course_student_id'];
+    protected $fillable = ['title', 'date', 'time_start', 'time_end', 'status', 'link_room', 'link_record', 'course_plan_id', 'course_student_id','complain'];
 
     public function course_student()
     {
-        return $this->belongsTo(CourseStudent::class,'course_student_id','id');
+        return $this->belongsTo(CourseStudent::class, 'course_student_id', 'id');
+    }
+
+    public function course_planes()
+    {
+        return $this->belongsTo(CoursePlanes::class,'course_plan_id','id');
     }
 }

@@ -14,14 +14,15 @@
         <p style="text-align: center; color: #fff">Đây là email tự động, quý khách vui lòng không phản hồi luồng
             email này !</p>
         <div class="row" style="background-color: cadetblue;padding: 15px">
-            <div class="col-md-12"> <p  style="font-size: 30px; color: #fff; text-align: center">Website thuê huấn luyện viên thể hình</p> </div>
+            <div class="col-md-12"><p style="font-size: 30px; color: #fff; text-align: center">Website thuê huấn luyện
+                    viên thể hình</p></div>
             <div class="col-md-12">
-                <p style="font-weight: bold;">Xin chào {{ $name_student }} !</p>
-                <p>Cảm ơn bạn đã đăng ký khóa học {{$name_couser}} . Nhưng tôi rất xin lỗi khóa học này của bạn đã bị hủy !.
-                   Khóa học này có giá {{number_format($price)}} đ . Chúng tôi sẽ hoàn tiền lại cho bạn 100%.
-                    <br>Website còn rất nhiều khóa học khác, mong bạn sẽ sớm tìm được khóa học phù hợp với mình </p>
-                <br>
-                <p>Chân thành cảm ơn bạn đã ghé thăm website của chúng tôi.</p>
+                <p style="font-weight: bold;">Xin chào {{ $name_custorm }} !</p>
+                <p>Khóa học {{$name_cousre_plane}} vào ngày {{$date_complain}} mà bạn đã khiếu nại.
+                    Qua xem xét chúng tôi thấy PT thực hiện chưa đúng nội quy khi dạy học.Nên bạn sẽ được sử thắng trong
+                    vụ khiếu nại này. </p>
+                <p>Vì vậy sắp tới bạn sẽ được xếp lại lịch học vào hôm hây hoặc sẽ được bồi thường 100 % số tiền học hôm đấy.</p>
+                <p>Mong chú ý email , trong đấy sẽ có lịch học của bạn.</p>
                 <i>Mọi thắc mắc về buổi học quý khách vui lòng liên hệ đến 0828890896 ! Một lần nữa cảm ơn quý khách
                     đã tin tưởng website chúng tôi !</i>
             </div>
@@ -31,3 +32,5 @@
 </body>
 
 </html>
+
+
