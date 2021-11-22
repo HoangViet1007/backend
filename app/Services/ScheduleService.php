@@ -386,7 +386,7 @@ class ScheduleService extends BaseService
 
     public function listComplain()
     {
-        return Schedule::where('complain', StatusConstant::NOCOMPLAINTS)->get();
+        return Schedule::where('complain', StatusConstant::COMPLAIN)->get();
     }
 
 
