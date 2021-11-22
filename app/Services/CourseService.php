@@ -7,6 +7,7 @@ use App\Exceptions\BadRequestException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
+use App\Models\AccountLevel;
 use App\Models\Course;
 use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
@@ -14,6 +15,7 @@ use App\Models\SpecializeDetail;
 use App\Models\Stage;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,8 +46,9 @@ class CourseService extends BaseService
     public function getAll(): LengthAwarePaginator
     {
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->with('customerLevel', 'stages', 'specializeDetails.user',
-                                                                   'specializeDetails.specialize')
+        $data = $this->queryHelper->buildQuery($this->model)
+                                  ->with('customerLevel', 'stages', 'specializeDetails.user',
+                                         'specializeDetails.specialize')
                                   ->join('specialize_details', 'courses.specialize_detail_id',
                                          'specialize_details.id')
                                   ->join('specializes', 'specialize_details.specialize_id',
@@ -77,7 +80,7 @@ class CourseService extends BaseService
     {
         $request = request()->all();
         $data    = $this->queryHelper->buildQuery($this->model)
-                                     ->with('customerLevel', 'stages', 'specializeDetails.user',
+                                     ->with('customerLevel', 'stagesClient', 'specializeDetails.user',
                                             'specializeDetails.specialize')
                                      ->join('specialize_details', 'courses.specialize_detail_id',
                                             'specialize_details.id')
@@ -89,14 +92,7 @@ class CourseService extends BaseService
                                      ->select('courses.*')
                                      ->where('users.id', self::currentUser()->id);
         try {
-            $response = $data->paginate(QueryHelper::limit());
-
-            $response->getCollection()->transform(function ($value) {
-                $value->total_stages = count($value->stages);
-                unset($value->stages);
-
-                return $value;
-            });
+            $response = $data->get();
 
             return $response;
         } catch (Exception $e) {
@@ -209,10 +205,19 @@ class CourseService extends BaseService
     public function getCourseRequest()
     {
         $data = $this->queryHelper->buildQuery($this->model)
-                                  ->with(['stagesClient.course_planes_client'])
-                                  ->where('status', '!=',StatusConstant::PENDING);
+                                  ->with(['teacher', 'customerLevel', 'specializeDetails',
+                                          'specializeDetails.specialize', 'stagesClient.course_planes_client'])
+                                  ->join('specialize_details', 'courses.specialize_detail_id',
+                                         'specialize_details.id')
+                                  ->join('specializes', 'specialize_details.specialize_id',
+                                         'specializes.id')
+                                  ->join('customer_levels', 'courses.customer_level_id',
+                                         'customer_levels.id')
+                                  ->join('users', 'specialize_details.user_id', 'users.id')
+                                  ->where('courses.status', '!=', StatusConstant::PENDING)
+                                  ->select('courses.*');
         try {
-            $response = $data->paginate(QueryHelper::limit());
+            $response = $data->get();
 
             return $response;
         } catch (Exception $e) {
@@ -220,6 +225,7 @@ class CourseService extends BaseService
         }
     }
 
+    // admin huy khoa hoc
     public function cancelRequestCourse(object $request, $id)
     {
         $course = Course::find($id);
@@ -262,7 +268,8 @@ class CourseService extends BaseService
             return true;
         } else {
             throw new BadRequestException(
-                ['message' => __("Hãy thêm đầy đủ giai đoạn và buổi học cho khoá học trước khi gửi yêu cầu xác nhận !")], new Exception()
+                ['message' => __("Hãy thêm đầy đủ giai đoạn và buổi học cho khoá học trước khi gửi yêu cầu xác nhận !")],
+                new Exception()
             );
         }
     }
@@ -295,6 +302,21 @@ class CourseService extends BaseService
 
     public function preAdd(object $request)
     {
+        // check cấp độ của user
+        $user             = Auth::user();
+        $account_level_id = $user['account_level_id'];
+
+        if ($account_level_id) {
+            $numberCourseCurrentLevel = AccountLevel::where('id', $account_level_id)->first()->course_number;
+            $numberCourse             = Course::where('created_by', $user['id'])->count();
+            if ($numberCourse > $numberCourseCurrentLevel) {
+                throw new BadRequestException(
+                    ['message' => __("Số khoá học của bạn đã đạt mực giới hạn !")], new Exception()
+                );
+            }
+        }
+
+
         if ($request instanceof Request) {
             $request->merge([
                                 'created_by' => $this->currentUser()->id ?? null,
@@ -379,6 +401,13 @@ class CourseService extends BaseService
             );
         }
 
+        // check xem khoá học có đang hoc hay ko
+        if ($this->countUserLearning($id) > 0) {
+            throw new BadRequestException(
+                ['message' => __("Không thể chỉnh sửa khoá học khi có học viên đang học !")], new Exception()
+            );
+        }
+
         if ($request instanceof Request) {
             $request->merge([
                                 'created_by' => $this->currentUser()->id ?? null,
@@ -454,6 +483,12 @@ class CourseService extends BaseService
         return parent::updateRequestValidate($id, $request, $rules, $messages);
     }
 
+    public function postUpdate(int|string $id, object $request, Model $model)
+    {
+        $this->updateStatusCoursePending($id);
+        parent::postUpdate($id, $request, $model);
+    }
+
     // update display index
     public function updateDisplay(object $request, $id)
     {
@@ -502,11 +537,12 @@ class CourseService extends BaseService
         $userId                  = $this->currentUser()->id ?? null;
         $courseForUser           = Course::where('created_by', '=', $userId)->where('id', '=', $id)->first();
         $countStageCurrentCourse = Stage::where('course_id', $id)->count();
-        if (!$courseForUser || $countStageCurrentCourse > 0) {
+        if (!$courseForUser || $countStageCurrentCourse > 0 || ($this->checkCoursePlanCurrentCourse($id) > 0)) {
             throw new BadRequestException(
                 ['message' => __("Xoá khoá học không thành công !")], new Exception()
             );
         }
+
         parent::preDelete($id);
     }
 
@@ -530,6 +566,30 @@ class CourseService extends BaseService
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
+    }
+
+    // dem so hoc vien dang hoc cua khó hoc
+    public function countUserLearning($course_id)
+    {
+        $statusHappenning   = StatusConstant::SCHEDULE;
+        $numberUserLearning = CourseStudent::where(function ($q) use ($course_id, $statusHappenning) {
+            $q->where('course_id', $course_id)
+              ->where('status', $statusHappenning);
+        })->count();
+
+        return $numberUserLearning;
+    }
+
+    // update trang thai status pending khoa hoc sau khi chinh sua
+    public function updateStatusCoursePending($course_id)
+    {
+        $course = Course::find($course_id);
+        if (!($course)) {
+            throw new BadRequestException(
+                ['message' => __("Khoá học không tồn tại !")], new Exception()
+            );
+        }
+        $course->update(['status' => StatusConstant::PENDING]);
     }
 
 }

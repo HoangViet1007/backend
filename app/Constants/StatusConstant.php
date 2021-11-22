@@ -46,12 +46,12 @@ class StatusConstant
     const NOJOIN = 'NoJoin';
 
     // payments
-    const RECHARGE = 'Nap tien';
-    const PAY      = 'Thanh toan khoa hoc';
+    const RECHARGE = 'Rechage'; // nạp tiền
+    const COURSEPAYMENT      = 'CoursePayment'; // thanh toán khóa học
 
     // bills
-    const WALLET = 'Thanh toan bang vi';
-    const DIRECT = 'Thanh toan truc tiep';
+    const WALLET = 'Wallet'; // mua khoa hoc bang vi
+    const DIRECT = 'Direct'; // mua khoa hoc thanh toan truc tiep bang vnpay
 
     const All
         = [
@@ -68,7 +68,7 @@ class StatusConstant
             self::SCHEDULE,
             self::COMPLETE,
             self::RECHARGE,
-            self::PAY,
+            self::COURSEPAYMENT,
             self::WALLET,
             self::DIRECT,
             self::COMPLETE,

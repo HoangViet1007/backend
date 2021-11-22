@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
-use App\Helpers\QueryHelper;
+use App\Mail\CancelCourse;
 use App\Models\Bill;
 use App\Models\Course;
 use App\Models\CoursePlanes;
@@ -14,8 +14,8 @@ use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
 use Exception;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * @Author apple
@@ -29,7 +29,7 @@ class CourseStudentService extends BaseService
         $this->model = new CourseStudent();
     }
 
-    public function getAll(): LengthAwarePaginator
+    public function getAllCourseStidentByPt()
     {
         $userIdLogin = Auth::user();
         $data        = $this->queryHelper->buildQuery($this->model)
@@ -39,7 +39,7 @@ class CourseStudentService extends BaseService
                                          ->where('courses.created_by', '=', $userIdLogin['id'])
                                          ->select('course_students.*');
         try {
-            $response = $data->paginate(QueryHelper::limit());
+            $response = $data->get();
 
             return $response;
         } catch (Exception $e) {
@@ -54,24 +54,25 @@ class CourseStudentService extends BaseService
         $user          = Auth::user();
         $courseStudent = CourseStudent::find($id);
 
-       if($courseStudent){
-           if (!($courseStudent->user_id == $user['id'])) {
-               throw new BadRequestException(
-                   ['message' => __("Bài học không tồn tại !")], new Exception()
-               );
-           }
-       }
+        if ($courseStudent) {
+            if (!($courseStudent->user_id == $user['id'])) {
+                throw new BadRequestException(
+                    ['message' => __("Bài học không tồn tại !")], new Exception()
+                );
+            }
+        }
 
         $stageArray = Stage::where('course_id', $courseStudent->course_id)->pluck('id')->toArray();
-        if($stageArray){
+        if ($stageArray) {
             $coursePlan = CoursePlanes::whereIn('stage_id', $stageArray)
                                       ->with(['schedules' => function ($q) use ($id) {
                                           $q->where('schedules.course_student_id', $id);
                                       }])
                                       ->select('course_planes.*')->get();
+
             return $coursePlan;
 
-        }else{
+        } else {
             throw new BadRequestException(
                 ['message' => __("Bài học không tồn tại !")], new Exception()
             );
@@ -104,6 +105,7 @@ class CourseStudentService extends BaseService
             $user         = User::find($courseStudent->user_id)->update(['money' => $price_course]);
 
             // gửi email cho người dùng
+            // email
 
             return CourseStudent::find($id);
         } else {
@@ -174,13 +176,14 @@ class CourseStudentService extends BaseService
                                        'status'      => StatusConstant::CANCELEDBYPT
                                    ]);
 
-            // hoan lai tien 90% kho hoc
+            // hoan lai tien 100 kho hoc
             $courseId     = $courseStudent->course_id;
             $course       = Course::find($courseId);
             $price_course = (int)$course->price;
             $user         = User::find($courseStudent->user_id)->update(['money' => $price_course]);
 
             // gửi email cho người dùng
+            // truyền vào email người nhận , tên học viên , tên khoá học .
 
             return CourseStudent::find($id);
         } else {
@@ -190,15 +193,87 @@ class CourseStudentService extends BaseService
         }
     }
 
+    // sent request customer (guiw yeu cau xac nhan dong ys lich hoc)
+    public function sentRequestCustomer(object $request, $id)
+    {
+        $course_student = CourseStudent::find($id);
+        if (!$course_student) {
+            throw new BadRequestException(
+                ['message' => __("Học viên này không tồn tại !")], new Exception()
+            );
+        }
+        if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
+            throw new BadRequestException(
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")],
+                new Exception()
+            );
+        }
+
+        /* phai them du so buo thi moi gui dc yêu cầu cho người dùng
+         * */
+        if (!($this->getCountScheduleForCourseStudent($id) == $this->getCountCoursePlanOff($course_student->course_id))) {
+            throw new BadRequestException(
+                ['message' => __("Gửi yêu cầu cho người dùng thất bại, hãy thêm lịch cho đủ số buổi học trực tuyến !")],
+                new Exception()
+            );
+        }
+
+        $course_student->update(['user_consent' => StatusConstant::SENT]);
+
+        return true;
+    }
+
+    // customer ok
+    public function userAgreesCourseStudent(object $request, $id)
+    {
+        $course_student = CourseStudent::find($id);
+        if (!$course_student) {
+            throw new BadRequestException(
+                ['message' => __("Học viên này không tồn tại !")], new Exception()
+            );
+        }
+        if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
+            throw new BadRequestException(
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")],
+                new Exception()
+            );
+        }
+        $course_student->update(['user_consent' => StatusConstant::USERAGREES]);
+
+        return true;
+    }
+
+    //customer ko ok
+    public function userDisAgreesCourseStudent(object $request, $id)
+    {
+        $course_student = CourseStudent::find($id);
+        if (!$course_student) {
+            throw new BadRequestException(
+                ['message' => __("Học viên này không tồn tại !")], new Exception()
+            );
+        }
+        if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
+            throw new BadRequestException(
+                ['message' => __("Chỉ gửi yêu cầu xác nhận lịch học cho người dùng khi đang ở trạng thái chờ xếp lịch !")],
+                new Exception()
+            );
+        }
+        $course_student->update(['user_consent' => StatusConstant::USERDISAGREES]);
+
+        return true;
+    }
+
     public function getCourseForCustomer()
     {
         $user_id = Auth::user();
         try {
             $data     = $this->queryHelper->buildQuery($this->model)
-                                          ->with(['courses.teacher'])
+                                          ->with(['courses.teacher', 'schedules'])
+                                          ->join('courses', 'courses.id', 'course_students.course_id')
+                                          ->join('users','users.id','courses.created_by')
                                           ->select('course_students.*')
-                                          ->where('user_id', '=', $user_id['id']);
-            $response = $data->paginate(QueryHelper::limit());
+                                          ->where('course_students.user_id', '=', 3);
+            $response = $data->get();
 
             return $response;
 
@@ -244,12 +319,19 @@ class CourseStudentService extends BaseService
             );
         }
 
-        // duyet khoa hoc mot cach tuan tu (dk status = unchedule)
-        /*
+        /* check duyet khoa hoc khi co su dong ý cu nguoi dung
+         * user_consent = UserAgrees
          * */
-
+        if (!($course_student->user_consent == StatusConstant::USERAGREES)) {
+            throw new BadRequestException(
+                ['message' => __("Không thể duyệt khoá học khi chưa có sự đồng ý từ phía người dùng !")],
+                new Exception()
+            );
+        }
         // update duyet dang ki
         $course_student->update(['status' => StatusConstant::SCHEDULE]);
+        // gửi mail
+
 
         return true;
     }

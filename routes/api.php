@@ -149,6 +149,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('role','RoleController');
 
     // course student
+    Route::get('sent-request-customer/{id}','CourseStudentController@sentRequestCustomer');
+    Route::get('user-agrees-course-student/{id}','CourseStudentController@userAgreesCourseStudent');
+    Route::get('user-dis-agrees-course-student/{id}','CourseStudentController@userDisAgreesCourseStudent');
     Route::get('get-course_plan-by-course-student/{id}','CourseStudentController@getCoursePlanByCourseStudent');
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
     Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');
@@ -167,6 +170,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('bill', 'BillController');
 
     //schedule
+    Route::put('not-engaged/{id}','ScheduleController@notEngaged');
+    Route::put('engaged/{id}','ScheduleController@engaged');
+    Route::put('complanin/{id}', 'ScheduleController@complanin');
     Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
     Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
     Route::get('get-schedule-by-customer/{id}','ScheduleController@getScheduleByCustomer');

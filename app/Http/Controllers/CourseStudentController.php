@@ -23,7 +23,7 @@ class CourseStudentController extends Controller
      */
     public function index(): JsonResponse
     {
-        return response()->json($this->service->getAll());
+        return response()->json($this->service->getAllCourseStidentByPt());
     }
 
     public function getCourseForCustomer(): JsonResponse
@@ -109,6 +109,24 @@ class CourseStudentController extends Controller
     public function ptThough(Request $request, $id): JsonResponse
     {
         return response()->json($this->service->ptThough($request, $id));
+    }
+
+    // sent request customer
+    public function sentRequestCustomer(Request $request, $id)
+    {
+        return response()->json($this->service->sentRequestCustomer($request,$id));
+    }
+
+    // userAgreesCourseStudent
+    public function userAgreesCourseStudent(Request $request, $id)
+    {
+        return response()->json($this->service->userAgreesCourseStudent($request,$id));
+    }
+
+    // userDisAgreesCourseStudent
+    public function userDisAgreesCourseStudent(Request $request, $id)
+    {
+        return response()->json($this->service->userDisAgreesCourseStudent($request,$id));
     }
 
     /**

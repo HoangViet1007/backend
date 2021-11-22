@@ -354,12 +354,13 @@ class ScheduleService extends BaseService
 
         $schedule = Schedule::find($id);
         $course_student = CourseStudent::find($schedule->course_student_id);
-        if (!($schedule->status == StatusConstant::UNFINISHED || $course_student->status == StatusConstant::COMPLETE)) {
+        if (!($schedule->status == StatusConstant::UNFINISHED || $course_student->status == StatusConstant::COMPLETE || $course_student->status == StatusConstant::UNSCHEDULED)) {
             throw new BadRequestException(
                 ['message' => __("Xoá lịch học không thành công !")],
                 new Exception()
             );
         }
+
     }
 
     // update status schedule complete
@@ -435,10 +436,10 @@ class ScheduleService extends BaseService
 
                     // send email pt accept complaints
 
-                    Mail::to('ngohongnguyen016774@gmail.com')->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
+                    Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
 
                     // send email custorm
-                    Mail::to('ngohongnguyen016774@gmail.com')->send(new AcceptComlaintCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+                    Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
 
 
                     $data->update(['status' => StatusConstant::UNFINISHED]);
@@ -458,4 +459,84 @@ class ScheduleService extends BaseService
             }
         }
     }
+    // từ chối tham gia buổi học
+    public function notEngaged($id, object $request)
+    {
+        /* check xem schedule co phai cua user dang login hay ko
+         * */
+        $user = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+        // gui email cho pt thông báo người dùng không tham gia buổi học.
+
+        $schedule = Schedule::find($id);
+        $schedule->update([
+            'participation' => StatusConstant::NOJOIN,
+            'status' => StatusConstant::COMPLETE
+        ]);
+        return $schedule;
+    }
+
+    // chấp nhận tham gia buổi học
+    public function engaged($id, object $request)
+    {
+        /* check xem schedule co phai cua user dang login hay ko
+         * */
+        $user = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+
+        $schedule = Schedule::find($id);
+        $schedule->update([
+            'participation' => StatusConstant::JOIN
+        ]);
+        return $schedule;
+    }
+
+    // customer khiếu nại
+    public function complanin($id, object $request)
+    {
+        $user = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+
+        $schedule = Schedule::find($id);
+        if ($schedule->status != StatusConstant::COMPLETE) {
+            throw new BadRequestException(
+                ['message' => __("Khóa học chưa kết thúc, quý khách vui lòng đợi thêm !")],
+                new Exception()
+            );
+        }
+        if ($request->reason_complain || $request->reason_complain  == "") {
+            throw new BadRequestException(
+                ['message' => __("Vui lòng nhập lý do bạn khiếu nại buổi học !")],
+                new Exception()
+            );
+        }
+
+        // gửi mail cho pt thông báo bị khiếu nại ở đây
+
+        $schedule->update([
+            'complain' => StatusConstant::COMPLAIN,
+            'reason_complain' => $request->reason_complain
+        ]);
+        return $schedule;
+    }
+
+
 }
