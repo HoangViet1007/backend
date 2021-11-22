@@ -347,7 +347,7 @@ class ScheduleService extends BaseService
             $data = Schedule::join('course_students', 'schedules.course_student_id', 'course_students.id')
                 ->where('schedules.id', $schedule)
                 ->first();
-                
+
             return $data->user_id;
         }
     }
@@ -425,8 +425,11 @@ class ScheduleService extends BaseService
                 $item['name_course'] =  $name_course;
 
                 return $item;
+
             });
+
             return $response;
+            
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
