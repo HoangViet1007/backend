@@ -14,14 +14,13 @@
         <p style="text-align: center; color: #fff">Đây là email tự động, quý khách vui lòng không phản hồi luồng
             email này !</p>
         <div class="row" style="background-color: cadetblue;padding: 15px">
-            <div class="col-md-12"> <p  style="font-size: 30px; color: #fff; text-align: center">Website thuê huấn luyện viên thể hình</p> </div>
+            <div class="col-md-12"><p  style="font-size: 30px; color: #fff; text-align: center">Website thuê huấn luyện viên thể hình</p> </div>
             <div class="col-md-12">
-                <p style="font-weight: bold;">Xin chào {{ $name_student }} !</p>
-                <p>Cảm ơn bạn đã đăng ký khóa học {{$name_couser}} . Nhưng tôi rất xin lỗi khóa học này của bạn đã bị hủy !.
-                   Khóa học này có giá {{number_format($price)}} đ . Chúng tôi sẽ hoàn tiền lại cho bạn 100%.
-                    <br>Website còn rất nhiều khóa học khác, mong bạn sẽ sớm tìm được khóa học phù hợp với mình </p>
+                <p style="font-weight: bold;">Xin chào {{ $teach_name }} !</p>
+                <p> Tôi là {{$student_name}} hôm nay tôi có khóa học {{$name_couser}} vào lúc {{$time_hour}} ngày {{$time_study}}.
+                    <p>Hôm nay tôi {{$reason}} nên không thể tham gia khóa học được.Nên tôi xin phép được nghỉ học 1 buổi.</p>
                 <br>
-                <p>Chân thành cảm ơn bạn đã ghé thăm website của chúng tôi.</p>
+                <p>Tôi chân thành cảm ơn!</p>
                 <i>Mọi thắc mắc về buổi học quý khách vui lòng liên hệ đến 0828890896 ! Một lần nữa cảm ơn quý khách
                     đã tin tưởng website chúng tôi !</i>
             </div>

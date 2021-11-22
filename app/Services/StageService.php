@@ -105,7 +105,7 @@ class StageService extends BaseService
     public function listStage($id)
     {
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->where('course_id', $id)->where('status',StatusConstant::ACTIVE);
+        $data = $this->queryHelper->buildQuery($this->model)->where('course_id', $id);
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);

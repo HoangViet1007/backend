@@ -25,7 +25,7 @@ class CoursePlanes extends Model
 
     public function cousre()
     {
-        return $this->hasManyThrough(
+        return $this->hasOneThrough(
             Course::class,
             Stage::class,
             'course_id',

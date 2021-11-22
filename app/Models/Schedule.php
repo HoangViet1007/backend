@@ -11,6 +11,7 @@ class Schedule extends Model
 
     protected $table    = 'schedules';
     protected $guarded  = [];
+
     protected $fillable = ['title', 'date', 'time_start', 'time_end', 'status', 'participation', 'complain', 'reason_complain', 'link_room', 'link_record', 'actual_end_time', 'actual_start_time', 'course_plan_id', 'course_student_id'];
 
     public function course_student()

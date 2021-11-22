@@ -37,13 +37,27 @@ Route::get('/send-email-student','StageController@sendEmailStudent');
 // hủy khóa học
 Route::get('/send-email-cancel-course','StageController@sendEmailCancelStudent');
 // PT không thể dạy khóa học đấy
-Route::get('/send-email-pt-cant-teach','StageController@sendEmailStudent');
-// xác thực email
-Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')->middleware('auth:api')->name('verification.send');;
+Route::get('/send-email-pt-cant-teach','StageController@ptCantTeach');
+
+// Học viên xin nghỉ buổi học
+Route::get('/send-email-custorm-dont-study','StageController@CustormCancel');
+//SuccessfulCourseBrowsing
+// PT duyệt học viên
+Route::get('/send-email-successful-course-browsing','StageController@SuccessfulCourseBrowsing');
+
+// xác thực email CustormCancel
+
+Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')
+    ->middleware('auth:api')
+    ->name('verification.send');
 
 // check verify email
-Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')->middleware('auth:api')->name('verification.verify');;
+Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')
+    ->middleware('auth:api')
+    ->name('verification.verify');
 // api clien
+
+Route::get('/check-add-user-verify' ,'EmailVerificationController@addUserVerify');
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
     Route::post('user_pt', 'UserController@addUserHasRolePt');
@@ -165,5 +179,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('get-calender-work-customer','ScheduleController@getCalenderCustomer');
     Route::get('get-calender-work-pt','ScheduleController@getCalenderPt');
     Route::resource('schedule','ScheduleController');
+
+    // complain in admin
+
+    Route::get('list-complain','ScheduleAdminController@listComplain');
+    Route::put('change-complain','ScheduleAdminController@changeComplain');
 });
 

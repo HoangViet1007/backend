@@ -5,13 +5,22 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Mail\CancelCourse;
+use App\Mail\Schedule\AcceptComlaintCustorm;
+use App\Mail\Schedule\AcceptComlaintPT;
+use App\Mail\Schedule\ScheduleDontComplainCustorm;
+use App\Mail\Schedule\ScheduleDontComplainPT;
+use App\Mail\Schedule\SendLinkRecordCustorm;
+use App\Mail\Schedule\SendLinkRecordPT;
 use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 /**
@@ -374,6 +383,82 @@ class ScheduleService extends BaseService
         $schedule->update(['status' => StatusConstant::COMPLETE]);
     }
 
+
+    public function listComplain()
+    {
+        return Schedule::where('complain', StatusConstant::COMPLAIN)->get();
+    }
+
+
+    public function changeComplain($request)
+    {
+
+        $data = Schedule::find($request['schedule_id']);
+
+        // info PT
+        $dataCourse = CoursePlanes::where('id', $data['course_plan_id'])->with(['stage'])->first();
+
+        $dataPt = Stage::where('id', $dataCourse->stage->id)->with('course')->first();
+        // tên giai đoạn
+        $name_cousre_plane = $data->title;
+
+        $id_pt = $dataPt->course->created_by;
+
+        $info_pt = User::where('id', $id_pt)->first();
+
+        $name_pt = $info_pt->name;
+        $email_pt = $info_pt->email;
+        $date_complain = $data->date;
+
+        // info Student
+
+        $dataCustorm = CourseStudent::where('id', $data['course_student_id'])->with(['users'])->first();
+
+        $email_custorm = $dataCustorm->users->email;
+        $name_custorm = $dataCustorm->users->name;
+
+        if (!empty($request['complain']) && $data) {
+
+            switch ($request['complain']) {
+                // complain dont success
+                case 'nocomplain' :
+
+                    // send email pt
+                    Mail::to($email_pt)->send(new ScheduleDontComplainPT($name_cousre_plane, $name_pt, $date_complain));
+                    // send email custorm
+                    Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+
+                    $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
+
+                    break;
+
+                case 'complain' :
+
+                    // send email pt accept complaints
+
+                    Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
+
+                    // send email custorm
+                    Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+
+
+                    $data->update(['status' => StatusConstant::UNFINISHED]);
+
+                    break;
+
+                case 'send_link_record' :
+
+                    Mail::to($email_pt)->send(new SendLinkRecordPT());
+
+                    Mail::to($email_custorm)->send(new SendLinkRecordCustorm());
+
+                    break;
+
+                default :
+                    break;
+            }
+        }
+    }
     // từ chối tham gia buổi học
     public function notEngaged($id, object $request)
     {
