@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Mail\CancelCourse;
 use App\Mail\Schedule\AcceptComlaintCustorm;
 use App\Mail\Schedule\AcceptComlaintPT;
@@ -346,7 +347,7 @@ class ScheduleService extends BaseService
             $data = Schedule::join('course_students', 'schedules.course_student_id', 'course_students.id')
                 ->where('schedules.id', $schedule)
                 ->first();
-                
+
             return $data->user_id;
         }
     }
@@ -399,7 +400,39 @@ class ScheduleService extends BaseService
 
     public function listComplain()
     {
-        return Schedule::where('complain', StatusConstant::COMPLAIN)->get();
+        $this->preGetAll();
+        $data = Schedule::where('complain', StatusConstant::COMPLAIN)->with(['course_student', 'course_planes']);
+
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+
+            $response->map(function ($item) {
+                $name_student ='';
+                $name_stage = '';
+                $name_course = '';
+                if ($item->course_student) {
+                    $name_student = User::where('id', $item->course_student->user_id)->first();
+                    $name_student = $name_student->name ;
+                }
+                $info_course = Stage::where('id', $item->course_planes->stage_id)->with('course')->first();
+                if ($info_course) {
+                    $name_stage = $info_course->name;
+                    $name_course = $info_course->course->name ;
+                }
+                $item['name_student'] = $name_student;
+                $item['name_stage'] =  $name_stage;
+                $item['name_course'] =  $name_course;
+
+                return $item;
+
+            });
+
+            return $response;
+            
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
 
@@ -439,7 +472,7 @@ class ScheduleService extends BaseService
                     // send email pt
                     Mail::to($email_pt)->send(new ScheduleDontComplainPT($name_cousre_plane, $name_pt, $date_complain));
                     // send email custorm
-                    Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+                    Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
 
                     $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
 
@@ -452,7 +485,7 @@ class ScheduleService extends BaseService
                     Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
 
                     // send email custorm
-                    Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+                    Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
 
 
                     $data->update(['status' => StatusConstant::UNFINISHED]);
@@ -472,6 +505,7 @@ class ScheduleService extends BaseService
             }
         }
     }
+
     // từ chối tham gia buổi học
     public function notEngaged($id, object $request)
     {
@@ -535,7 +569,7 @@ class ScheduleService extends BaseService
                 new Exception()
             );
         }
-        if ($request->reason_complain || $request->reason_complain  == "") {
+        if ($request->reason_complain || $request->reason_complain == "") {
             throw new BadRequestException(
                 ['message' => __("Vui lòng nhập lý do bạn khiếu nại buổi học !")],
                 new Exception()
