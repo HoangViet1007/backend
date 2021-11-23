@@ -346,7 +346,6 @@ class ScheduleService extends BaseService
             $data = Schedule::join('course_students', 'schedules.course_student_id', 'course_students.id')
                 ->where('schedules.id', $schedule)
                 ->first();
-                
             return $data->user_id;
         }
     }
@@ -479,7 +478,7 @@ class ScheduleService extends BaseService
          * */
         $user = Auth::user();
         $userId = $user['id'];
-        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+        if (!($userId == $this->checkScheduleCurrentCustomer($id))) {
             throw new BadRequestException(
                 ['message' => __("Lịch học không tồn tại !")],
                 new Exception()
@@ -502,7 +501,7 @@ class ScheduleService extends BaseService
          * */
         $user = Auth::user();
         $userId = $user['id'];
-        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+        if (!($userId == $this->checkScheduleCurrentCustomer($id))) {
             throw new BadRequestException(
                 ['message' => __("Lịch học không tồn tại !")],
                 new Exception()
@@ -535,7 +534,7 @@ class ScheduleService extends BaseService
                 new Exception()
             );
         }
-        if ($request->reason_complain || $request->reason_complain  == "") {
+        if (!$request->reason_complain || $request->reason_complain  == "") {
             throw new BadRequestException(
                 ['message' => __("Vui lòng nhập lý do bạn khiếu nại buổi học !")],
                 new Exception()
@@ -598,6 +597,36 @@ class ScheduleService extends BaseService
         $schedule->update([
             'status' => StatusConstant::COMPLETE,
             'actual_end_time' => date('Y-m-d H:i:s')
+        ]);
+        return $schedule;
+    }
+
+    // upload link record
+    public function updateRecord($id, object $request)
+    {
+        $user = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+        $schedule = Schedule::find($id);
+        if ($schedule->status != StatusConstant::COMPLETE) {
+            throw new BadRequestException(
+                ['message' => __("Buổi học chưa kết thúc !")],
+                new Exception()
+            );
+        }
+        if (!$request->link_record || $request->link_record  == "") {
+            throw new BadRequestException(
+                ['message' => __("Vui lòng nhập link record buổi học !")],
+                new Exception()
+            );
+        }
+        $schedule->update([
+            'link_record' => $request->link_record
         ]);
         return $schedule;
     }
