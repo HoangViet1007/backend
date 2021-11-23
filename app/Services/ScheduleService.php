@@ -442,70 +442,94 @@ class ScheduleService extends BaseService
         $data = Schedule::find($request['schedule_id']);
 
         // info PT
-        $dataCourse = CoursePlanes::where('id', $data['course_plan_id'])->with(['stage'])->first();
+        if($data){
 
-        $dataPt = Stage::where('id', $dataCourse->stage->id)->with('course')->first();
-        // tên giai đoạn
-        $name_cousre_plane = $data->title;
+            $dataCourse = CoursePlanes::where('id', $data['course_plan_id'])->with(['stage'])->first();
 
-        $id_pt = $dataPt->course->created_by;
+            $dataPt = Stage::where('id', $dataCourse->stage->id)->with('course')->first();
+            // tên giai đoạn
+            $name_cousre_plane = $data->title;
 
-        $info_pt = User::where('id', $id_pt)->first();
+            $id_pt = $dataPt->course->created_by;
 
-        $name_pt = $info_pt->name;
-        $email_pt = $info_pt->email;
-        $date_complain = $data->date;
+            $info_pt = User::where('id', $id_pt)->first();
 
-        // info Student
+            $name_pt = $info_pt->name;
+            $email_pt = $info_pt->email;
+            $date_complain = $data->date;
 
-        $dataCustorm = CourseStudent::where('id', $data['course_student_id'])->with(['users'])->first();
+            // info Student
 
-        $email_custorm = $dataCustorm->users->email;
-        $name_custorm = $dataCustorm->users->name;
+            $dataCustorm = CourseStudent::where('id', $data['course_student_id'])->with(['users'])->first();
 
-        if (!empty($request['complain']) && $data) {
+            $email_custorm = $dataCustorm->users->email;
+            $name_custorm = $dataCustorm->users->name;
 
-            switch ($request['complain']) {
-                // complain dont success
-                case 'nocomplain' :
+            if (!empty($request['complain']) && $data) {
 
-                    // send email pt
-                    Mail::to($email_pt)->send(new ScheduleDontComplainPT($name_cousre_plane, $name_pt, $date_complain));
-                    // send email custorm
-                    Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
+                switch ($request['complain']) {
+                    // complain dont success
+                    case 'nocomplain' :
 
-                    $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
-                    return true;
+                        // send email pt
+                        Mail::to($email_pt)->send(new ScheduleDontComplainPT($name_cousre_plane, $name_pt, $date_complain));
+                        // send email custorm
+                        Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
+                        if (Mail::failures()) {
+                            return throw new BadRequestException(
+                                ['message' => __("Gửi email không thành công !")],
+                                new Exception()
+                            );
+                        } else {
+                            $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
+                            return response()->json([
+                                'message' => 'Thành công !'
+                            ], 200);
+                        }
 
-                    break;
 
-                case 'complain' :
+                        break;
 
-                    // send email pt accept complaints
+                    case 'complain' :
 
-
-                    Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
-                    // send email custorm
-                    Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
+                        // send email pt accept complaints
 
 
-                    $data->update(['status' => StatusConstant::UNFINISHED]);
-                    return true;
+                        Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
+                        // send email custorm
+                        Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
 
-                    break;
 
-                case 'send_link_record' :
+                        if (Mail::failures()) {
+                            return throw new BadRequestException(
+                                ['message' => __("Gủi email không thành công !")],
+                                new Exception()
+                            );
+                        } else {
+                            $data->update(['status' => StatusConstant::UNFINISHED]);
+                            return response()->json([
+                                'message' => 'Thành công !'
+                            ], 200);
+                        }
 
-                    $mailPT = Mail::to($email_pt)->send(new SendLinkRecordPT());
+//                case 'send_link_record' :
+//
+//                    $mailPT = Mail::to($email_pt)->send(new SendLinkRecordPT());
+//
+//                    $mailCustorm = Mail::to($email_custorm)->send(new SendLinkRecordCustorm());
+//
+//                    break;
 
-                    $mailCustorm = Mail::to($email_custorm)->send(new SendLinkRecordCustorm());
-
-                    break;
-
-                default :
-                    break;
+                    default :
+                        break;
+                }
             }
+        }else{
+            return response()->json([
+                'message' => 'Đơn khiếu nại không tồn tại !'
+            ], 404);
         }
+
     }
 
     // từ chối tham gia buổi học
