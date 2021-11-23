@@ -151,6 +151,11 @@ class ScheduleController extends Controller
         return response()->json($this->service->endSchedule($id, $request));
     }
 
+    public function updateRecord($id, Request $request): JsonResponse
+    {
+        return response()->json($this->service->updateRecord($id, $request));
+    }
+
     /**
      * Remove the specified resource from storage.
      *
