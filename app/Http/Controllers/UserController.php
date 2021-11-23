@@ -240,7 +240,6 @@ class UserController extends Controller
     }
 
     public function getPassword(Request $request){
-        dd($request->all());
         return response()->json($this->service->getPassword($request));
 
     }
