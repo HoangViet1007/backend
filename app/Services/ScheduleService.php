@@ -475,10 +475,9 @@ class ScheduleService extends BaseService
                         // send email custorm
                         Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
                         if (Mail::failures()) {
-                            return throw new BadRequestException(
-                                ['message' => __("Gửi email không thành công !")],
-                                new Exception()
-                            );
+                            return response()->json([
+                                'message' => 'Gửi email không thành công !'
+                            ], 500);
                         } else {
                             $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
                             return response()->json([
@@ -500,10 +499,9 @@ class ScheduleService extends BaseService
 
 
                         if (Mail::failures()) {
-                            return throw new BadRequestException(
-                                ['message' => __("Gủi email không thành công !")],
-                                new Exception()
-                            );
+                            return response()->json([
+                                'message' => 'Gửi email không thành công !'
+                            ], 500);
                         } else {
                             $data->update(['status' => StatusConstant::UNFINISHED]);
                             return response()->json([
