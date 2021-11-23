@@ -408,28 +408,28 @@ class ScheduleService extends BaseService
             $this->postGetAll($response);
 
             $response->map(function ($item) {
-                $name_student ='';
+                $name_student = '';
                 $name_stage = '';
                 $name_course = '';
                 if ($item->course_student) {
                     $name_student = User::where('id', $item->course_student->user_id)->first();
-                    $name_student = $name_student->name ;
+                    $name_student = $name_student->name;
                 }
                 $info_course = Stage::where('id', $item->course_planes->stage_id)->with('course')->first();
                 if ($info_course) {
                     $name_stage = $info_course->name;
-                    $name_course = $info_course->course->name ;
+                    $name_course = $info_course->course->name;
                 }
                 $item['name_student'] = $name_student;
-                $item['name_stage'] =  $name_stage;
-                $item['name_course'] =  $name_course;
+                $item['name_stage'] = $name_stage;
+                $item['name_course'] = $name_course;
 
                 return $item;
 
             });
 
             return $response;
-            
+
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
@@ -475,6 +475,7 @@ class ScheduleService extends BaseService
                     Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
 
                     $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
+                    return true;
 
                     break;
 
@@ -482,21 +483,22 @@ class ScheduleService extends BaseService
 
                     // send email pt accept complaints
 
-                    Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
 
+                    Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
                     // send email custorm
                     Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
 
 
                     $data->update(['status' => StatusConstant::UNFINISHED]);
+                    return true;
 
                     break;
 
                 case 'send_link_record' :
 
-                    Mail::to($email_pt)->send(new SendLinkRecordPT());
+                    $mailPT = Mail::to($email_pt)->send(new SendLinkRecordPT());
 
-                    Mail::to($email_custorm)->send(new SendLinkRecordCustorm());
+                    $mailCustorm = Mail::to($email_custorm)->send(new SendLinkRecordCustorm());
 
                     break;
 
@@ -635,8 +637,6 @@ class ScheduleService extends BaseService
         ]);
         return $schedule;
     }
-
-
 
 
 }

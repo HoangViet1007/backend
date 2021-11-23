@@ -33,7 +33,6 @@ class CoursePlaneService extends BaseService
             ],
             'content'     => 'required',
             'descreption' => 'required',
-            'video_link'  => 'file|mimes:mp4|max:1048576',
             'stage_id'    => 'required|exists:stages,id',
             'status'      => 'required|in:' . implode(',', $this->status),
             'image'       => 'required',
@@ -46,9 +45,6 @@ class CoursePlaneService extends BaseService
             'name.unique'          => 'Tên kế hoạch khóa học đã tồn tại !',
             'content.required'     => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
-            'video_link.file'      => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
-            'video_link.mimes'     => 'Xin mời bạn nhập video !',
-            'video_link.max'       => 'Video nhập quá dung lượng !',
             'stage_id.required'    => 'Hãy chọn giai đoạn của khóa học  !',
             'stage_id.exists'      => 'Giai đoạn của khóa học không tồn tại !',
             'status.required'      => 'Hãy chọn trạng thái hoạt động !',
@@ -76,7 +72,6 @@ class CoursePlaneService extends BaseService
             ],
             'content'     => 'required',
             'descreption' => 'required',
-            'video_link'  => 'file|mimes:mp4|max:1048576',
             'stage_id'    => 'required|exists:stages,id',
             'status'      => 'required|in:' . implode(',', $this->status),
             'image'       => 'required',
@@ -88,9 +83,6 @@ class CoursePlaneService extends BaseService
             'name.unique'          => 'Tên kế hoạch khóa học đã tồn tại !',
             'content.required'     => 'Hãy nhập mô tả cho kế hoạch khóa học !',
             'descreption.required' => 'Hãy nhập mô tả ngắn cho kế hoạch khóa học !',
-            'video_link.file'      => 'Hãy nhập video phải là một tệp được tải lên thành công. !',
-            'video_link.mimes'     => 'Xin mời bạn nhập video !',
-            'video_link.max'       => 'Video nhập quá dung lượng !',
             'stage_id.required'    => 'Hãy chọn giai đoạn của khóa học  !',
             'stage_id.exists'      => 'Giai đoạn của khóa học không tồn tại !',
             'status.required'      => 'Hãy chọn trạng thái hoạt động !',
@@ -130,18 +122,18 @@ class CoursePlaneService extends BaseService
     }
 
 
-    public function preAdd(object $request)
-    {
-        $url = '';
-        if (!empty($request->file('video_link'))) {
-            $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
-
-            $url = S3Constant::LINK_S3 . $path;
-
-        }
-        $request->video_link = $url;
-        parent::preAdd($request);
-    }
+//    public function preAdd(object $request)
+//    {
+//        $url = '';
+//        if (!empty($request->file('video_link'))) {
+//            $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
+//
+//            $url = S3Constant::LINK_S3 . $path;
+//
+//        }
+//        $request->video_link = $url;
+//        parent::preAdd($request);
+//    }
 
     public function preUpdate($id, $request)
     {
@@ -159,16 +151,16 @@ class CoursePlaneService extends BaseService
                 );
             }
             // update
-            $result = str_replace(env('S3_URL'), '', $item->video_link);
-            Storage::disk('s3')->delete($result);
-            if (!empty($request->file('video_link')) || $request->file('video_link') != "") {
-                $path                = Storage::disk('s3')
-                                              ->put('images/originals', $request->file('video_link'), 'public');
-                $url                 = S3Constant::LINK_S3 . $path;
-                $request->video_link = $url;
-            } else {
-                $request->video_link = $item->video_link;
-            }
+//            $result = str_replace(env('S3_URL'), '', $item->video_link);
+//            Storage::disk('s3')->delete($result);
+//            if (!empty($request->file('video_link')) || $request->file('video_link') != "") {
+//                $path                = Storage::disk('s3')
+//                                              ->put('images/originals', $request->file('video_link'), 'public');
+//                $url                 = S3Constant::LINK_S3 . $path;
+//                $request->video_link = $url;
+//            } else {
+//                $request->video_link = $item->video_link;
+//            }
         }
         parent::preUpdate($id, $request);
 
@@ -200,7 +192,7 @@ class CoursePlaneService extends BaseService
             }
 
             $result = str_replace(S3Constant::LINK_S3, '', $item->video_link);
-            Storage::disk('s3')->delete($result);
+//            Storage::disk('s3')->delete($result);
         }
         parent::preDelete($id);
 
