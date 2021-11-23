@@ -179,6 +179,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::put('complanin/{id}', 'ScheduleController@complanin');
     Route::put('start-schedule/{id}', 'ScheduleController@startSchedule');
     Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
+    Route::put('update-record-schedule/{id}', 'ScheduleController@updateRecord');
 
     Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
     Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
