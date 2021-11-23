@@ -628,10 +628,11 @@ class ScheduleService extends BaseService
                 new Exception()
             );
         }
-
+        $linkRecord = $request->link_record ?? null;
         $schedule = Schedule::find($id);
         $schedule->update([
             'status' => StatusConstant::COMPLETE,
+            'link_record' => $linkRecord,
             'actual_end_time' => date('Y-m-d H:i:s')
         ]);
         return $schedule;
