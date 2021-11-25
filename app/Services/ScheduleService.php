@@ -441,7 +441,7 @@ class ScheduleService extends BaseService
         $data = Schedule::find($request['schedule_id']);
 
         // info PT
-        if($data){
+        if ($data) {
 
             $dataCourse = CoursePlanes::where('id', $data['course_plan_id'])->with(['stage'])->first();
 
@@ -503,7 +503,7 @@ class ScheduleService extends BaseService
                                 'message' => 'Gửi email không thành công !'
                             ], 500);
                         } else {
-                            $data->update(['status' => StatusConstant::UNFINISHED]);
+                            $data->update(['status' => StatusConstant::UNFINISHED, 'complain' => StatusConstant::NOCOMPLAINTS]);
                             return response()->json([
                                 'message' => 'Thành công !'
                             ], 200);
@@ -521,7 +521,7 @@ class ScheduleService extends BaseService
                         break;
                 }
             }
-        }else{
+        } else {
             return response()->json([
                 'message' => 'Đơn khiếu nại không tồn tại !'
             ], 404);
@@ -689,7 +689,6 @@ class ScheduleService extends BaseService
         ]);
         return $schedule;
     }
-
 
 
 }
