@@ -25,6 +25,7 @@ class StatusConstant
     const CANCELEDBYPT = 'CanceledByPt';
     const UNSCHEDULED  = 'Unscheduled';
     const SCHEDULE     = 'Schedule';
+    const REQUESTADMIN = 'RequestAdmin'; // gửi yêu cầu cho admin khi hoàn thành khoá dạy
     const COMPLETE     = 'Complete';
 
     // user_consent in course_student
