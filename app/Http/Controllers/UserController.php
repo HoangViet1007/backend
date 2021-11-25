@@ -183,6 +183,7 @@ class UserController extends Controller
                                         'message' => 'Mật khẩu hoặc tài khoản không chính xác !'
                                     ], 401);
         }
+        // check them role
 
         //create token and refresh token
         $oClient  = OClient::where('password_client', 1)->first();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\BaseService;
 use App\Services\CourseStudentService;
+use http\Env\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -109,6 +110,12 @@ class CourseStudentController extends Controller
     public function ptThough(Request $request, $id): JsonResponse
     {
         return response()->json($this->service->ptThough($request, $id));
+    }
+
+    // gui yeu cau cho admin khi day xong
+    public function adminThrough(Request $request, $id): JsonResponse
+    {
+        return response()->json($this->service->adminThrough($request, $id));
     }
 
     // sent request customer

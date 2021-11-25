@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
-use App\Mail\CancelCourse;
 use App\Models\Bill;
 use App\Models\Course;
 use App\Models\CoursePlanes;
@@ -15,7 +14,6 @@ use App\Models\Stage;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * @Author apple
@@ -270,7 +268,7 @@ class CourseStudentService extends BaseService
             $data     = $this->queryHelper->buildQuery($this->model)
                                           ->with(['courses.teacher', 'schedules'])
                                           ->join('courses', 'courses.id', 'course_students.course_id')
-                                          ->join('users','users.id','courses.created_by')
+                                          ->join('users', 'users.id', 'courses.created_by')
                                           ->select('course_students.*')
                                           ->where('course_students.user_id', '=', 3);
             $response = $data->get();
@@ -288,53 +286,114 @@ class CourseStudentService extends BaseService
     public function ptThough(object $request, $id)
     {
         $course_student = CourseStudent::find($id);
-        $user_id        = $course_student->user_id;
-        $course_id      = $course_student->course_id;
 
+        if ($course_student) {
+            $user_id   = $course_student->user_id;
+            $course_id = $course_student->course_id;
 
-        // status phải  = Unschedule
-        if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
-            throw new BadRequestException(
-                ['message' => __("Không thể duyệt khoá học trong khi đang không ở trạng thái chờ lên lịch !")],
-                new Exception()
-            );
+            // check xem co phai course cua no ko
+            $userIDCourse = Course::find($course_id)->created_by;
+            $userLogin    = Auth::user();
+            if (!($userLogin['id'] == $userIDCourse)) {
+                throw new BadRequestException(
+                    ['message' => __("Đăng ký không tồn tại !")],
+                    new Exception()
+                );
+            }
+
+            // status phải  = Unschedule
+            if (!($course_student->status == StatusConstant::UNSCHEDULED)) {
+                throw new BadRequestException(
+                    ['message' => __("Không thể duyệt khoá học trong khi đang không ở trạng thái chờ lên lịch !")],
+                    new Exception()
+                );
+            }
+
+            // check duyet tuan tu
+            if ($this->getCourseStudentOldEst($id) == false) {
+                throw new BadRequestException(
+                    ['message' => __("Không thể duyệt đăng ký này, hãy duyệt một cách tuần tự !")],
+                    new Exception()
+                );
+            }
+
+            /*
+             * khi duyêt khoa hoc để học viên bắt đầu học thì cần phải thêm đủ lịch cho những buổi học off
+             * check tổng số buổi học off = tổng số lịch học đã lên  (ví dụ có 5 buổi off = 5 lịch
+            * */
+            if (!($this->getCountScheduleForCourseStudent($id) == $this->getCountCoursePlanOff($course_id))) {
+                throw new BadRequestException(
+                    ['message' => __("Không thể duyệt khoá học, hãy thêm lịch cho đủ số buổi học trực tuyến !")],
+                    new Exception()
+                );
+            }
+
+            /* check duyet khoa hoc khi co su dong ý cu nguoi dung
+             * user_consent = UserAgrees
+             * */
+            if (!($course_student->user_consent == StatusConstant::USERAGREES)) {
+                throw new BadRequestException(
+                    ['message' => __("Không thể duyệt khoá học khi chưa có sự đồng ý từ phía người dùng !")],
+                    new Exception()
+                );
+            }
+            // update duyet dang ki
+            $course_student->update(['status' => StatusConstant::SCHEDULE]);
+
+            // gửi mail
+
+            return true;
         }
 
-        // check duyet tuan tu
-        if ($this->getCourseStudentOldEst($id) == false) {
-            throw new BadRequestException(
-                ['message' => __("Không thể duyệt đăng ký này, hãy duyệt một cách tuần tự !")],
-                new Exception()
-            );
-        }
-
-        /*
-         * khi duyêt khoa hoc để học viên bắt đầu học thì cần phải thêm đủ lịch cho những buổi học off
-         * check tổng số buổi học off = tổng số lịch học đã lên  (ví dụ có 5 buổi off = 5 lịch
-        * */
-        if (!($this->getCountScheduleForCourseStudent($id) == $this->getCountCoursePlanOff($course_id))) {
-            throw new BadRequestException(
-                ['message' => __("Không thể duyệt khoá học, hãy thêm lịch cho đủ số buổi học trực tuyến !")],
-                new Exception()
-            );
-        }
-
-        /* check duyet khoa hoc khi co su dong ý cu nguoi dung
-         * user_consent = UserAgrees
-         * */
-        if (!($course_student->user_consent == StatusConstant::USERAGREES)) {
-            throw new BadRequestException(
-                ['message' => __("Không thể duyệt khoá học khi chưa có sự đồng ý từ phía người dùng !")],
-                new Exception()
-            );
-        }
-        // update duyet dang ki
-        $course_student->update(['status' => StatusConstant::SCHEDULE]);
-        // gửi mail
-
-
-        return true;
+        throw new BadRequestException(
+            ['message' => __("Duyệt đăng ký khoá học không thành công !")],
+            new Exception()
+        );
     }
+
+    // admin through
+    public function adminThrough(object $request, $id)
+    {
+        $course_student = CourseStudent::find($id);
+        if ($course_student) {
+            $course_id = $course_student->course_id;
+
+            // check xem co phai course cua no ko
+            $userIDCourse = Course::find($course_id)->created_by;
+            $userLogin    = Auth::user();
+            if (!($userLogin['id'] == $userIDCourse)) {
+                throw new BadRequestException(
+                    ['message' => __("Gửi yêu cầu cho admin không thành công !")],
+                    new Exception()
+                );
+            }
+
+            // status phải  = Unschedule
+            if (!($course_student->status == StatusConstant::SCHEDULE)) {
+                throw new BadRequestException(
+                    ['message' => __("Không thể gửi yêu cầu duyệt trong khi không ở trạng thái đang học !")],
+                    new Exception()
+                );
+            }
+
+            // check xem dang ki nay dã du so buoi hoc thanh cong ma o co khieu lai
+            if (!($this->getCountScheduleComplete($id) == $this->getCountCoursePlanOff($course_id))) {
+                throw new BadRequestException(
+                    ['message' => __("Không thể gửi yêu cầu khi có sự khiếu nại của người dùng !")],
+                    new Exception()
+                );
+            }
+            // update course_student
+            $course_student->update(['status' => StatusConstant::REQUESTADMIN]);
+            return true ;
+        }
+        throw new BadRequestException(
+            ['message' => __("Gửi yêu cầu cho admin không thành công !")],
+            new Exception()
+        );
+    }
+
+
 
     // lấy za số lịch xếp cho những buổi học off của khoa hoc của customer
     /* xem lại -> dem schedule thông qua course_student_id -> where nó xong count
@@ -356,6 +415,15 @@ class CourseStudentService extends BaseService
     {
         $schedule = Schedule::where('course_student_id', $course_student_id)->count();
 
+        return $schedule;
+    }
+
+    public function getCountScheduleComplete($course_student_id)
+    {
+        $schedule = Schedule::where('course_student_id', $course_student_id)
+                            ->where('status', StatusConstant::COMPLETE)
+                            ->where('complain',StatusConstant::NOCOMPLAINTS)
+                            ->count();
         return $schedule;
     }
 
