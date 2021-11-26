@@ -331,7 +331,7 @@ class CourseStudentService extends BaseService
             /* check duyet khoa hoc khi co su dong ý cu nguoi dung
              * user_consent = UserAgrees
              * */
-            if (!($course_student->user_consent == StatusConstant::USERAGREES)) {
+            if ($course_student->user_consent != StatusConstant::USERAGREES) {
                 throw new BadRequestException(
                     ['message' => __("Không thể duyệt khoá học khi chưa có sự đồng ý từ phía người dùng !")],
                     new Exception()
@@ -342,7 +342,7 @@ class CourseStudentService extends BaseService
 
             // gửi mail
 
-            return true;
+            return $course_student;
         }
 
         throw new BadRequestException(
@@ -369,7 +369,7 @@ class CourseStudentService extends BaseService
             }
 
             // status phải  = Unschedule
-            if (!($course_student->status == StatusConstant::SCHEDULE)) {
+            if ($course_student->status != StatusConstant::SCHEDULE) {
                 throw new BadRequestException(
                     ['message' => __("Không thể gửi yêu cầu duyệt trong khi không ở trạng thái đang học !")],
                     new Exception()
@@ -385,7 +385,7 @@ class CourseStudentService extends BaseService
             }
             // update course_student
             $course_student->update(['status' => StatusConstant::REQUESTADMIN]);
-            return true ;
+            return $course_student ;
         }
         throw new BadRequestException(
             ['message' => __("Gửi yêu cầu cho admin không thành công !")],
