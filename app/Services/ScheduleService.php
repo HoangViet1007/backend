@@ -570,7 +570,7 @@ class ScheduleService extends BaseService
                     }
                     else {
 
-                        $data->update(['check_link_record' => StatusConstant::SENT, 'date_send_link_record' => Carbon::now()->addDay()]);
+                        $data->update(['check_link_record' => StatusConstant::SENTSUCCESS, 'date_send_link_record' => Carbon::now()->addDay()]);
                         return true;
                     }
 

@@ -7,31 +7,31 @@ namespace App\Constants;
  */
 class StatusConstant
 {
-    const ACTIVE    = 'Active';
-    const INACTIVE  = 'Inactive';
-    const PROCESS   = 'Process';
+    const ACTIVE = 'Active';
+    const INACTIVE = 'Inactive';
+    const PROCESS = 'Process';
     const PROCESSED = 'Processed';
 
     // status course
-    const PENDING   = 'Pending';
+    const PENDING = 'Pending';
     const HAPPENING = 'Happening';
-    const PAUSE     = 'Pause';
+    const PAUSE = 'Pause';
 
     // gửi yêu cầu
     const REQUEST = 'Request';
 
     // course_student
-    const CANCELED     = 'Canceled';
+    const CANCELED = 'Canceled';
     const CANCELEDBYPT = 'CanceledByPt';
-    const UNSCHEDULED  = 'Unscheduled';
-    const SCHEDULE     = 'Schedule';
+    const UNSCHEDULED = 'Unscheduled';
+    const SCHEDULE = 'Schedule';
     const REQUESTADMIN = 'RequestAdmin'; // gửi yêu cầu cho admin khi hoàn thành khoá dạy
-    const COMPLETE     = 'Complete';
+    const COMPLETE = 'Complete';
 
     // user_consent in course_student
-    const UNSENT        = 'Unsent'; // chua gui yeu cau cho nguoi dung
-    const SENT          = 'Sent'; // da gui yeu cau cho nguoi dung
-    const USERAGREES    = 'UserAgrees'; // nguoi dung dong y
+    const UNSENT = 'Unsent'; // chua gui yeu cau cho nguoi dung
+    const SENT = 'Sent'; // da gui yeu cau cho nguoi dung
+    const USERAGREES = 'UserAgrees'; // nguoi dung dong y
     const USERDISAGREES = 'UserDisAgrees'; // nguoi dung khong dong y
 
     // status schedule hoan thanh và chua hoan thanh (complete)
@@ -48,12 +48,14 @@ class StatusConstant
 
     // payments
     const RECHARGE = 'Rechage'; // nạp tiền
-    const COURSEPAYMENT      = 'CoursePayment'; // thanh toán khóa học
+    const COURSEPAYMENT = 'CoursePayment'; // thanh toán khóa học
 
     // bills
     const WALLET = 'Wallet'; // mua khoa hoc bang vi
     const DIRECT = 'Direct'; // mua khoa hoc thanh toan truc tiep bang vnpay
-
+// trạng thái check_link_record
+    const SENTSUCCESS = 0;
+    const SENTFALSE = 1;
     const All
         = [
             self::ACTIVE,
