@@ -32,7 +32,10 @@ class ScheduleCourse extends Mailable
     // link room
     protected $link_room;
 
-    public function __construct($name_student,$date_study, $name_couser, $time_hour, $name_pt, $phone_pt,  $link_room)
+// lịch học trong ngày
+    protected $arr_schedule;
+
+    public function __construct($name_student, $date_study, $name_couser, $time_hour, $name_pt, $phone_pt, $link_room, $arr_schedule)
     {
         $this->name_student = $name_student;
         $this->date_study = $date_study;
@@ -41,6 +44,7 @@ class ScheduleCourse extends Mailable
         $this->name_pt = $name_pt;
         $this->phone_pt = $phone_pt;
         $this->link_room = $link_room;
+        $this->arr_schedule = $arr_schedule;
     }
 
     /**
@@ -59,7 +63,8 @@ class ScheduleCourse extends Mailable
                 'name_pt' => $this->name_pt,
                 'phone_pt' => $this->phone_pt,
                 'date_study' => $this->date_study,
-                'link_room' => $this->link_room
+                'link_room' => $this->link_room,
+                'arr_schedule' => $this->arr_schedule
             ]);
     }
 }

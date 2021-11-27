@@ -7,11 +7,16 @@
     <title>Lịch khóa học</title>
 </head>
 <body><br><br>
-Dear {{$studentName}} !<br><br>
-Hôm nay ngày {{$time_study}}. Bạn có khóa học {{$name_couser}} vào lúc {{$time_hour}}. <br>
-Tôi rất xin lỗi vì hôm nay tôi bận không thể dạy học được cho bạn.
-Tôi sẽ sớm xếp lịch học bù cho bạn vào ngày gần nhất <br>
+Dear {{$name_student}} !<br><br>
+<p>Đơn khiếu nại khóa học {{$name_cousre_plane}} vào ngày {{$date_complain}} do
+    {{$name_pt}} dạy hiện tại chưa đủ bằng chứng để chúng tôi của thể phân xử chính xác nhất.
+Vì vậy bạn cần thêm link record vào đơn khiếu nại để chúng tôi có thể xác định chính xác nhất.
+    Nếu tong vòng 24h bạn không đưa ra bằng chứng cho chúng tôi,
+    chúng tôi sẽ hủy đơn khiếu nại của bạn.</p>
 <br>
-Tôi xin chân thành cảm ơn!
+<p>Chân thành cảm ơn!</p>
+
+<i>Mọi thắc mắc về buổi học quý khách vui lòng liên hệ đến 0828890896 ! Một lần nữa cảm ơn quý khách
+    đã tin tưởng website chúng tôi !</i>
 </body>
 </html>
