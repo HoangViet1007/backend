@@ -474,7 +474,7 @@ class ScheduleService extends BaseService
 
                 $item['name_student'] = isset($item->course_student->users->name) ? $item->course_student->users->name : '';
                 $item['name_stage'] = isset($item->course_planes->stage->name) ? $item->course_planes->stage->name : '';
-                $item['name_course'] = isset($item->course_planes->stage->course->teacher->name) ?? '';
+                $item['name_course'] = isset($item->course_planes->stage->course->teacher->name) ? $item->course_planes->stage->course->teacher->name : '';
 
                 return $item;
 
@@ -538,8 +538,6 @@ class ScheduleService extends BaseService
                         }
 
 
-                        break;
-
                     case 'complain' :
 
                         // send email pt accept complaints
@@ -562,16 +560,19 @@ class ScheduleService extends BaseService
 
                 case 'send_link_record' :
 
-                    Mail::to('ngohongnguyen016774@gmail.com')->send(new SendLinkRecordCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+                    Mail::to($email_custorm)->send(new SendLinkRecordCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+
                     if (Mail::failures()) {
                         throw new BadRequestException(
                             ['message' => __("Gửi email không thành công !")],
                             new Exception()
                         );
-                    } else {
+                    }
+                    else {
                         $data->update(['status' => StatusConstant::UNFINISHED, 'complain' => StatusConstant::NOCOMPLAINTS]);
                         return true;
                     }
+
                     default :
                         break;
                 }
