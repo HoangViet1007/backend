@@ -474,7 +474,7 @@ class ScheduleService extends BaseService
 
                 $item['name_student'] = isset($item->course_student->users->name) ? $item->course_student->users->name : '';
                 $item['name_stage'] = isset($item->course_planes->stage->name) ? $item->course_planes->stage->name : '';
-                $item['name_course'] = isset($item->course_planes->stage->course->teacher->name) ? $item->course_planes->stage->course->teacher->name : '';
+                $item['name_course'] = isset($item->course_planes->stage->course->name) ? $item->course_planes->stage->course->name : '';
 
                 return $item;
 
@@ -570,7 +570,7 @@ class ScheduleService extends BaseService
                     }
                     else {
 
-                        $data->update(['check_link_record' => StatusConstant::SENT, 'date_send_link_record' => Carbon::now()->addDay()]);
+                        $data->update(['check_link_record' => StatusConstant::SENTSUCCESS, 'date_send_link_record' => Carbon::now()->addDay()]);
                         return true;
                     }
 
