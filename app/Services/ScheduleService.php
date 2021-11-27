@@ -474,7 +474,7 @@ class ScheduleService extends BaseService
 
                 $item['name_student'] = isset($item->course_student->users->name) ? $item->course_student->users->name : '';
                 $item['name_stage'] = isset($item->course_planes->stage->name) ? $item->course_planes->stage->name : '';
-                $item['name_course'] = isset($item->course_planes->stage->course->teacher->name) ?? '';
+                $item['name_course'] = isset($item->course_planes->stage->course->teacher->name) ? $item->course_planes->stage->course->teacher->name : '';
 
                 return $item;
 
@@ -533,12 +533,10 @@ class ScheduleService extends BaseService
                                 new Exception()
                             );
                         } else {
-                            $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
+                            $data->update(['complain' => StatusConstant::NOCOMPLAINTS,'check_link_record' => null, 'date_send_link_record' => null]);
                             return true;
                         }
 
-
-                        break;
 
                     case 'complain' :
 
@@ -563,15 +561,19 @@ class ScheduleService extends BaseService
                 case 'send_link_record' :
 
                     Mail::to('ngohongnguyen016774@gmail.com')->send(new SendLinkRecordCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+
                     if (Mail::failures()) {
                         throw new BadRequestException(
                             ['message' => __("Gửi email không thành công !")],
                             new Exception()
                         );
-                    } else {
-                        $data->update(['status' => StatusConstant::UNFINISHED, 'complain' => StatusConstant::NOCOMPLAINTS]);
+                    }
+                    else {
+
+                        $data->update(['check_link_record' => StatusConstant::SENT, 'date_send_link_record' => Carbon::now()->addDay()]);
                         return true;
                     }
+
                     default :
                         break;
                 }
