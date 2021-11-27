@@ -474,7 +474,7 @@ class ScheduleService extends BaseService
 
                 $item['name_student'] = isset($item->course_student->users->name) ? $item->course_student->users->name : '';
                 $item['name_stage'] = isset($item->course_planes->stage->name) ? $item->course_planes->stage->name : '';
-                $item['name_course'] = isset($item->course_planes->stage->course->teacher->name) ? $item->course_planes->stage->course->teacher->name : '';
+                $item['name_course'] = isset($item->course_planes->stage->course->name) ? $item->course_planes->stage->course->name : '';
 
                 return $item;
 
