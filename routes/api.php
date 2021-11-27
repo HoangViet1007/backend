@@ -62,6 +62,14 @@ Route::get('/check-add-user-verify' ,'EmailVerificationController@addUserVerify'
 
 Route::post('/get-password','UserController@getPassword');
 
+
+// get schedule PT and Custorm
+
+Route::get('/get-schedule','ScheduleController@scheduleCustormAndPT');
+Route::get('/get-schedules','ScheduleController@getCalenderCustomer');
+
+
+
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
     Route::post('user_pt', 'UserController@addUserHasRolePt');

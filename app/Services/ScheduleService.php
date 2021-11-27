@@ -13,11 +13,13 @@ use App\Mail\Schedule\ScheduleDontComplainCustorm;
 use App\Mail\Schedule\ScheduleDontComplainPT;
 use App\Mail\Schedule\SendLinkRecordCustorm;
 use App\Mail\Schedule\SendLinkRecordPT;
+use App\Mail\ScheduleCourse;
 use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -400,28 +402,17 @@ class ScheduleService extends BaseService
     public function listComplain()
     {
         $this->preGetAll();
-        $data = Schedule::where('complain', StatusConstant::COMPLAIN)->with(['course_student', 'course_planes']);
+        $data = Schedule::where('complain', StatusConstant::COMPLAIN)->with(['course_student.users', 'course_planes.stage.course.teacher']);
 
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
 
             $response->map(function ($item) {
-                $name_student = '';
-                $name_stage = '';
-                $name_course = '';
-                if ($item->course_student) {
-                    $name_student = User::where('id', $item->course_student->user_id)->first();
-                    $name_student = $name_student->name;
-                }
-                $info_course = Stage::where('id', $item->course_planes->stage_id)->with('course')->first();
-                if ($info_course) {
-                    $name_stage = $info_course->name;
-                    $name_course = $info_course->course->name;
-                }
-                $item['name_student'] = $name_student;
-                $item['name_stage'] = $name_stage;
-                $item['name_course'] = $name_course;
+                
+                $item['name_student'] = isset($item->course_student->users->name) ? $item->course_student->users->name : '';
+                $item['name_stage'] = isset($item->course_planes->stage->name) ? $item->course_planes->stage->name : '';
+                $item['name_course'] = isset($item->course_planes->stage->course->teacher->name) ?? '';
 
                 return $item;
 
@@ -475,14 +466,13 @@ class ScheduleService extends BaseService
                         // send email custorm
                         Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
                         if (Mail::failures()) {
-                            return response()->json([
-                                'message' => 'Gửi email không thành công !'
-                            ], 500);
+                            throw new BadRequestException(
+                                ['message' => __("Gửi email không thành công !")],
+                                new Exception()
+                            );
                         } else {
                             $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
-                            return response()->json([
-                                'message' => 'Thành công !'
-                            ], 200);
+                            return true;
                         }
 
 
@@ -492,39 +482,44 @@ class ScheduleService extends BaseService
 
                         // send email pt accept complaints
 
-
                         Mail::to($email_pt)->send(new AcceptComlaintPT($name_cousre_plane, $name_pt, $date_complain));
                         // send email custorm
                         Mail::to($email_custorm)->send(new AcceptComlaintCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
 
 
                         if (Mail::failures()) {
-                            return response()->json([
-                                'message' => 'Gửi email không thành công !'
-                            ], 500);
+                            throw new BadRequestException(
+                                ['message' => __("Gửi email không thành công !")],
+                                new Exception()
+                            );
                         } else {
                             $data->update(['status' => StatusConstant::UNFINISHED, 'complain' => StatusConstant::NOCOMPLAINTS]);
-                            return response()->json([
-                                'message' => 'Thành công !'
-                            ], 200);
+                            return true;
+
                         }
 
-//                case 'send_link_record' :
-//
-//                    $mailPT = Mail::to($email_pt)->send(new SendLinkRecordPT());
-//
-//                    $mailCustorm = Mail::to($email_custorm)->send(new SendLinkRecordCustorm());
-//
-//                    break;
+                case 'send_link_record' :
+                    dd(Carbon::now());
 
+                    Mail::to('ngohongnguyen016774@gmail.com')->send(new SendLinkRecordCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+                    if (Mail::failures()) {
+                        throw new BadRequestException(
+                            ['message' => __("Gửi email không thành công !")],
+                            new Exception()
+                        );
+                    } else {
+                        $data->update(['status' => StatusConstant::UNFINISHED, 'complain' => StatusConstant::NOCOMPLAINTS]);
+                        return true;
+                    }
                     default :
                         break;
                 }
             }
         } else {
-            return response()->json([
-                'message' => 'Đơn khiếu nại không tồn tại !'
-            ], 404);
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
         }
 
     }
@@ -689,6 +684,65 @@ class ScheduleService extends BaseService
         ]);
         return $schedule;
     }
+
+    public function scheduleCustormAndPT()
+    {
+        $date = '2021-11-25';
+
+        $schedule = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
+            ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
+            ->leftJoin('courses', 'course_students.course_id', 'courses.id')
+            ->when($date, function ($q) use ($date) {
+                $q->where('schedules.date', $date);
+            })
+            ->where('course_students.status', StatusConstant::SCHEDULE)
+            ->select('schedules.*')
+            ->get();
+
+        $arrInfoTeacher = [];
+        foreach ($schedule as $key => $value) {
+            if (count($arrInfoTeacher) < 1) {
+
+                $arrInfoTeacher[$key]['id'] = $value->course_planes->stage->course->teacher->id;
+                $arrInfoTeacher[$key]['name_pt'] = $value->course_planes->stage->course->teacher->name;
+                $arrInfoTeacher[$key]['email'] = $value->course_planes->stage->course->teacher->email;
+
+                $arrInfoTeacher['infoCourse'][$key] = [
+                    'name' => $value->course_planes->id,
+                ];
+
+            } else {
+                foreach ($arrInfoTeacher as $new_value){
+                    dd($new_value['name_pt']);
+                }
+                if ($arrInfoTeacher['id'] == $value->course_planes->stage->course->teacher->id) {
+                    $arrInfoTeacher['infoCourse'][$key] = [
+                        'name' => $value->course_planes->id,
+                    ];
+                    continue;
+                } else {
+
+
+                    $arrInfoTeacher['id'] = $value->course_planes->stage->course->teacher->id;
+                    $arrInfoTeacher['name_pt'] = $value->course_planes->stage->course->teacher->name;
+                    $arrInfoTeacher['email'] = $value->course_planes->stage->course->teacher->email;
+
+                    $arrInfoTeacher['infoCourse'][$key] = [
+                        'name' => $value->course_planes->id,
+                    ];
+                }
+            }
+
+        }
+
+//        foreach ($arrInfoTeacher as $key => $value) {
+//            if($key === 'email')
+//            Mail::to($key)->send(new ScheduleCourse());
+//        }
+dd($arrInfoTeacher);
+        return $schedule;
+    }
+
 
 
 }

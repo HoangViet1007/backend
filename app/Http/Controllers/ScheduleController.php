@@ -167,4 +167,9 @@ class ScheduleController extends Controller
     {
         return response()->json($this->service->delete($id));
     }
+
+    public function scheduleCustormAndPT(){
+        return response()->json($this->service->scheduleCustormAndPT());
+
+    }
 }
