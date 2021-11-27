@@ -168,7 +168,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
     Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');
     Route::put('pt-through/{id}','CourseStudentController@ptThough');
-    Route::put('admin-through/{id}','CourseStudentController@adminThrough');
+    Route::put('send-admin-through/{id}','CourseStudentController@sendAdminThrough');
     Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
     Route::resource('course_student','CourseStudentController');
 

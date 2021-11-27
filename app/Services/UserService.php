@@ -325,7 +325,7 @@ class UserService extends BaseService
     public function getCurrentUserInformation(object $request): object
     {
         try {
-            $entity = $this->model->with('roles')->findOrFail($request->user()->id);
+            $entity = $this->model->with('roles','accountLevels')->findOrFail($request->user()->id);
 
             return $entity;
         } catch (Exception $e) {
