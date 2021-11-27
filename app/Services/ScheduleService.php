@@ -533,7 +533,7 @@ class ScheduleService extends BaseService
                                 new Exception()
                             );
                         } else {
-                            $data->update(['complain' => StatusConstant::NOCOMPLAINTS]);
+                            $data->update(['complain' => StatusConstant::NOCOMPLAINTS,'check_link_record' => null, 'date_send_link_record' => null]);
                             return true;
                         }
 
@@ -560,7 +560,7 @@ class ScheduleService extends BaseService
 
                 case 'send_link_record' :
 
-                    Mail::to($email_custorm)->send(new SendLinkRecordCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
+                    Mail::to('ngohongnguyen016774@gmail.com')->send(new SendLinkRecordCustorm($name_custorm,$name_cousre_plane, $name_pt, $date_complain));
 
                     if (Mail::failures()) {
                         throw new BadRequestException(
@@ -569,7 +569,8 @@ class ScheduleService extends BaseService
                         );
                     }
                     else {
-                        $data->update(['status' => StatusConstant::UNFINISHED, 'complain' => StatusConstant::NOCOMPLAINTS]);
+
+                        $data->update(['check_link_record' => StatusConstant::SENT, 'date_send_link_record' => Carbon::now()->addDay()]);
                         return true;
                     }
 
