@@ -76,6 +76,11 @@ class ScheduleController extends Controller
         return response()->json($this->service->add($request));
     }
 
+    public function scheduleRepeat(Request $request):JsonResponse
+    {
+        return response()->json($this->service->scheduleRepeat($request));
+    }
+
     /**
      * Display the specified resource.
      *
