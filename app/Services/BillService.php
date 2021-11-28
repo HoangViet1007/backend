@@ -18,7 +18,8 @@ class BillService extends BaseService
         $this->preGetAll();
         $data = $this->queryHelper->buildQuery($this->model)->with('course', 'user')
             ->join('courses', 'courses.id', 'bills.course_id')
-            ->select('bills.*', 'courses.name');
+            ->join('users', 'users.id', 'bills.user_id')
+            ->select('bills.*', 'courses.name', 'users.name as userName');
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);

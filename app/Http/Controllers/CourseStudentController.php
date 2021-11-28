@@ -136,6 +136,21 @@ class CourseStudentController extends Controller
         return response()->json($this->service->userDisAgreesCourseStudent($request,$id));
     }
 
+    public function getCourseStudentRequestAdminForAdmin()
+    {
+        return response()->json($this->service->getCourseStudentRequestAdminForAdmin());
+    }
+
+    public function getCourseStudentRequestAdminForPt()
+    {
+        return response()->json($this->service->getCourseStudentRequestAdminForPt());
+    }
+
+    public function getCourseStudentById($id)
+    {
+        return response()->json($this->service->getCourseStudentById($id));
+    }
+
     /**
      * Remove the specified resource from storage.
      *

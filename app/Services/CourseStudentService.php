@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Mail\CustormCancel;
 use App\Mail\PTCantTeach;
 use App\Mail\PtThough;
@@ -301,6 +302,61 @@ class CourseStudentService extends BaseService
                 ['message' => __("Không tồn tại khoá học !")], new Exception()
             );
         }
+    }
+
+    // lấy danh sách khóa học đã dạy xong và gửi yêu cầu lên admin
+    public function getCourseStudentRequestAdminForAdmin()
+    {
+        try {
+            $data = $this->queryHelper->buildQuery($this->model)
+                ->with(['courses.teacher', 'schedules', 'users'])
+                ->join('courses', 'courses.id', 'course_students.course_id')
+                ->join('users', 'users.id', 'courses.created_by')
+                ->select('course_students.*', 'users.name as userName', 'courses.name as courseName')
+                ->where('course_students.status', '=', StatusConstant::REQUESTADMIN);
+            $response = $data->paginate(QueryHelper::limit());
+            return $response;
+
+        } catch (Exception $exception) {
+            throw new BadRequestException(
+                ['message' => __("Không thành công !")], new Exception()
+            );
+        }
+    }
+
+    // lấy danh sách khóa học đã dạy xong và gửi yêu cầu lên admin ngoài màn PT
+    public function getCourseStudentRequestAdminForPt()
+    {
+        $userId = $this->currentUser()->id ?? null;
+        try {
+            $data = $this->queryHelper->buildQuery($this->model)
+                ->with(['courses.teacher', 'schedules', 'users'])
+                ->join('courses', 'courses.id', 'course_students.course_id')
+                ->join('users', 'users.id', 'courses.created_by')
+                ->select('course_students.*', 'users.name as userName', 'courses.name as courseName')
+                ->where('course_students.status', '=', StatusConstant::REQUESTADMIN)
+                ->where('courses.created_by', '=', $userId);
+            $response = $data->paginate(QueryHelper::limit());
+            return $response;
+
+        } catch (Exception $exception) {
+            throw new BadRequestException(
+                ['message' => __("Không thành công !")], new Exception()
+            );
+        }
+    }
+
+    // lấy 1 course student để in vào hóa đơn thanh toán cho pt theo id truyển lên
+    public function getCourseStudentById($id)
+    {
+        $data = $this->queryHelper->buildQuery($this->model)
+            ->with(['courses.teacher', 'schedules', 'users'])
+            ->join('courses', 'courses.id', 'course_students.course_id')
+            ->join('users', 'users.id', 'courses.created_by')
+            ->select('course_students.*', 'users.name as userName', 'courses.name as courseName')
+            ->where('course_students.id', '=', $id)
+            ->get();
+        return $data;
     }
 
     // duyet dang ki

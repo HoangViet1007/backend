@@ -161,6 +161,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('role','RoleController');
 
     // course student
+    Route::get('get-request-admin-for-pt-by-id/{id}', 'CourseStudentController@getCourseStudentById'); // ở PT
+    Route::get('get-request-admin-for-pt', 'CourseStudentController@getCourseStudentRequestAdminForPt'); // ở PT
+    Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
     Route::get('sent-request-customer/{id}','CourseStudentController@sentRequestCustomer');
     Route::get('user-agrees-course-student/{id}','CourseStudentController@userAgreesCourseStudent');
     Route::get('user-dis-agrees-course-student/{id}','CourseStudentController@userDisAgreesCourseStudent');
@@ -199,8 +202,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('schedule','ScheduleController');
 
     // complain in admin
-
     Route::get('list-complain','ScheduleAdminController@listComplain');
     Route::put('change-complain','ScheduleAdminController@changeComplain');
+
+    // api course student for admin
+    Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
+    Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
 });
 
