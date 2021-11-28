@@ -269,13 +269,6 @@ class CourseService extends BaseService
         if ($this->checkCoursePlanCurrentCourse($course->id) == true) {
             $course->update(['status' => StatusConstant::REQUEST]);
 
-            // // gui email
-            // $teacher = User::find($course->created_by);
-            // $emailTeacher = $teacher->email;
-            // $name_teacher = $teacher->name;
-            // $name_course = $course->name;
-            // Mail::to($emailTeacher)->send(new AdminThough($name_teacher,$name_course));
-
             return true;
         } else {
             throw new BadRequestException(
@@ -543,7 +536,7 @@ class CourseService extends BaseService
         $course->update(['status' => $request->status]);
 
         // gui email
-        if($course->status = StatusConstant::HAPPENNING){
+        if($course->status == StatusConstant::HAPPENNING){
             $teacher = User::find($course->created_by);
             $emailTeacher = $teacher->email;
             $name_teacher = $teacher->name;
