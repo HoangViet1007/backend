@@ -115,7 +115,7 @@ class CourseStudentController extends Controller
     // gui yeu cau cho admin khi day xong
     public function adminThrough(Request $request, $id): JsonResponse
     {
-        return response()->json($this->service->adminThrough($request, $id));
+        return response()->json($this->service->sendAdminThrough($request, $id));
     }
 
     // sent request customer

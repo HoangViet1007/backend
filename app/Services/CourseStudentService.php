@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\SystemException;
+use App\Mail\CustormCancel;
+use App\Mail\PTCantTeach;
+use App\Mail\PtThough;
 use App\Models\Bill;
 use App\Models\Course;
 use App\Models\CoursePlanes;
@@ -14,6 +17,7 @@ use App\Models\Stage;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * @Author apple
@@ -100,10 +104,20 @@ class CourseStudentService extends BaseService
             $courseId     = $courseStudent->course_id;
             $course       = Course::find($courseId);
             $price_course = (int)$course->price * 0.95;
-            $user         = User::find($courseStudent->user_id)->update(['money' => $price_course]);
+            $user         = User::find($courseStudent->user_id);
+            $user->update(['money' => $price_course]);
 
             // gửi email cho người dùng
             // email
+            $teacher      = User::find($course->created_by);
+            $teacherEmail = $teacher->email;
+            $teacher_name = $teacher->name;
+            $student_name = $user->name;
+            $name_course  = $course->name;
+            $created_at   = $courseStudent->created_at;
+            $description  = $request->description;
+            Mail::to($teacherEmail)->send(new CustormCancel($teacher_name, $student_name, $name_course, $created_at,
+                                                            $description));
 
             return CourseStudent::find($id);
         } else {
@@ -178,15 +192,22 @@ class CourseStudentService extends BaseService
             $courseId     = $courseStudent->course_id;
             $course       = Course::find($courseId);
             $price_course = (int)$course->price;
-            $user         = User::find($courseStudent->user_id)->update(['money' => $price_course]);
+            $user         = User::find($courseStudent->user_id);
+            $user->update(['money' => $price_course]);
 
             // gửi email cho người dùng
-            // truyền vào email người nhận , tên học viên , tên khoá học .
+            $emailCustomer = $user->email;
+            $student_name  = $user->name;
+            $time_study    = date('y-m-d');
+            $name_couser   = $course->name;
+            $created_at    = $courseStudent->created_at;
+
+            Mail::to($emailCustomer)->send(new PTCantTeach($student_name, $time_study, $name_couser, $created_at));
 
             return CourseStudent::find($id);
         } else {
             throw new BadRequestException(
-                ['message' => __("Bạn không thể huỷ khoá học !")], new Exception()
+                ['message' => __("Bạn không thể huỷ khoá học khi đang trong trạng thái đang học !")], new Exception()
             );
         }
     }
@@ -270,7 +291,7 @@ class CourseStudentService extends BaseService
                                           ->join('courses', 'courses.id', 'course_students.course_id')
                                           ->join('users', 'users.id', 'courses.created_by')
                                           ->select('course_students.*')
-                                          ->where('course_students.user_id', '=', 3);
+                                          ->where('course_students.user_id', '=', $user_id['id']);
             $response = $data->get();
 
             return $response;
@@ -341,6 +362,16 @@ class CourseStudentService extends BaseService
             $course_student->update(['status' => StatusConstant::SCHEDULE]);
 
             // gửi mail
+            $customer = User::find($course_student->user_id);
+            $course   = Course::find($course_student->course_id);
+
+            $emailCustomer = $customer->email;
+            $student_name  = $customer->name;
+            $created_at    = $course_student->created_at;
+            $name_course   = $course->name;
+            $teacher_name  = User::find($course->created_by)->name;
+
+            Mail::to($emailCustomer)->send(new PtThough($student_name, $created_at, $teacher_name, $name_course));
 
             return $course_student;
         }
@@ -352,7 +383,7 @@ class CourseStudentService extends BaseService
     }
 
     // admin through
-    public function adminThrough(object $request, $id)
+    public function sendAdminThrough(object $request, $id)
     {
         $course_student = CourseStudent::find($id);
         if ($course_student) {
@@ -385,7 +416,8 @@ class CourseStudentService extends BaseService
             }
             // update course_student
             $course_student->update(['status' => StatusConstant::REQUESTADMIN]);
-            return $course_student ;
+
+            return $course_student;
         }
         throw new BadRequestException(
             ['message' => __("Gửi yêu cầu cho admin không thành công !")],
@@ -422,8 +454,9 @@ class CourseStudentService extends BaseService
     {
         $schedule = Schedule::where('course_student_id', $course_student_id)
                             ->where('status', StatusConstant::COMPLETE)
-                            ->where('complain',StatusConstant::NOCOMPLAINTS)
+                            ->where('complain', StatusConstant::NOCOMPLAINTS)
                             ->count();
+
         return $schedule;
     }
 

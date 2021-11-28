@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -16,24 +15,19 @@ class CustormCancel extends Mailable
      *
      * @return void
      */
-    protected $teach_name;
+    protected $teacher_name;
     protected $student_name;
-    protected $name_couser;
-    protected $time_hour;
-    protected $time_study;
-    protected $reason;
+    protected $name_courser;
+    protected $created_at;
+    protected $description;
 
-    public function __construct($teach_name, $student_name, $time_hour, $time_study, $reason, $name_couser)
+    public function __construct($teacher_name, $student_name, $name_courser, $created_at, $description)
     {
-        $this->teach_name = $teach_name;
+        $this->teacher_name = $teacher_name;
         $this->student_name = $student_name;
-        $this->student_name = $student_name;
-        $this->time_hour = $time_hour;
-        $this->time_study = $time_study;
-        $this->reason = $reason;
-        $this->name_couser = $name_couser;
-
-
+        $this->name_courser = $name_courser;
+        $this->created_at   = $created_at;
+        $this->description  = $description;
     }
 
     /**
@@ -44,15 +38,13 @@ class CustormCancel extends Mailable
     public function build()
     {
         return $this->view('send_email.CustormCancel')
-            ->subject('Mail xin nghỉ học '.$this->name_couser)
-            ->with([
-                'teach_name' => $this->teach_name,
-                'student_name' => $this->student_name,
-                'time_hour' => $this->time_hour,
-                'time_study' => $this->time_study,
-                'reason' => $this->reason,
-                'name_couser' => $this->name_couser,
-
-            ]);
+                    ->subject('Mail huỷ khoá học từ khách hàng')
+                    ->with([
+                               'teacher_name' => $this->teacher_name,
+                               'student_name' => $this->student_name,
+                               'name_courser' => $this->name_courser,
+                               'created_at'   => $this->created_at,
+                               'description'  => $this->description,
+                           ]);
     }
 }

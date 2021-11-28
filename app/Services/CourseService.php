@@ -7,18 +7,22 @@ use App\Exceptions\BadRequestException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
+use App\Mail\AdminThough;
+use App\Mail\PtThough;
 use App\Models\AccountLevel;
 use App\Models\Course;
 use App\Models\CoursePlanes;
 use App\Models\CourseStudent;
 use App\Models\SpecializeDetail;
 use App\Models\Stage;
+use App\Models\User;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 /**
@@ -264,6 +268,13 @@ class CourseService extends BaseService
         }
         if ($this->checkCoursePlanCurrentCourse($course->id) == true) {
             $course->update(['status' => StatusConstant::REQUEST]);
+
+            // // gui email
+            // $teacher = User::find($course->created_by);
+            // $emailTeacher = $teacher->email;
+            // $name_teacher = $teacher->name;
+            // $name_course = $course->name;
+            // Mail::to($emailTeacher)->send(new AdminThough($name_teacher,$name_course));
 
             return true;
         } else {
@@ -529,7 +540,17 @@ class CourseService extends BaseService
                           ]
         );
 
-        return $course->update(['status' => $request->status]);
+        $course->update(['status' => $request->status]);
+
+        // gui email
+        if($course->status = StatusConstant::HAPPENNING){
+            $teacher = User::find($course->created_by);
+            $emailTeacher = $teacher->email;
+            $name_teacher = $teacher->name;
+            $name_course = $course->name;
+            Mail::to($emailTeacher)->send(new AdminThough($name_teacher,$name_course));
+        }
+        return $course;
     }
 
     public function preDelete(int|string $id)
