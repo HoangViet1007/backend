@@ -46,6 +46,7 @@ class UserService extends BaseService
         $specializes = $request['specializes__id__eq'] ?? null;
         $experience = $request['specialize_details__experience__gt'] ?? null;
         $accountLevel = $request['account_levels__id__eq'] ?? null;
+        $role = $request['roles__id__eq'] ?? null;
         $data = $this->queryHelper->buildQuery($this->model)
             ->with(['roles', 'specializeDetails.specialize', 'specializeDetails.certificates', 'accountLevels', 'specializeDetails.courses'])
             ->when($specializes, function ($q) {
@@ -69,6 +70,15 @@ class UserService extends BaseService
                     'specialize_details.specialize_id');
                 $q->leftJoin('account_levels', 'users.account_level_id',
                     'account_levels.id');
+                $q->distinct();
+            })
+            ->when($role, function ($q) {
+                $q->leftJoin('specialize_details', 'users.id',
+                             'specialize_details.user_id');
+                $q->leftJoin('specializes', 'specializes.id',
+                             'specialize_details.specialize_id');
+                $q->leftJoin('model_has_roles','model_has_roles.user_id','users.id');
+                $q->leftJoin('roles','roles.id','model_has_roles.role_id');
                 $q->distinct();
             })
             ->select('users.*');

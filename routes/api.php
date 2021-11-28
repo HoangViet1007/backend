@@ -93,51 +93,66 @@ Route::group(['prefix' => '/'], function () {
     // get all chuyên môn cho list khoá học client
     Route::get('list-specialize-for-client','SpecializeController@getSpecializeForClient');
 
+    // thanh toan
+    Route::post('thanh-toan', 'PaymentController@createPayment');
+    Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
+
 });
 
+// admin
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
-    Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
-
     // setting
     Route::resource('setting', 'SettingController');
 
     // customer_level
     Route::resource('customer_level', 'CustomerLevelController');
 
-    // Certificates of PT and Admin
-    Route::resource('certificates', 'CertificateController');
-
-    Route::get('get-list-certificates-specialize/{id}', 'CertificateController@listCertificatesSpecialize');
     // slide
     Route::resource('slide', 'SlideController');
 
-    // specialize
-    Route::get('specialize/select-option/', 'SpecializeController@getAllUseSelectOption');
-    Route::resource('specialize', 'SpecializeController');
+    // role
+    Route::resource('role','RoleController');
 
     // specialize
+    Route::resource('specialize', 'SpecializeController');
+
+    // account level
+    Route::resource('account-level', 'AccountLevelController');
+
+    // complain in admin
+    Route::get('list-complain','ScheduleAdminController@listComplain');
+    Route::put('change-complain','ScheduleAdminController@changeComplain');
+
+    // bill
+    Route::resource('bill', 'BillController');
+
+    // payment
+    Route::resource('payment', 'PaymentController');
+
+    // user
+    Route::resource('user', 'UserController');
+
+    // list course in admin
+    Route::get('get-course-request','CourseController@getCourseRequest');
+
+    Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
+
+    Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
+
+});
+
+// pt
+Route::group(['prefix' => '/', 'middleware' => ['auth:api','authPt']], function () {
+    // Certificates of PT and Admin
+    Route::get('get-list-certificates-specialize/{id}', 'CertificateController@listCertificatesSpecialize');
+    Route::resource('certificates', 'CertificateController');
+
+    // specialize-detail
     Route::get('specialize-detail/select-option/', 'SpecializeDetailController@getAllUseSelectOption');
     Route::get('specialize-detail/pt', 'SpecializeDetailController@getAllByPt');
     Route::get('specialize-detail/pt/{id}', 'SpecializeDetailController@showByPt');
     Route::delete('specialize-detail/pt/{id}', 'SpecializeDetailController@destroyByPt');
     Route::resource('specialize-detail', 'SpecializeDetailController');
-
-    //user
-    Route::post('update-password','UserController@updatePassword');
-    Route::put('user-edit/{id}', 'UserController@editUser');
-    Route::resource('user', 'UserController');
-
-    // course
-    Route::get('/cancel-request-course/{id}','CourseController@cancelRequestCourse');
-    Route::get('/request-course/{id}','CourseController@requestCourse');
-    Route::get('get-course-request','CourseController@getCourseRequest');
-    Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
-    Route::put('/course/display/{id}','CourseController@updateDisplay');
-    Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
-    Route::get('course/pt', 'CourseController@getCourseCurrentPt');
-    Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');
-    Route::put('course/pt/{id}', 'CourseController@updateCourseForAdmin');
-    Route::resource('course', 'CourseController');
 
     // Stage of PT and Admin
     Route::get('stage-of-course/{id}', 'StageController@listStage');
@@ -153,60 +168,73 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::delete('course_planes/{id}', 'CoursePlansController@deleteCoursePlanes');
     Route::get('detail-course_planes/{id}', 'CoursePlansController@detailCoursePlanes');
 
-    // account level
-    Route::get('account-level/select-option/', 'AccountLevelController@getAllUseSelectOption');
-    Route::resource('account-level', 'AccountLevelController');
-
-    // role
-    Route::resource('role','RoleController');
+    //course
+    Route::get('/cancel-request-course/{id}','CourseController@cancelRequestCourse');
+    Route::get('/request-course/{id}','CourseController@requestCourse');
+    Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
+    Route::put('/course/display/{id}','CourseController@updateDisplay');
+    Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
+    Route::get('course/pt', 'CourseController@getCourseCurrentPt');
+    Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');
+    Route::put('course/pt/{id}', 'CourseController@updateCourseForAdmin');
+    Route::resource('course', 'CourseController');
 
     // course student
     Route::get('get-request-admin-for-pt-by-id/{id}', 'CourseStudentController@getCourseStudentById'); // ở PT
     Route::get('get-request-admin-for-pt', 'CourseStudentController@getCourseStudentRequestAdminForPt'); // ở PT
-    Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
     Route::get('sent-request-customer/{id}','CourseStudentController@sentRequestCustomer');
+    Route::resource('course_student','CourseStudentController');
+    Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
+    Route::put('pt-through/{id}','CourseStudentController@ptThough');
+    Route::put('send-admin-through/{id}','CourseStudentController@sendAdminThrough');
+
+    // schedule
+    Route::resource('schedule','ScheduleController');
+    Route::get('get-calender-work-pt','ScheduleController@getCalenderPt');
+    Route::put('update-record-schedule/{id}', 'ScheduleController@updateRecord');
+    Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
+    Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
+
+    Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
+
+});
+
+// customer
+Route::group(['prefix' => '/', 'middleware' => ['auth:api','authCustomer']], function () {
+    // hoa don
+    Route::get('hoa-don', 'BillController@listBillByCustomer');
+
+    Route::get('khach-hang/payment', 'PaymentController@listPaymentByCustomer');
+
+    // course_student customer
+    Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
+    Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');
     Route::get('user-agrees-course-student/{id}','CourseStudentController@userAgreesCourseStudent');
     Route::get('user-dis-agrees-course-student/{id}','CourseStudentController@userDisAgreesCourseStudent');
     Route::get('get-course_plan-by-course-student/{id}','CourseStudentController@getCoursePlanByCourseStudent');
-    Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
-    Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');
-    Route::put('pt-through/{id}','CourseStudentController@ptThough');
-    Route::put('send-admin-through/{id}','CourseStudentController@sendAdminThrough');
-    Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
-    Route::resource('course_student','CourseStudentController');
 
-    // thanh toan
-    Route::post('thanh-toan', 'PaymentController@createPayment');
-    Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
-    Route::get('khach-hang/payment', 'PaymentController@listPaymentByCustomer');
-    Route::resource('payment', 'PaymentController');
+    //schedule customer
+    Route::get('get-calender-work-customer','ScheduleController@getCalenderCustomer');
+    Route::put('start-schedule/{id}', 'ScheduleController@startSchedule');
+    Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
 
-    // hoa don
-    Route::get('hoa-don', 'BillController@listBillByCustomer');
-    Route::resource('bill', 'BillController');
-
-    //schedule
+    // schedule repeat
     Route::post('schedule-repeat','ScheduleController@scheduleRepeat');
     Route::put('not-engaged/{id}','ScheduleController@notEngaged');
     Route::put('engaged/{id}','ScheduleController@engaged');
     Route::put('complanin/{id}', 'ScheduleController@complanin');
-    Route::put('start-schedule/{id}', 'ScheduleController@startSchedule');
-    Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
-    Route::put('update-record-schedule/{id}', 'ScheduleController@updateRecord');
-
-    Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
-    Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
     Route::get('get-schedule-by-customer/{id}','ScheduleController@getScheduleByCustomer');
-    Route::get('get-calender-work-customer','ScheduleController@getCalenderCustomer');
-    Route::get('get-calender-work-pt','ScheduleController@getCalenderPt');
-    Route::resource('schedule','ScheduleController');
 
-    // complain in admin
-    Route::get('list-complain','ScheduleAdminController@listComplain');
-    Route::put('change-complain','ScheduleAdminController@changeComplain');
+});
 
-    // api course student for admin
-    Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
-    Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
+Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
+    Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
+    //user
+    Route::post('update-password','UserController@updatePassword');// car hai cai deu dung pt vaf cusstomer
+    Route::put('user-edit/{id}', 'UserController@editUser');
+
+    Route::get('account-level/select-option/', 'AccountLevelController@getAllUseSelectOption'); // viet them ow pt
+    Route::get('specialize/select-option/', 'SpecializeController@getAllUseSelectOption'); // viet them owr pt
+
 });
 
