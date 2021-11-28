@@ -10,11 +10,11 @@ class CourseStudent extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table    = 'course_students';
-    protected $guarded  = [];
-    protected $fillable = ['status','user_consent', 'description', 'user_id', 'course_id'];
+    protected $table = 'course_students';
+    protected $guarded = [];
+    protected $fillable = ['status', 'user_consent', 'description', 'user_id', 'course_id'];
 
-        public function users()
+    public function users()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
@@ -26,7 +26,7 @@ class CourseStudent extends Model
 
     public function schedules()
     {
-        return $this->hasMany(Schedule::class,'course_student_id','id');
+        return $this->hasMany(Schedule::class, 'course_student_id', 'id');
     }
 
     // with([course_students.users]) custorm
