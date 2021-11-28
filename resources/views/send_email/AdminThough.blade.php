@@ -18,7 +18,7 @@
                     viên thể hình</p></div>
             <div class="col-md-12">
                 <p style="font-weight: bold;">Xin chào {{ $teacher_name }} !</p>
-                <p>Khoá học {{ $name_course }} của ban đã được duyệt. Chúc bạn có thật nhiều học viên trong thời gian sắp tới.</p>
+                <p>Khoá học : '{{ $name_course }}' của ban đã được duyệt. Chúc bạn có thật nhiều học viên trong thời gian sắp tới.</p>
                 <p>Chân thành cảm ơn bạn đã tin tưởng và sử dụng website của chúng tôi.</p>
                 <i>Mọi thắc mắc về khoá học vui lòng liên hệ đến 0828890896.</i>
             </div>
