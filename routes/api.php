@@ -97,6 +97,9 @@ Route::group(['prefix' => '/'], function () {
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
 
+    // dang ki khoa học course_student
+    Route::post('course_student-post','CourseStudentController@store');
+
 });
 
 // admin
@@ -137,6 +140,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
 
+    // dăng kí khoá học bảo fe call lại
     Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
 
 });
@@ -189,6 +193,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authPt']], function 
     Route::put('send-admin-through/{id}','CourseStudentController@sendAdminThrough');
 
     // schedule
+    Route::post('schedule-repeat','ScheduleController@scheduleRepeat');
     Route::resource('schedule','ScheduleController');
     Route::get('get-calender-work-pt','ScheduleController@getCalenderPt');
     Route::put('update-record-schedule/{id}', 'ScheduleController@updateRecord');
@@ -208,7 +213,10 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authCustomer']], fun
 
     // course_student customer
     Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
-    Route::get('course_student/customer','CourseStudentController@getCourseForCustomer');
+
+    // bảo fe sửa call lại api
+    Route::get('get-course_student/customer','CourseStudentController@getCourseForCustomer');
+
     Route::get('user-agrees-course-student/{id}','CourseStudentController@userAgreesCourseStudent');
     Route::get('user-dis-agrees-course-student/{id}','CourseStudentController@userDisAgreesCourseStudent');
     Route::get('get-course_plan-by-course-student/{id}','CourseStudentController@getCoursePlanByCourseStudent');
@@ -219,7 +227,6 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authCustomer']], fun
     Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
 
     // schedule repeat
-    Route::post('schedule-repeat','ScheduleController@scheduleRepeat');
     Route::put('not-engaged/{id}','ScheduleController@notEngaged');
     Route::put('engaged/{id}','ScheduleController@engaged');
     Route::put('complanin/{id}', 'ScheduleController@complanin');
@@ -237,4 +244,5 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('specialize/select-option/', 'SpecializeController@getAllUseSelectOption'); // viet them owr pt
 
 });
+
 
