@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'name',
             'image',
             'address',
+            'description',
             'phone',
             'status',
             'sex',
@@ -80,7 +81,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function accountLevels()
     {
-        return $this->belongsTo(AccountLevel::class,'account_level_id','id');
+        return $this->belongsTo(AccountLevel::class, 'account_level_id', 'id');
+    }
+
+    public function socials()
+    {
+        return $this->belongsToMany(Social::class,'user_socials','user_id','social_id');
     }
 
 }
