@@ -11,4 +11,9 @@ class Social extends Model
 
     protected $table    = 'socials';
     protected $fillable = ['name', 'display_name'];
+
+    public function userSocials()
+    {
+        return $this->hasMany(UserSocial::class,'social_id','id');
+    }
 }

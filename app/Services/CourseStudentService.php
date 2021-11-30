@@ -132,6 +132,7 @@ class CourseStudentService extends BaseService
     {
         $course_ids = Course::all()->pluck('id')->toArray();
         $user       = User::find(Auth::id());
+
         $this->doValidate(
             $request,
             [
