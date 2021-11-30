@@ -97,9 +97,6 @@ Route::group(['prefix' => '/'], function () {
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
 
-    // dang ki khoa học course_student
-    Route::post('course_student-post','CourseStudentController@store');
-
 });
 
 // admin
@@ -140,7 +137,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
 
-    // dăng kí khoá học bảo fe call lại
     Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
 
 });
@@ -243,6 +239,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('account-level/select-option/', 'AccountLevelController@getAllUseSelectOption'); // viet them ow pt
     Route::get('specialize/select-option/', 'SpecializeController@getAllUseSelectOption'); // viet them owr pt
 
+    // dang ki khoa học course_student // fe call lại
+    Route::post('course_student-post','CourseStudentController@store');
 });
 
 

@@ -11,4 +11,9 @@ class UserSocial extends Model
 
     protected $table    = 'user_socials';
     protected $fillable = ['link', 'user_id', 'social_id'];
+
+    public function socials()
+    {
+        return $this->belongsTo(Social::class,'social_id','id');
+    }
 }
