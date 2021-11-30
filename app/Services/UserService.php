@@ -323,16 +323,24 @@ class UserService extends BaseService
 
     public function postEditUser(int|string $id, object $request, Model $model)
     {
-        if(count($request->social) > 0){
+        if(isset($request->social)){
+            if(count($request->social) > 0){
+                $userSocial = UserSocial::where('user_id',$id);
+                $userSocial->delete();
+                foreach ($request->social as $item){
+                    $data = new UserSocial();
+                    $data->link = $item['link'];
+                    $data->user_id = $id;
+                    $data->social_id = $item['id'];
+                    $data->save();
+                }
+            }else{
+                $userSocial = UserSocial::where('user_id',$id);
+                $userSocial->delete();
+            }
+        }else{
             $userSocial = UserSocial::where('user_id',$id);
             $userSocial->delete();
-            foreach ($request->social as $item){
-                 $data = new UserSocial();
-                 $data->link = $item['link'];
-                 $data->user_id = $id;
-                 $data->social_id = $item['id'];
-                 $data->save();
-            }
         }
     }
 
