@@ -14,6 +14,7 @@
         }
         th,td{
             border:1px solid white;
+            padding:10px;
         }
     </style>
 </head>
@@ -28,7 +29,7 @@
                 thể hình
             </div>
             <div class="col-md-12">
-                <p style="font-weight: bold;">Xin chào {{ $name_pt }} !</p>
+                <p style="font-weight: bold;">Xin chào {{ $name_student }} !</p>
                 <p>Thời khóa biểu</p>
                 <table>
                     <thead>
@@ -37,7 +38,7 @@
                         <th>Giai đoạn</th>
                         <th>Kế hoạch</th>
                         <th>Thời gian học</th>
-                        <th>Tên học sinh</th>
+                        <th>Tên PT</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
                         <th>Link phòng học</th>
@@ -46,14 +47,14 @@
                     <tbody>
                     @foreach($arr_schedule as $value)
                         <tr>
-                        <td>{{$value['name_course']}}</td>
-                        <td>{{$value['name_stage']}}</td>
-                        <td>{{$value['name_course_plane']}}</td>
-                        <td>{{$value['time_start']}} - {{$value['time_end']}}</td>
-                        <td>{{$value['name_student']}}</td>
-                        <td>{{$value['email_student']}}</td>
-                        <td>{{$value['phone_student']}}</td>
-                        <td>{{$value['link_room']}}</td>
+                            <td>{{$value['name_course']}}</td>
+                            <td>{{$value['name_stage']}}</td>
+                            <td>{{$value['name_course_plane']}}</td>
+                            <td>{{$value['time_start']}} - {{$value['time_end']}}</td>
+                            <td>{{$value['name_teacher']}}</td>
+                            <td>{{$value['email_teacher']}}</td>
+                            <td>{{$value['phone_teacher']}}</td>
+                            <td>{{$value['link_room']}}</td>
                         </tr>
                     @endforeach
                     </tbody>

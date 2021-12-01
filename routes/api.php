@@ -101,6 +101,7 @@ Route::group(['prefix' => '/'], function () {
 
 // admin
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
+
     // setting
     Route::resource('setting', 'SettingController');
 
