@@ -241,6 +241,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // dang ki khoa học course_student // fe call lại
     Route::post('course_student-post','CourseStudentController@store');
+
+    // get all social
+    Route::get('get-all-social','SocialController@getAll');
 });
 
 
