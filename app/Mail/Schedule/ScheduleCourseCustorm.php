@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Mail;
+namespace App\Mail\Schedule;
 
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ScheduleCourse extends Mailable
+class ScheduleCourseCustorm extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -17,16 +16,13 @@ class ScheduleCourse extends Mailable
      *
      * @return void
      */
-
-
-    protected $name_pt;
-    // lịch học trong ngày
+    protected $name_student;
     protected $arr_schedule;
-// ngày hiện tại
-protected $date;
-    public function __construct($name_pt, $arr_schedule,$date)
+    protected $date;
+
+    public function __construct($name_student, $arr_schedule, $date)
     {
-        $this->name_pt = $name_pt;
+        $this->name_student = $name_student;
         $this->arr_schedule = $arr_schedule;
         $this->date = $date;
     }
@@ -38,10 +34,10 @@ protected $date;
      */
     public function build()
     {
-        return $this->view('send_email.scheduleCourse')
-            ->subject('Email thông báo lịch dạy học ngày ' . $this->date)
+        return $this->view('Schedule.ScheduleCourseCustorm')
+            ->subject('Thông báo lịch học ngày ' . $this->date)
             ->with([
-                'name_pt' => $this->name_pt,
+                'name_student' => $this->name_student,
                 'arr_schedule' => $this->arr_schedule
             ]);
     }
