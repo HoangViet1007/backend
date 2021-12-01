@@ -174,7 +174,7 @@ class ScheduleController extends Controller
     }
 
     public function scheduleCustormAndPT(){
-        return response()->json($this->service->scheduleCustormAndPT());
+        return response()->json($this->service->updateLevel());
 
     }
 }

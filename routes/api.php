@@ -96,6 +96,7 @@ Route::group(['prefix' => '/'], function () {
 });
 
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
+    // quyền cả pt và custorm dùng được
     Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
 
     // setting
