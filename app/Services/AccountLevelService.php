@@ -99,10 +99,8 @@ class AccountLevelService extends BaseService
 
     public function getAllUseSelectOption()
     {
-        $this->preGetAll();
         $data = $this->queryHelper->buildQuery($this->model)->get();
         try {
-            $this->postGetAll($data);
             return $data;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
