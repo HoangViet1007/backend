@@ -14,13 +14,13 @@
         <p style="text-align: center; color: #fff">Đây là email tự động, quý khách vui lòng không phản hồi luồng
             email này !</p>
         <div class="row" style="background-color: cadetblue;padding: 15px">
-            <div class="col-md-12"><p  style="font-size: 30px; color: #fff; text-align: center">Website thuê huấn luyện viên thể hình</p> </div>
+            <div class="col-md-12"><p style="font-size: 30px; color: #fff; text-align: center">Website thuê huấn luyện
+                    viên thể hình</p></div>
             <div class="col-md-12">
                 <p style="font-weight: bold;">Xin chào {{ $teacher_name }} !</p>
-                <p>Tôi là {{$student_name}} học viên đã đăng ký khoá học '{{$name_courser}}' của bạn vào ngày {{ $created_at }}.</p>
-                <p>Lý do huỷ khoá học : {{ $description }}.</p>
-                <p>Tôi rất xin lỗi vì sự cố này, mong bạn thông cảm.</p>
-                <p>Tôi chân thành cảm ơn!</p>
+                <p>Khoá học : '{{ $name_course }}' của ban đã được duyệt. Chúc bạn có thật nhiều học viên trong thời gian sắp tới.</p>
+                <p>Chân thành cảm ơn bạn đã tin tưởng và sử dụng website của chúng tôi.</p>
+                <i>Mọi thắc mắc về khoá học vui lòng liên hệ đến 0828890896.</i>
             </div>
         </div>
     </div>

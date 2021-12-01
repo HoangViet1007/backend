@@ -17,9 +17,9 @@
             <div class="col-md-12"><p style="font-size: 30px; color: #fff; text-align: center">Website thuê huấn luyện
                     viên thể hình</p></div>
             <div class="col-md-12">
-                <p style="font-weight: bold;">Xin chào {{ $studentName }} !</p>
-                <p>Hôm nay ngày {{$time_study}}. Bạn có khóa học {{$name_couser}} đăng ký vào ngày {{$created_at}}.</p>
-                <p>Tôi rất xin lỗi vì vấn đề thời gian nên không thể dạy cho bạn khoá học này. Tiền đăng ký khoá học sẽ dược hoàn trả 100% vào tài khoản.</p>
+                <p style="font-weight: bold;">Xin chào {{ $student_name }} !</p>
+                <p>Bạn có khóa học '{{$name_course}}' đăng ký vào ngày {{ $created_at }}.</p>
+                <p>Khoá học của ban đã được PT : '{{ $teacher_name }}' duyệt . Hãy truy cập website để xem lịch học cụ thể nha.</p>
                 <p>Chân thành cảm ơn bạn đã tin tưởng và sử dụng website của chúng tôi.</p>
                 <i>Mọi thắc mắc về khoá học vui lòng liên hệ đến 0828890896.</i>
             </div>

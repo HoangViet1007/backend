@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -19,13 +18,14 @@ class PTCantTeach extends Mailable
     protected $student_name;
     protected $time_study;
     protected $name_couser;
-    protected $time_hour;
-    public function __construct($student_name, $time_study, $name_couser, $time_hour)
+    protected $created_at;
+
+    public function __construct($student_name, $time_study, $name_couser, $created_at)
     {
-        $this->student_name =$student_name;
-        $this->time_study =$time_study;
-        $this->name_couser =$name_couser;
-        $this->time_hour =$time_hour;
+        $this->student_name = $student_name;
+        $this->time_study   = $time_study;
+        $this->name_couser  = $name_couser;
+        $this->created_at    = $created_at;
     }
 
     /**
@@ -36,13 +36,13 @@ class PTCantTeach extends Mailable
     public function build()
     {
         return $this->view('send_email.ptCantTeach')
-            ->subject('PT không thể dạy ')
-            ->with([
-                'studentName' => $this->student_name,
-                'time_study' => $this->time_study,
-                'name_couser' => $this->name_couser,
-                'time_hour' => $this->time_hour,
-            ]);
+                    ->subject('Thư huỷ khoá học từ phía PT')
+                    ->with([
+                               'studentName' => $this->student_name,
+                               'time_study'  => $this->time_study,
+                               'name_couser' => $this->name_couser,
+                               'created_at'   => $this->created_at,
+                           ]);
 
     }
 }
