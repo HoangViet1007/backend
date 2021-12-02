@@ -133,6 +133,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // user
     Route::resource('user', 'UserController');
 
+
     // list course in admin
     Route::get('get-course-request','CourseController@getCourseRequest');
 
@@ -237,8 +238,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::post('update-password','UserController@updatePassword');// car hai cai deu dung pt vaf cusstomer
     Route::put('user-edit/{id}', 'UserController@editUser');
 
-    Route::get('account-level/select-option/', 'AccountLevelController@getAllUseSelectOption'); // viet them ow pt
-    Route::get('specialize/select-option/', 'SpecializeController@getAllUseSelectOption'); // viet them owr pt
+    Route::get('account-level-select-option/', 'AccountLevelController@getAllUseSelectOption'); // viet them ow pt
+    Route::get('specialize-select-option/', 'SpecializeController@getAllUseSelectOption'); // viet them owr pt
 
     // dang ki khoa học course_student // fe call lại
     Route::post('course_student-post','CourseStudentController@store');
@@ -249,6 +250,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // add comment
     Route::post('add-comment','CommentController@addComment');
 
+    // permission
+    Route::post('permission-import','PermissionController@import');
+    Route::get('permission-export','PermissionController@export');
+    Route::resource('permission','PermissionController');
 });
 
 
