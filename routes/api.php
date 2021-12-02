@@ -245,6 +245,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // get all social
     Route::get('get-all-social','SocialController@getAll');
+
+    // add comment
+    Route::post('add-comment','CommentController@addComment');
+
 });
 
 

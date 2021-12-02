@@ -29,6 +29,4 @@ class CourseStudent extends Model
         return $this->hasMany(Schedule::class, 'course_student_id', 'id');
     }
 
-    // with([course_students.users]) custorm
-    // course_student.courses.teach
 }

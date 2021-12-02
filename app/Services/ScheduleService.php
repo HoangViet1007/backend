@@ -755,7 +755,7 @@ class ScheduleService extends BaseService
     public function schedulePT()
     {
 
-        $date = '2021-11-28';
+        $date = Carbon::now();
 
         $schedule = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
             ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
@@ -817,7 +817,7 @@ class ScheduleService extends BaseService
 
     public function scheduleCustorm()
     {
-        $date = '2021-11-28';
+        $date = Carbon::now();
 
         $schedule = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
             ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
