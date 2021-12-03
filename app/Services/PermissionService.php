@@ -1,8 +1,10 @@
 <?php
 namespace App\Services;
 
+use App\Exceptions\SystemException;
+use App\Helpers\QueryHelper;
 use App\Models\Permission;
-use Illuminate\Database\Eloquent\Model;
+use Exception;
 
 class PermissionService extends BaseService
 {
@@ -16,13 +18,26 @@ class PermissionService extends BaseService
     {
         $permissions = Permission::all();
 
-        $result      = [];
+        $result = [];
         foreach ($permissions as $permission) {
             $arrData               = explode(':', $permission['name']);
             $result[$arrData[0]][] = ['id' => $permission['id'], 'name' => $permission->name];
         }
 
         return $result;
+    }
+
+    public function getAllPermission2()
+    {
+        $data = $this->queryHelper->buildQuery($this->model);
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+
+            return $response;
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     public function storeRequestValidate(object $request, array $rules = [], array $messages = []): bool|array
