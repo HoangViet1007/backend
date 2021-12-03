@@ -43,9 +43,9 @@ class RoleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        return response()->json($this->service->add($request));
     }
 
     /**
@@ -55,9 +55,9 @@ class RoleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        //
+        return response()->json($this->service->getById($id));
     }
 
     /**
@@ -80,9 +80,9 @@ class RoleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
-        //
+        return response()->json($this->service->update($id, $request));
     }
 
     /**
@@ -92,8 +92,8 @@ class RoleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
-        //
+        return response()->json($this->service->delete($id));
     }
 }
