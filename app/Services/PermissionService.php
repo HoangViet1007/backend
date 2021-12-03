@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Models\Permission;
+use Illuminate\Database\Eloquent\Model;
 
 class PermissionService extends BaseService
 {
@@ -18,7 +19,7 @@ class PermissionService extends BaseService
         $result      = [];
         foreach ($permissions as $permission) {
             $arrData               = explode(':', $permission['name']);
-            $result[$arrData[0]][] = ['id' => $permission['id'], 'name' => $arrData[1]];
+            $result[$arrData[0]][] = ['id' => $permission['id'], 'name' => $permission->name];
         }
 
         return $result;
