@@ -253,6 +253,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // permission
     Route::post('permission-import','PermissionController@import');
     Route::get('permission-export','PermissionController@export');
+    Route::get('get-all-permission','PermissionController@getAllPermission');
     Route::resource('permission','PermissionController');
 });
 

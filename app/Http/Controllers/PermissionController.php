@@ -29,6 +29,11 @@ class PermissionController extends Controller
         return response()->json($this->service->getAllPermission());
     }
 
+    public function getAllPermission(): JsonResponse
+    {
+        return response()->json($this->service->getAllPermission2());
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -121,6 +126,6 @@ class PermissionController extends Controller
 
     public function export()
     {
-        return Excel::download(new ExportPermission(),'Template_permission.xlsx');
+        return Excel::download(new ExportPermission(), 'Template_permission.xlsx');
     }
 }
