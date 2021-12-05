@@ -59,7 +59,7 @@ class RoleService extends BaseService
             $result = [];
             foreach ($entity->permissions as $permission) {
                 $arrData               = explode(':', $permission['name']);
-                $result[$arrData[0]][] = ['id' => $permission['id'], 'name' => $permission->name];
+                $result[$arrData[0]][] = $permission['id'];
             }
 
             $entity->{'role_has_permissions'} = $result;
