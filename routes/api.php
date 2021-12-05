@@ -68,7 +68,9 @@ Route::post('/get-password','UserController@getPassword');
 Route::get('/get-schedule','ScheduleController@scheduleCustormAndPT');
 Route::get('/get-schedules','ScheduleController@getCalenderCustomer');
 
+// màn hình trang chủ
 
+Route::get('/','ClientController@index');
 
 Route::group(['prefix' => '/'], function () {
     // register customer and pt

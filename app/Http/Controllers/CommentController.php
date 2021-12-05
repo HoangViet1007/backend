@@ -14,6 +14,7 @@ class CommentController extends Controller
     }
 
     public function addComment(Request $request){
+
         return response()->json($this->commentService->add($request));
     }
 }
