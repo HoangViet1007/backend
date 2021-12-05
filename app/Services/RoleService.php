@@ -56,6 +56,14 @@ class RoleService extends BaseService
             $entity = $this->model->with('permissions')->findOrFail($id);
             $entity->{'count_user'} = $this->countUserViaRoleId($id);
 
+            $result = [];
+            foreach ($entity->permissions as $permission) {
+                $arrData               = explode(':', $permission['name']);
+                $result[$arrData[0]][] = ['id' => $permission['id'], 'name' => $permission->name];
+            }
+
+            $entity->{'role_has_permissions'} = $result;
+
             return $entity;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
