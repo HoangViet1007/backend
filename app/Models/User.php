@@ -94,4 +94,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(UserSocial::class,'user_id','id');
     }
 
+    public function modelHasRoles(){
+        return $this->hasMany(ModelHasRole::class,'user_id','id');
+    }
 }
