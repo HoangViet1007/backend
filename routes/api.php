@@ -68,7 +68,9 @@ Route::post('/get-password','UserController@getPassword');
 Route::get('/get-schedule','ScheduleController@scheduleCustormAndPT');
 Route::get('/get-schedules','ScheduleController@getCalenderCustomer');
 
+// màn hình trang chủ
 
+Route::get('/','ClientController@index');
 
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
@@ -246,6 +248,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // get all social
     Route::get('get-all-social','SocialController@getAll');
+
+    // add comment
+    Route::post('add-comment','CommentController@addComment');
 
     // permission
     Route::post('permission-import','PermissionController@import');
