@@ -306,21 +306,6 @@ class CourseService extends BaseService
 
     public function preAdd(object $request)
     {
-        // check cấp độ của user
-        $user             = Auth::user();
-        $account_level_id = $user['account_level_id'];
-
-        if ($account_level_id) {
-            $numberCourseCurrentLevel = AccountLevel::where('id', $account_level_id)->first()->course_number;
-            $numberCourse             = Course::where('created_by', $user['id'])->count();
-            if ($numberCourse > $numberCourseCurrentLevel) {
-                throw new BadRequestException(
-                    ['message' => __("Số khoá học của bạn đã đạt mực giới hạn !")], new Exception()
-                );
-            }
-        }
-
-
         if ($request instanceof Request) {
             $request->merge([
                                 'created_by' => $this->currentUser()->id ?? null,
@@ -391,6 +376,20 @@ class CourseService extends BaseService
             'customer_level_id.exists'   => 'Mức độ không hợp lệ !',
 
         ];
+
+        // check cấp độ của user
+        $user             = Auth::user();
+        $account_level_id = $user['account_level_id'];
+
+        if ($account_level_id) {
+            $numberCourseCurrentLevel = AccountLevel::where('id', $account_level_id)->first()->course_number;
+            $numberCourse             = Course::where('created_by', $user['id'])->count();
+            if ($numberCourse > $numberCourseCurrentLevel) {
+                throw new BadRequestException(
+                    ['message' => __("Số khoá học của bạn đã đạt mực giới hạn !")], new Exception()
+                );
+            }
+        }
 
         return parent::storeRequestValidate($request, $rules, $messages);
     }
