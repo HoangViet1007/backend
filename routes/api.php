@@ -197,6 +197,8 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authPt']], function 
     Route::put('update-record-schedule/{id}', 'ScheduleController@updateRecord');
     Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
     Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
+    Route::put('start-schedule/{id}', 'ScheduleController@startSchedule');
+    Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
 
     Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
 
@@ -221,8 +223,6 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authCustomer']], fun
 
     //schedule customer
     Route::get('get-calender-work-customer','ScheduleController@getCalenderCustomer');
-    Route::put('start-schedule/{id}', 'ScheduleController@startSchedule');
-    Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
 
     // schedule repeat
     Route::put('not-engaged/{id}','ScheduleController@notEngaged');
