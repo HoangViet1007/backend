@@ -25,7 +25,7 @@ class CommetnService extends BaseService
             'id_course' => 'required|exists:courses,id',
             'user_id' => 'required|exists:users,id',
             'content' => 'required|max:255',
-            'number_stars' => 'required|numeric'
+            'number_stars' => 'bail|required|numeric'
         ];
         $messages = [
             'id_course.required' => 'Hãy chọn khóa học !',
@@ -47,7 +47,7 @@ class CommetnService extends BaseService
             $check = CourseStudent::where('user_id', $request->user_id)->where('course_id', $request->id_course)->where('status', StatusConstant::COMPLETE)->first();
             if (!$check) {
                 throw new BadRequestException(
-                    ['message' => __("Bạn không thể đáng giá được khóa học này !")],
+                    ['message' => __("Bạn không thể đánh giá được khóa học này do bạn chưa học khóa học này !")],
                     new Exception()
                 );
             }
