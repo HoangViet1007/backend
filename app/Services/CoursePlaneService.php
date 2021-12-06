@@ -36,7 +36,14 @@ class CoursePlaneService extends BaseService
             'stage_id'    => 'required|exists:stages,id',
             'status'      => 'required|in:' . implode(',', $this->status),
             'image'       => 'required',
-            'type'        => 'required|in:' . implode(',', config('constant.type'))
+            'type'        => 'required|in:' . implode(',', config('constant.type')),
+            'video_link' =>  function ($attribute, $value, $fail) {
+                if (request()->type == config('constant.type.video')) {
+                    if(empty($value)){
+                        return $fail("Hãy nhập video cho khóa học !");
+                    }
+                }
+            },
 
 
         ];
@@ -76,6 +83,13 @@ class CoursePlaneService extends BaseService
             'status'      => 'required|in:' . implode(',', $this->status),
             'image'       => 'required',
             'type'        => 'required|in:' . implode(',', config('constant.type')),
+            'video_link' =>  function ($attribute, $value, $fail) {
+                if (request()->type == config('constant.type.video')) {
+                    if(empty($value)){
+                        return $fail("Hãy nhập video cho khóa học !");
+                    }
+                }
+            },
 
         ];
         $messages = [
