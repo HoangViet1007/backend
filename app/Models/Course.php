@@ -14,8 +14,8 @@ class Course extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table    = 'courses';
-    protected $guarded  = [];
+    protected $table = 'courses';
+    protected $guarded = [];
     protected $fillable = ['name', 'image', 'lessons', 'time_a_lessons', 'price', 'description', 'content', 'status', 'display', 'specialize_detail_id', 'customer_level_id', 'created_by'];
 
     public function customerLevel(): BelongsTo
@@ -35,7 +35,7 @@ class Course extends Model
 
     public function stagesClient(): HasMany
     {
-        return $this->hasMany(Stage::class)->where('status',StatusConstant::ACTIVE);
+        return $this->hasMany(Stage::class)->where('status', StatusConstant::ACTIVE);
     }
 
     public function cousre_planes(): HasManyThrough
@@ -50,12 +50,18 @@ class Course extends Model
         );
     }
 
-    public function teacher(){
-        return $this->belongsTo(User::class,'created_by','id');
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    public function course_students(){
-        return $this->belongsToMany(CourseStudent::class,'course_id','id');
+    public function course_students()
+    {
+        return $this->belongsToMany(CourseStudent::class, 'course_id', 'id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class,'id_course','id');
+    }
 }
