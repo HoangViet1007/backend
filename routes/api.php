@@ -70,7 +70,7 @@ Route::get('/get-schedules','ScheduleController@getCalenderCustomer');
 
 // màn hình trang chủ
 
-Route::get('/','ClientController@index');
+Route::get('/trang-chu','ClientController@index');
 
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
