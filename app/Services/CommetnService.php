@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Helpers\QueryHelper;
 use App\Models\Comment;
 use App\Models\CourseStudent;
 use Illuminate\Validation\Rule;
@@ -53,4 +54,35 @@ class CommetnService extends BaseService
             }
         }
     }
+
+    public function list_comment()
+    {
+        $data = $this->queryHelper->buildQuery($this->model);
+        return $data->paginate(QueryHelper::limit());
+    }
+
+    public function changeStatus($request)
+    {
+        $this->doValidate($request,
+            [
+                'status' => 'in:' . implode(',', $this->status),
+            ],
+            [
+                'status.in' => 'Trạng thái không hợp lệ !',
+            ]
+        );
+        $comment = Comment::find($request->id);
+        if ($comment) {
+            if ($request['status'] == StatusConstant::ACTIVE) {
+                return $comment->update(['status' => StatusConstant::INACTIVE]);
+            } else {
+                return $comment->update(['status' => StatusConstant::ACTIVE]);
+            }
+        } else {
+            throw new BadRequestException(
+                ['message' => __("Không thể thay đổi trạng thái của bình luận !")], new Exception()
+            );
+        }
+    }
+
 }
