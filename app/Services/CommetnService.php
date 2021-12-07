@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Helpers\QueryHelper;
 use App\Models\Comment;
 use App\Models\CourseStudent;
 use Illuminate\Validation\Rule;
@@ -56,7 +57,8 @@ class CommetnService extends BaseService
 
     public function list_comment()
     {
-        return Comment::all();
+        $data = $this->queryHelper->buildQuery($this->model);
+        return $data->paginate(QueryHelper::limit());
     }
 
     public function changeStatus($request)
