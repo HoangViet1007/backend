@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-
 Route::resource('/demo', 'DemoController');
 // login cho tk thuong
 Route::post('/login', 'UserController@login')->name('login');
@@ -31,46 +30,46 @@ Route::get('logout', 'UserController@logout')->name('logout')->middleware('auth:
 Route::get('/redirect', 'GoogleController@redirectToProvider');
 Route::get('/callback', 'GoogleController@handleProviderCallback');
 
-Route::get('/send-email','StageController@sendEmail');
+Route::get('/send-email', 'StageController@sendEmail');
 // gửi email thông báo lịch học
-Route::get('/send-email-student','StageController@sendEmailStudent');
+Route::get('/send-email-student', 'StageController@sendEmailStudent');
 // hủy khóa học
-Route::get('/send-email-cancel-course','StageController@sendEmailCancelStudent');
+Route::get('/send-email-cancel-course', 'StageController@sendEmailCancelStudent');
 // PT không thể dạy khóa học đấy
-Route::get('/send-email-pt-cant-teach','StageController@ptCantTeach');
+Route::get('/send-email-pt-cant-teach', 'StageController@ptCantTeach');
 
 // Học viên xin nghỉ buổi học
-Route::get('/send-email-custorm-dont-study','StageController@CustormCancel');
+Route::get('/send-email-custorm-dont-study', 'StageController@CustormCancel');
 //SuccessfulCourseBrowsing
 // PT duyệt học viên
-Route::get('/send-email-successful-course-browsing','StageController@SuccessfulCourseBrowsing');
+Route::get('/send-email-successful-course-browsing', 'StageController@SuccessfulCourseBrowsing');
 
 // xác thực email CustormCancel
 
-Route::post('/email/verification-notification','EmailVerificationController@sendEmailVerification')
+Route::post('/email/verification-notification', 'EmailVerificationController@sendEmailVerification')
     ->middleware('auth:api')
     ->name('verification.send');
 
 // check verify email
-Route::get('/verify-email/{id}/{hash}','EmailVerificationController@verify')
+Route::get('/verify-email/{id}/{hash}', 'EmailVerificationController@verify')
     ->middleware('auth:api')
     ->name('verification.verify');
 // api clien
 
-Route::get('/check-add-user-verify' ,'EmailVerificationController@addUserVerify');
+Route::get('/check-add-user-verify', 'EmailVerificationController@addUserVerify');
 
 
-Route::post('/get-password','UserController@getPassword');
+Route::post('/get-password', 'UserController@getPassword');
 
 
 // get schedule PT and Custorm
 
-Route::get('/get-schedule','ScheduleController@scheduleCustormAndPT');
-Route::get('/get-schedules','ScheduleController@getCalenderCustomer');
+Route::get('/get-schedule', 'ScheduleController@scheduleCustormAndPT');
+Route::get('/get-schedules', 'ScheduleController@getCalenderCustomer');
 
 // màn hình trang chủ
 
-Route::get('/trang-chu','ClientController@index');
+Route::get('/trang-chu', 'ClientController@index');
 
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
@@ -84,16 +83,16 @@ Route::group(['prefix' => '/'], function () {
     Route::resource('contact', 'ContactController');
 
     // get course noi bat
-    Route::get('list-course','CourseController@getCourse');
+    Route::get('list-course', 'CourseController@getCourse');
 
     // get course by id in client
-    Route::get('course-detail/client/{id}','CourseController@getCourseByIdInClient');
+    Route::get('course-detail/client/{id}', 'CourseController@getCourseByIdInClient');
 
     // get customer level cho list course in client
-    Route::get('list-customer-level','CustomerLevelController@getCustomerLevel');
+    Route::get('list-customer-level', 'CustomerLevelController@getCustomerLevel');
 
     // get all chuyên môn cho list khoá học client
-    Route::get('list-specialize-for-client','SpecializeController@getSpecializeForClient');
+    Route::get('list-specialize-for-client', 'SpecializeController@getSpecializeForClient');
 
     // thanh toan
     Route::post('thanh-toan', 'PaymentController@createPayment');
@@ -114,7 +113,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('slide', 'SlideController');
 
     // role
-    Route::resource('role','RoleController');
+    Route::resource('role', 'RoleController');
 
     // specialize
     Route::resource('specialize', 'SpecializeController');
@@ -123,8 +122,8 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('account-level', 'AccountLevelController');
 
     // complain in admin
-    Route::get('list-complain','ScheduleAdminController@listComplain');
-    Route::put('change-complain','ScheduleAdminController@changeComplain');
+    Route::get('list-complain', 'ScheduleAdminController@listComplain');
+    Route::put('change-complain', 'ScheduleAdminController@changeComplain');
 
     // bill
     Route::resource('bill', 'BillController');
@@ -137,16 +136,19 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
 
     // list course in admin
-    Route::get('get-course-request','CourseController@getCourseRequest');
+    Route::get('get-course-request', 'CourseController@getCourseRequest');
 
     Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
 
     Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
-
+// danh sách comment của PT
+    Route::get('list-comment', 'CommentController@listComment');
+    // thay đổi status của comment
+    Route::post('change-status-comment', 'CommentController@chaneStatus');
 });
 
 // pt
-Route::group(['prefix' => '/', 'middleware' => ['auth:api','authPt']], function () {
+Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt']], function () {
     // Certificates of PT and Admin
     Route::get('get-list-certificates-specialize/{id}', 'CertificateController@listCertificatesSpecialize');
     Route::resource('certificates', 'CertificateController');
@@ -173,10 +175,10 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authPt']], function 
     Route::get('detail-course_planes/{id}', 'CoursePlansController@detailCoursePlanes');
 
     //course
-    Route::get('/cancel-request-course/{id}','CourseController@cancelRequestCourse');
-    Route::get('/request-course/{id}','CourseController@requestCourse');
-    Route::get('get-course-plan-off-by-course/{id}','CourseController@getCoursePlanOff');
-    Route::put('/course/display/{id}','CourseController@updateDisplay');
+    Route::get('/cancel-request-course/{id}', 'CourseController@cancelRequestCourse');
+    Route::get('/request-course/{id}', 'CourseController@requestCourse');
+    Route::get('get-course-plan-off-by-course/{id}', 'CourseController@getCoursePlanOff');
+    Route::put('/course/display/{id}', 'CourseController@updateDisplay');
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
     Route::get('course/pt', 'CourseController@getCourseCurrentPt');
     Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');
@@ -186,19 +188,19 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authPt']], function 
     // course student
     Route::get('get-request-admin-for-pt-by-id/{id}', 'CourseStudentController@getCourseStudentById'); // ở PT
     Route::get('get-request-admin-for-pt', 'CourseStudentController@getCourseStudentRequestAdminForPt'); // ở PT
-    Route::get('sent-request-customer/{id}','CourseStudentController@sentRequestCustomer');
-    Route::resource('course_student','CourseStudentController');
-    Route::post('pt-cancel/{id}','CourseStudentController@ptCancel');
-    Route::put('pt-through/{id}','CourseStudentController@ptThough');
-    Route::put('send-admin-through/{id}','CourseStudentController@sendAdminThrough');
+    Route::get('sent-request-customer/{id}', 'CourseStudentController@sentRequestCustomer');
+    Route::resource('course_student', 'CourseStudentController');
+    Route::post('pt-cancel/{id}', 'CourseStudentController@ptCancel');
+    Route::put('pt-through/{id}', 'CourseStudentController@ptThough');
+    Route::put('send-admin-through/{id}', 'CourseStudentController@sendAdminThrough');
 
     // schedule
-    Route::post('schedule-repeat','ScheduleController@scheduleRepeat');
-    Route::resource('schedule','ScheduleController');
-    Route::get('get-calender-work-pt','ScheduleController@getCalenderPt');
+    Route::post('schedule-repeat', 'ScheduleController@scheduleRepeat');
+    Route::resource('schedule', 'ScheduleController');
+    Route::get('get-calender-work-pt', 'ScheduleController@getCalenderPt');
     Route::put('update-record-schedule/{id}', 'ScheduleController@updateRecord');
-    Route::get('get-schedule-by-course-student/{id}','ScheduleController@getScheduleByCourseStudent');
-    Route::put('update-status-schedule-complete/{id}','ScheduleController@updateStatusScheduleComplete');
+    Route::get('get-schedule-by-course-student/{id}', 'ScheduleController@getScheduleByCourseStudent');
+    Route::put('update-status-schedule-complete/{id}', 'ScheduleController@updateStatusScheduleComplete');
     Route::put('start-schedule/{id}', 'ScheduleController@startSchedule');
     Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
 
@@ -207,56 +209,56 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api','authPt']], function 
 });
 
 // customer
-Route::group(['prefix' => '/', 'middleware' => ['auth:api','authCustomer']], function () {
+Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer']], function () {
     // hoa don
     Route::get('hoa-don', 'BillController@listBillByCustomer');
 
     Route::get('khach-hang/payment', 'PaymentController@listPaymentByCustomer');
 
     // course_student customer
-    Route::post('customer-cancel/{id}','CourseStudentController@customerCancel');
+    Route::post('customer-cancel/{id}', 'CourseStudentController@customerCancel');
 
     // bảo fe sửa call lại api
-    Route::get('get-course_student/customer','CourseStudentController@getCourseForCustomer');
+    Route::get('get-course_student/customer', 'CourseStudentController@getCourseForCustomer');
 
-    Route::get('user-agrees-course-student/{id}','CourseStudentController@userAgreesCourseStudent');
-    Route::get('user-dis-agrees-course-student/{id}','CourseStudentController@userDisAgreesCourseStudent');
-    Route::get('get-course_plan-by-course-student/{id}','CourseStudentController@getCoursePlanByCourseStudent');
+    Route::get('user-agrees-course-student/{id}', 'CourseStudentController@userAgreesCourseStudent');
+    Route::get('user-dis-agrees-course-student/{id}', 'CourseStudentController@userDisAgreesCourseStudent');
+    Route::get('get-course_plan-by-course-student/{id}', 'CourseStudentController@getCoursePlanByCourseStudent');
 
     //schedule customer
-    Route::get('get-calender-work-customer','ScheduleController@getCalenderCustomer');
+    Route::get('get-calender-work-customer', 'ScheduleController@getCalenderCustomer');
 
     // schedule repeat
-    Route::put('not-engaged/{id}','ScheduleController@notEngaged');
-    Route::put('engaged/{id}','ScheduleController@engaged');
+    Route::put('not-engaged/{id}', 'ScheduleController@notEngaged');
+    Route::put('engaged/{id}', 'ScheduleController@engaged');
     Route::put('complanin/{id}', 'ScheduleController@complanin');
-    Route::get('get-schedule-by-customer/{id}','ScheduleController@getScheduleByCustomer');
+    Route::get('get-schedule-by-customer/{id}', 'ScheduleController@getScheduleByCustomer');
 
 });
 
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
     //user
-    Route::post('update-password','UserController@updatePassword');// car hai cai deu dung pt vaf cusstomer
+    Route::post('update-password', 'UserController@updatePassword');// car hai cai deu dung pt vaf cusstomer
     Route::put('user-edit/{id}', 'UserController@editUser');
 
     Route::get('account-level-select-option/', 'AccountLevelController@getAllUseSelectOption'); // viet them ow pt
     Route::get('specialize-select-option/', 'SpecializeController@getAllUseSelectOption'); // viet them owr pt
 
     // dang ki khoa học course_student // fe call lại
-    Route::post('course_student-post','CourseStudentController@store');
+    Route::post('course_student-post', 'CourseStudentController@store');
 
     // get all social
-    Route::get('get-all-social','SocialController@getAll');
+    Route::get('get-all-social', 'SocialController@getAll');
 
     // add comment
-    Route::post('add-comment','CommentController@addComment');
+    Route::post('add-comment', 'CommentController@addComment');
 
     // permission
-    Route::post('permission-import','PermissionController@import');
-    Route::get('permission-export','PermissionController@export');
-    Route::get('get-all-permission','PermissionController@getAllPermission');
-    Route::resource('permission','PermissionController');
+    Route::post('permission-import', 'PermissionController@import');
+    Route::get('permission-export', 'PermissionController@export');
+    Route::get('get-all-permission', 'PermissionController@getAllPermission');
+    Route::resource('permission', 'PermissionController');
 });
 
 

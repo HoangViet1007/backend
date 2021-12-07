@@ -9,12 +9,25 @@ class CommentController extends Controller
 {
     protected $commentService;
 
-    public function __construct(CommetnService $commetnService){
+    public function __construct(CommetnService $commetnService)
+    {
         $this->commentService = $commetnService;
     }
 
-    public function addComment(Request $request){
+    public function addComment(Request $request)
+    {
 
         return response()->json($this->commentService->add($request));
+    }
+
+    public function listComment()
+    {
+        return response()->json($this->commentService->list_comment());
+    }
+
+    public function chaneStatus(Request $request){
+
+        return response()->json($this->commentService->changeStatus($request));
+
     }
 }
