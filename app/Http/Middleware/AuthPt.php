@@ -21,9 +21,13 @@ class AuthPt
     {
         // role_id = 3 pt
         $user = Auth::user();
-        $modelHasRole = ModelHasRole::where('user_id', $user['id'])->first();
-        if ($modelHasRole->role_id != 3) {
-            abort(403, 'Access denied');
+        if($user){
+            $modelHasRole = ModelHasRole::where('user_id', $user['id'])->first();
+            if ($modelHasRole->role_id != 3) {
+                abort(403, 'Access denied');
+            }
+        }else{
+            abort(401, 'Unauthenticated');
         }
 
         return $next($request);
