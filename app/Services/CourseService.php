@@ -160,7 +160,7 @@ class CourseService extends BaseService
                     ->with(['stagesClient.course_planes' => function ($q) {
                         $q->where('course_planes.status', StatusConstant::ACTIVE);
                     }])->with(['comments.user_comment' => function ($query) {
-                        $query->where('comments.status', StatusConstant::ACTIVE);
+                        $query->where('status', StatusConstant::ACTIVE);
                     }])
                     ->select('courses.*')
                     ->where('courses.id', $id)
