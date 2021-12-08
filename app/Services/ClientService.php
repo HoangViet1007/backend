@@ -47,7 +47,7 @@ class ClientService extends BaseService
     public function get_course()
     {
         $get_course = Course::where('display', StatusConstant::ACTIVE)
-            ->with(['stages','teacher'=>function($query){
+            ->with(['teacher'=>function($query){
                 $query->select('name','id','image');
             }])
             ->where('status', StatusConstant::HAPPENING)
