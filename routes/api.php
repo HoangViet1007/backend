@@ -77,7 +77,7 @@ Route::group(['prefix' => '/'], function () {
     Route::post('user_customer', 'UserController@addUserHasRoleCustomer');
 
     // BMI
-    Route::get('BMI', 'BMIController@countBMI');
+    Route::post('BMI', 'BMIController@countBMI');
 
     // contact
     Route::resource('contact', 'ContactController');
@@ -114,6 +114,12 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // role
     Route::resource('role', 'RoleController');
+
+    // permission
+    Route::post('permission-import','PermissionController@import');
+    Route::get('permission-export','PermissionController@export');
+    Route::get('get-all-permission','PermissionController@getAllPermission');
+    Route::resource('permission','PermissionController');
 
     // specialize
     Route::resource('specialize', 'SpecializeController');
@@ -254,11 +260,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // add comment
     Route::post('add-comment', 'CommentController@addComment');
 
-    // permission
-    Route::post('permission-import', 'PermissionController@import');
-    Route::get('permission-export', 'PermissionController@export');
-    Route::get('get-all-permission', 'PermissionController@getAllPermission');
-    Route::resource('permission', 'PermissionController');
 });
 
 

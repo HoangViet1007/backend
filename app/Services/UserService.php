@@ -124,6 +124,9 @@ class UserService extends BaseService
         $request = $this->preAddUser($request) ?? $request;
         // check role input
         $request_role_ids = $request->role_ids ?? [];
+        if(in_array(2,$request_role_ids) == true && in_array(3,$request_role_ids)){
+            abort(500,'Không thể chọn đồng thời cả chức vụ PT và Customer !');
+        }
         if (count($request_role_ids) > 0) {
             $role_ids = $request_role_ids;
         }
@@ -212,6 +215,19 @@ class UserService extends BaseService
         if (isset($account_level_id)) {
             $model->update(['account_level_id' => $account_level_id]);
         }
+    }
+
+    public function preUpdate(int|string $id, object $request)
+    {
+        // check role input
+        $request_role_ids = $request->role_ids ?? [];
+        if(in_array(2,$request_role_ids) == true && in_array(3,$request_role_ids)){
+            throw new BadRequestException(
+                ['message' => __("Không thể chọn đồng thời cả chức vụ PT và Customer !")],
+                new Exception()
+            );
+        }
+        parent::preUpdate($id, $request);
     }
 
     public function updateRequestValidate(int|string $id, object $request, array $rules = [],

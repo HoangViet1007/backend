@@ -400,7 +400,8 @@ class CourseService extends BaseService
     {
         $userId = $this->currentUser()->id ?? null;
         $courseForUser = Course::where('created_by', '=', $userId)->where('id', '=', $id)->first();
-        if (!$courseForUser) {
+        $kt_course = Course::find($id);
+        if (!$courseForUser || $kt_course) {
             throw new BadRequestException(
                 ['message' => __("Khoá học không tồn tại !")], new Exception()
             );
