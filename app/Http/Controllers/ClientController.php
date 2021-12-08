@@ -23,6 +23,18 @@ class ClientController extends Controller
     */
     public function index()
     {
-        return response()->json(['get_pt'=>$this->clientService->get_pt_highlights(),'get_course'=>$this->clientService->get_course()]);
+        return response()->json(['get_pt' => $this->clientService->get_pt_highlights(), 'get_course' => $this->clientService->get_course()]);
+    }
+
+    // danh sach pt
+
+    public function list_pt()
+    {
+
+    }
+
+    public function detail_pt($id)
+    {
+
     }
 }
