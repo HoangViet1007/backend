@@ -125,7 +125,7 @@ class UserService extends BaseService
         // check role input
         $request_role_ids = $request->role_ids ?? [];
         if(in_array(2,$request_role_ids) == true && in_array(3,$request_role_ids)){
-            abort(500,'Không thể chọn đồng thời cả chức vụ PT và Customer !');
+            abort(400,'Không thể chọn đồng thời cả chức vụ PT và Customer !');
         }
         if (count($request_role_ids) > 0) {
             $role_ids = $request_role_ids;

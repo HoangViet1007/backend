@@ -4,12 +4,14 @@ namespace App\Services;
 
 
 use App\Constants\StatusConstant;
+use App\Exceptions\SystemException;
 use App\Exceptions\BadRequestException;
 use App\Models\Comment;
 use App\Models\Course;
 use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\User;
+use Exception;
 
 /**
  * @Author apple
@@ -66,6 +68,36 @@ class ClientService extends BaseService
         });
 
         return $get_course;
+    }
+
+    public function getListPtClient()
+    {
+        try {
+            $request     = request()->all();
+            $specializes = $request['specializes'] ?? null;
+            $data        = $this->queryHelper->removeParam('specializes')
+                                             ->buildQuery(new User())
+                                             ->join('model_has_roles', 'model_has_roles.user_id', 'users.id')
+                                             ->join('roles', 'roles.id', 'model_has_roles.role_id')
+                                             ->join('account_levels', 'account_levels.id', 'users.account_level_id')
+                                             ->join('specialize_details', 'users.id',
+                                                    'specialize_details.user_id')
+                                             ->join('specializes', 'specializes.id',
+                                                    'specialize_details.specialize_id')
+                                             ->with('accountLevels', 'specializeDetails.specialize')
+                                             ->where('roles.id', 3)
+                                             ->where('users.status', StatusConstant::ACTIVE)
+                                             ->when($specializes, function ($q) use ($specializes) {
+                                                 $arraySpecialize = explode(',', $specializes) ?? [0];
+                                                 $q->whereIn('specializes.id', $arraySpecialize);
+                                             })
+                                             ->select(['users.id', 'users.name', 'users.image', 'users.email', 'users.phone', 'users.address', 'users.description', 'users.sex', 'users.account_level_id'])
+                                             ->distinct();
+
+            return $data->paginate(10);
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     public function detailPT($id)
