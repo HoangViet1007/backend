@@ -5,16 +5,15 @@ namespace App\Http\Controllers;
 
 use App\Services\BaseService;
 use App\Services\ClientService;
+use Illuminate\Http\JsonResponse;
 
 class ClientController extends Controller
 {
     public BaseService $service;
 
-    protected $clientService;
-
     public function __construct()
     {
-        $this->clientService = new ClientService();
+        $this->service = new ClientService();
     }
 
 
@@ -23,11 +22,15 @@ class ClientController extends Controller
     */
     public function index()
     {
-        return response()->json(['get_pt' => $this->clientService->get_pt_highlights(), 'get_course' => $this->clientService->get_course()]);
+        return response()->json(['get_pt' => $this->service->get_pt_highlights(), 'get_course' => $this->service->get_course()]);
     }
 
     // danh sach pt
 
+    public function getListPtClient(): JsonResponse
+    {
+        return response()->json($this->service->getListPtClient());
+    }
 
 
     public function detailPT($id)
