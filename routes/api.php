@@ -69,7 +69,6 @@ Route::get('/get-schedules', 'ScheduleController@getCalenderCustomer');
 
 // màn hình trang chủ
 
-Route::get('/trang-chu', 'ClientController@index');
 
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
@@ -98,6 +97,12 @@ Route::group(['prefix' => '/'], function () {
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
 
+// trang chủ
+    Route::get('trang-chu', 'ClientController@index');
+
+    // chi tiết PT
+    Route::get('detail-pt/{id}','ClientController@detailPT');
+
 });
 
 // admin
@@ -116,10 +121,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('role', 'RoleController');
 
     // permission
-    Route::post('permission-import','PermissionController@import');
-    Route::get('permission-export','PermissionController@export');
-    Route::get('get-all-permission','PermissionController@getAllPermission');
-    Route::resource('permission','PermissionController');
+    Route::post('permission-import', 'PermissionController@import');
+    Route::get('permission-export', 'PermissionController@export');
+    Route::get('get-all-permission', 'PermissionController@getAllPermission');
+    Route::resource('permission', 'PermissionController');
 
     // specialize
     Route::resource('specialize', 'SpecializeController');

@@ -165,7 +165,6 @@ class CourseService extends BaseService
                     ->select('courses.*')
                     ->where('courses.id', $id)
                     ->first();
-
             return $entity;
         } catch (ModelNotFoundException $e) {
             throw new NotFoundException(
@@ -606,6 +605,28 @@ class CourseService extends BaseService
             );
         }
         $course->update(['status' => StatusConstant::PENDING]);
+    }
+
+
+    public function relatedCourses($id)
+    {
+        try {
+            $course = Course::findOrFail($id);
+            if ($course && $course->status == StatusConstant::HAPPENING && $course->display == StatusConstant::ACTIVE) {
+                $list_course = Course::where('status', StatusConstant::HAPPENING)
+                    ->where('display', StatusConstant::ACTIVE)
+                    ->where('specialize_detail_id', $course->specialize_detail_id)
+                    ->whereNotIn('id', [$id])
+                    ->limit(config('constant.limit'))->get();
+                return $list_course;
+            }
+
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        }
     }
 
 }

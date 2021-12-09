@@ -28,13 +28,10 @@ class ClientController extends Controller
 
     // danh sach pt
 
-    public function list_pt()
+
+
+    public function detailPT($id)
     {
-
-    }
-
-    public function detail_pt($id)
-    {
-
+        return response()->json(['detail_pt' => $this->clientService->detailPT($id),'get_course' => $this->clientService->get_course()]);
     }
 }
