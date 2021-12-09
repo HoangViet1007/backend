@@ -107,6 +107,9 @@ Route::group(['prefix' => '/'], function () {
     // chi tiết PT
     Route::get('detail-pt/{id}','ClientController@detailPT');
 
+    // get setting in client
+    Route::get('get-setting-client','ClientController@getSettingClient');
+
 });
 
 // admin
