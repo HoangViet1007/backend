@@ -69,6 +69,7 @@ Route::get('/get-schedules', 'ScheduleController@getCalenderCustomer');
 
 // màn hình trang chủ
 
+Route::get('/trang-chu', 'ClientController@index');
 
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
@@ -96,6 +97,9 @@ Route::group(['prefix' => '/'], function () {
     // thanh toan
     Route::post('thanh-toan', 'PaymentController@createPayment');
     Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
+
+    // get list pt in client
+    Route::get('/get-list-pt-client','ClientController@getListPtClient');
 
 // trang chủ
     Route::get('trang-chu', 'ClientController@index');

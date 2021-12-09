@@ -40,9 +40,10 @@ class CourseStudentService extends BaseService
                                          ->join('users', 'users.id', 'course_students.user_id')
                                          ->join('courses', 'courses.id', 'course_students.course_id')
                                          ->where('courses.created_by', '=', $userIdLogin['id'])
-                                         ->select('course_students.*');
+                                         ->select('course_students.*')
+                                         ->get();
         try {
-            $response = $data->get();
+            $response = $data;
 
             return $response;
         } catch (Exception $e) {
@@ -309,13 +310,15 @@ class CourseStudentService extends BaseService
     public function getCourseStudentRequestAdminForAdmin()
     {
         try {
-            $data = $this->queryHelper->buildQuery($this->model)
-                ->with(['courses.teacher', 'schedules', 'users'])
-                ->join('courses', 'courses.id', 'course_students.course_id')
-                ->join('users', 'users.id', 'courses.created_by')
-                ->select('course_students.*', 'users.name as userName', 'courses.name as courseName')
-                ->where('course_students.status', '=', StatusConstant::REQUESTADMIN);
+            $data     = $this->queryHelper->buildQuery($this->model)
+                                          ->with(['courses.teacher', 'schedules', 'users'])
+                                          ->join('courses', 'courses.id', 'course_students.course_id')
+                                          ->join('users', 'users.id', 'courses.created_by')
+                                          ->select('course_students.*', 'users.name as userName',
+                                                   'courses.name as courseName')
+                                          ->where('course_students.status', '=', StatusConstant::REQUESTADMIN);
             $response = $data->paginate(QueryHelper::limit());
+
             return $response;
 
         } catch (Exception $exception) {
@@ -330,14 +333,16 @@ class CourseStudentService extends BaseService
     {
         $userId = $this->currentUser()->id ?? null;
         try {
-            $data = $this->queryHelper->buildQuery($this->model)
-                ->with(['courses.teacher', 'schedules', 'users'])
-                ->join('courses', 'courses.id', 'course_students.course_id')
-                ->join('users', 'users.id', 'courses.created_by')
-                ->select('course_students.*', 'users.name as userName', 'courses.name as courseName')
-                ->where('course_students.status', '=', StatusConstant::REQUESTADMIN)
-                ->where('courses.created_by', '=', $userId);
+            $data     = $this->queryHelper->buildQuery($this->model)
+                                          ->with(['courses.teacher', 'schedules', 'users'])
+                                          ->join('courses', 'courses.id', 'course_students.course_id')
+                                          ->join('users', 'users.id', 'courses.created_by')
+                                          ->select('course_students.*', 'users.name as userName',
+                                                   'courses.name as courseName')
+                                          ->where('course_students.status', '=', StatusConstant::REQUESTADMIN)
+                                          ->where('courses.created_by', '=', $userId);
             $response = $data->paginate(QueryHelper::limit());
+
             return $response;
 
         } catch (Exception $exception) {
@@ -351,12 +356,13 @@ class CourseStudentService extends BaseService
     public function getCourseStudentById($id)
     {
         $data = $this->queryHelper->buildQuery($this->model)
-            ->with(['courses.teacher', 'schedules', 'users'])
-            ->join('courses', 'courses.id', 'course_students.course_id')
-            ->join('users', 'users.id', 'courses.created_by')
-            ->select('course_students.*', 'users.name as userName', 'courses.name as courseName')
-            ->where('course_students.id', '=', $id)
-            ->get();
+                                  ->with(['courses.teacher', 'schedules', 'users'])
+                                  ->join('courses', 'courses.id', 'course_students.course_id')
+                                  ->join('users', 'users.id', 'courses.created_by')
+                                  ->select('course_students.*', 'users.name as userName', 'courses.name as courseName')
+                                  ->where('course_students.id', '=', $id)
+                                  ->get();
+
         return $data;
     }
 
@@ -534,10 +540,12 @@ class CourseStudentService extends BaseService
             $courseStudentThough = CourseStudent::find($id_course_student_though);
             $createdAtThough     = $courseStudentThough->created_at->format('Y-m-d H:i:s');
 
-
             // get create min in course_student
-            $courseStudent             = CourseStudent::where('status', StatusConstant::UNSCHEDULED)
-                                                      ->orderBy('created_at', 'asc')
+            $courseStudent             = CourseStudent::join('courses', 'courses.id', 'course_students.course_id')
+                                                      ->where('course_students.status', StatusConstant::UNSCHEDULED)
+                                                      ->where('courses.created_by', $this->currentUser()->id)
+                                                      ->orderBy('course_students.created_at', 'asc')
+                                                      ->select('course_students.*')
                                                       ->first();
             $courseStudentMinCreatedAt = $courseStudent->created_at->format('Y-m-d H:i:s');
 
