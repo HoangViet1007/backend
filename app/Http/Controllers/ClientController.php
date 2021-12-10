@@ -35,7 +35,7 @@ class ClientController extends Controller
 
     public function detailPT($id)
     {
-        return response()->json(['detail_pt' => $this->service->detailPT($id), 'get_course' => $this->service->get_course()]);
+        return response()->json([ $this->service->detailPT($id)]);
     }
 
     public function getSettingClient(): JsonResponse
