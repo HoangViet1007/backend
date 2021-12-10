@@ -117,7 +117,11 @@ class CourseService extends BaseService
                                   ->removeParam('specializes')
                                   ->buildQuery($this->model)
                                   ->with(['customerLevel', 'specializeDetails.user',
-                                          'specializeDetails.specialize'])
+                                          'specializeDetails.specialize', 'comments'])
+                                  ->with('course_students', function ($q){
+                                      $q->where('status',StatusConstant::SCHEDULE)
+                                      ->orWhere('status',StatusConstant::COMPLETE);
+                                  })
                                   ->leftJoin('specialize_details', 'courses.specialize_detail_id',
                                              'specialize_details.id')
                                   ->leftJoin('specializes', 'specialize_details.specialize_id',
@@ -140,6 +144,17 @@ class CourseService extends BaseService
                                   });
         try {
             $response = $data->paginate(QueryHelper::limit());
+
+            $response->getCollection()->transform(function ($value) {
+                $value->count_comment = count($value->comments);
+                return $value;
+            });
+
+             $response->getCollection()->transform(function ($value) {
+                 $value->count_student = count($value->course_students);
+                 return $value;
+             });
+
 
             return $response;
         } catch (Exception $e) {
@@ -170,6 +185,7 @@ class CourseService extends BaseService
                                             ->where('courses.id', $id)
                                             ->first();
             }
+
             return $entity;
         } catch (Exception $e) {
             throw new BadRequestException(
@@ -618,10 +634,11 @@ class CourseService extends BaseService
             $course = Course::findOrFail($id);
             if ($course && $course->status == StatusConstant::HAPPENING && $course->display == StatusConstant::ACTIVE) {
                 $list_course = Course::where('status', StatusConstant::HAPPENING)
-                    ->where('display', StatusConstant::ACTIVE)
-                    ->where('specialize_detail_id', $course->specialize_detail_id)
-                    ->whereNotIn('id', [$id])
-                    ->limit(config('constant.limit'))->get();
+                                     ->where('display', StatusConstant::ACTIVE)
+                                     ->where('specialize_detail_id', $course->specialize_detail_id)
+                                     ->whereNotIn('id', [$id])
+                                     ->limit(config('constant.limit'))->get();
+
                 return $list_course;
             }
 
