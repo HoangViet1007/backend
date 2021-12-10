@@ -49,14 +49,13 @@ class ClientService extends BaseService
     public function get_course()
     {
         $get_course = Course::where('display', StatusConstant::ACTIVE)
-            ->with(['teacher' => function ($query) {
+            ->with(['customerLevel','teacher' => function ($query) {
                 $query->select('name', 'id', 'image');
             }])->with(['specializeDetails.specialize' => function ($query) {
                 $query->where('status', StatusConstant::ACTIVE);
             }])
             ->where('status', StatusConstant::HAPPENING)
             ->inRandomOrder()->limit(config('constant.limit'))->get();
-
 
         $get_course->map(function ($item) {
             $item['avg_start'] = Comment::where('status', StatusConstant::ACTIVE)->where('id_course', $item->id)->avg('number_stars');
@@ -74,9 +73,10 @@ class ClientService extends BaseService
         if ($detail_pt) {
             $detail_pt['count_course'] = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
             $array_course = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();
-            if(count($array_course)>0){
+            if (count($array_course) > 0) {
                 $detail_pt['count_student'] = CourseStudent::where('status', StatusConstant::COMPLETE)->whereIn('course_id', $array_course)->count();
             }
+            $detail_pt['course_related'] = $this->get_courses($id);
             return $detail_pt;
         } else {
             throw new BadRequestException(
@@ -84,5 +84,28 @@ class ClientService extends BaseService
                 new \Exception()
             );
         }
+    }
+
+    public function get_courses($user_id)
+    {
+        $get_course = Course::where('display', StatusConstant::ACTIVE)
+            ->where('created_by',$user_id)
+            ->with(['customerLevel','teacher' => function ($query) {
+                $query->select('name', 'id', 'image');
+            }])->with(['specializeDetails.specialize' => function ($query) {
+                $query->where('status', StatusConstant::ACTIVE);
+            }])
+            ->where('status', StatusConstant::HAPPENING)
+            ->limit(config('constant.limit'))->get();;
+
+
+        $get_course->map(function ($item) {
+            $item['avg_start'] = Comment::where('status', StatusConstant::ACTIVE)->where('id_course', $item->id)->avg('number_stars');
+            $item['count_comment'] = Comment::where('status', StatusConstant::ACTIVE)->where('id_course', $item->id)->count();
+            $item['count_student'] = CourseStudent::where('status', StatusConstant::COMPLETE)->where('course_id', $item->id)->count();
+            return $item;
+        });
+
+        return $get_course;
     }
 }

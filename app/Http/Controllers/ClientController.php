@@ -32,6 +32,6 @@ class ClientController extends Controller
 
     public function detailPT($id)
     {
-        return response()->json(['detail_pt' => $this->clientService->detailPT($id),'get_course' => $this->clientService->get_course()]);
+        return response()->json(['detail_pt' => $this->clientService->detailPT($id)]);
     }
 }
