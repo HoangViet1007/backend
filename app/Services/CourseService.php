@@ -170,7 +170,6 @@ class CourseService extends BaseService
                                             ->where('courses.id', $id)
                                             ->first();
             }
-
             return $entity;
         } catch (Exception $e) {
             throw new BadRequestException(
