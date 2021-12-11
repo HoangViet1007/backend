@@ -67,9 +67,7 @@ Route::post('/get-password', 'UserController@getPassword');
 Route::get('/get-schedule', 'ScheduleController@scheduleCustormAndPT');
 Route::get('/get-schedules', 'ScheduleController@getCalenderCustomer');
 
-// màn hình trang chủ
 
-Route::get('/trang-chu', 'ClientController@index');
 
 Route::group(['prefix' => '/'], function () {
     // register customer and pt
@@ -109,6 +107,8 @@ Route::group(['prefix' => '/'], function () {
 
     // get setting in client
     Route::get('get-setting-client','ClientController@getSettingClient');
+
+
 
 });
 
@@ -159,10 +159,13 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
 
     Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
-// danh sách comment của PT
+   // danh sách comment của PT
     Route::get('list-comment', 'CommentController@listComment');
     // thay đổi status của comment
     Route::post('change-status-comment', 'CommentController@chaneStatus');
+
+// dashboard admin
+    Route::get('dashboard-admin','CommentController@chaneStatus');
 });
 
 // pt
@@ -224,6 +227,8 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt']], function
 
     Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
 
+    // dashboard pt
+    Route::get('dashboard-pt','CommentController@chaneStatus');
 });
 
 // customer
@@ -252,6 +257,8 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer']], fu
     Route::put('complanin/{id}', 'ScheduleController@complanin');
     Route::get('get-schedule-by-customer/{id}', 'ScheduleController@getScheduleByCustomer');
 
+    // dashboard customer
+    Route::get('dashboard-customer','CommentController@chaneStatus');
 });
 
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
@@ -271,6 +278,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // add comment
     Route::post('add-comment', 'CommentController@addComment');
+
 
 });
 
