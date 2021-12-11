@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Constants\StatusConstant;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\BillPersonalTrainer;
+use App\Models\CourseStudent;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -79,12 +81,14 @@ class BillPersonalTrainerService extends BaseService
             'code_bill' => date("YmdHis") . Auth::id(),
             'time' => date('Y-m-d H:i:s'),
             'money' => $request->money,
+            'money_old' => $request->money_old,
             'note' => $request->note,
             'image' => $request->image,
             'course_student_id' => $request->course_student_id,
             'user_id' => $request->user_id
         ];
         $billPt = BillPersonalTrainer::create($arr);
+        CourseStudent::update(['status', StatusConstant::COMPLETE]);
         $billPtRel = BillPersonalTrainer::with('courseStudent.courses', 'user', 'courseStudent.users')->where('bill_personal_trainers.id', $billPt->id)->first();
         return $billPtRel;
     }
