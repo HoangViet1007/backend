@@ -165,7 +165,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::post('change-status-comment', 'CommentController@chaneStatus');
 
 // dashboard admin
-    Route::get('dashboard-admin','CommentController@chaneStatus');
+    Route::get('dashboard-admin','DashboardController@chaneStatus');
 });
 
 // pt
@@ -228,7 +228,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt']], function
     Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
 
     // dashboard pt
-    Route::get('dashboard-pt','CommentController@chaneStatus');
+    Route::get('dashboard-pt','DashboardController@chaneStatus');
 });
 
 // customer
@@ -258,7 +258,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer']], fu
     Route::get('get-schedule-by-customer/{id}', 'ScheduleController@getScheduleByCustomer');
 
     // dashboard customer
-    Route::get('dashboard-customer','CommentController@chaneStatus');
+    Route::get('dashboard-customer','DashboardController@chaneStatus');
 });
 
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
