@@ -83,6 +83,21 @@ class CourseStudentService extends BaseService
         }
     }
 
+    public function getAllCourseStudent()
+    {
+        try {
+            $data = $this->queryHelper->buildQuery($this->model)
+                                      ->join('courses', 'courses.id', 'course_students.course_id')
+                                      ->join('users','users.id','course_students.user_id')
+                                      ->with(['schedules', 'users','courses.teacher'])
+                                      ->select('course_students.*');
+
+            return $data->get();
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
     public function customerCancel(object $request, $id)
     {
 
