@@ -16,7 +16,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\SchedulePT::class,
         Commands\ScheduleOfCustorm::class,
-        Commands\ScheduleAccountLevel::class
+        Commands\ScheduleAccountLevel::class,
+        Commands\UpdateCourseSucess::class
 
     ];
 
@@ -30,8 +31,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('command:schedule-pt')->dailyAt('06:00');
         $schedule->command('command:schedule-of-custorm')->dailyAt('06:00');
-        $schedule->command('command:update-level')->dailyAt('06:00');
-
+        $schedule->command('command:update-level')->dailyAt('00:00');
+        $schedule->command('command:update-course-sucess')->hourly();
 
     }
 
