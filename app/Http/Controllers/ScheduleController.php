@@ -177,4 +177,9 @@ class ScheduleController extends Controller
         return response()->json($this->service->updateLevel());
 
     }
+
+    public function updateCourseSucces(){
+        return response()->json($this->service->updateCourseSucces());
+
+    }
 }

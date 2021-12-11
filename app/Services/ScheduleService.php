@@ -809,7 +809,7 @@ class ScheduleService extends BaseService
                 $arrInfoTeacher[$data_key] = $data;
             }
             foreach ($arrInfoTeacher as $value) {
-                Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleCourse($value['name_teacher'], $value['info_course'], $date));
+                Mail::to($value->email)->send(new ScheduleCourse($value['name_teacher'], $value['info_course'], $date));
             }
         }
     }
@@ -895,6 +895,23 @@ class ScheduleService extends BaseService
             } elseif ($count_student > 12) {
                 $count_level_pt->update(['account_level_id' => 5]);
             } else {
+            }
+        }
+    }
+
+    // CRON JOB
+
+    public function updateCourseSucces()
+    {
+
+        $list_course = Schedule::where('status', StatusConstant::UNFINISHED)->get();
+
+        foreach ($list_course as $value) {
+            $dueDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $value->date . ' ' . $value->time_start)->addDay(2);
+            $date_now = \Carbon\Carbon::now();
+            if ($dueDateTime >= $date_now) {
+                $update = Schedule::find($value->id);
+                $update->update(['status'=>StatusConstant::COMPLETE,'participation'=>StatusConstant::NOJOIN]);
             }
         }
     }
