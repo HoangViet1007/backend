@@ -10,7 +10,7 @@ class BillPersonalTrainer extends Model
     use HasFactory;
     protected $table = 'bill_personal_trainers';
     protected $guarded = [];
-    protected $fillable = ['code_bill', 'time', 'money', 'note', 'image', 'course_student_id', 'user_id'];
+    protected $fillable = ['code_bill', 'time', 'money', 'money_old', 'note', 'image', 'course_student_id', 'user_id'];
 
     public function CourseStudent()
     {
