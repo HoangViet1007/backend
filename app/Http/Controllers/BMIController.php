@@ -47,7 +47,5 @@ class BMIController extends Controller
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
-
-
     }
 }
