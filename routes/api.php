@@ -166,8 +166,11 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // thay đổi status của comment
     Route::post('change-status-comment', 'CommentController@chaneStatus');
 
-// dashboard admin
-    Route::get('dashboard-admin','DashboardController@chaneStatus');
+   // dashboard admin
+
+    Route::get('dashboard-admin','DashboardController@DashboardAdmin');
+
+
 
     // list course student
     Route::get('get-all-course-student','CourseStudentController@getAllCourseStudent');
@@ -232,8 +235,9 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt']], function
 
     Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
 
-    // dashboard pt
-    Route::get('dashboard-pt','DashboardController@chaneStatus');
+// dashboard pt
+    Route::get('dashboard-pt','DashboardController@DashboardPT');
+
 });
 
 // customer

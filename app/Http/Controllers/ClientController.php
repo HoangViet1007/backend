@@ -22,7 +22,7 @@ class ClientController extends Controller
     */
     public function index()
     {
-        return response()->json(['get_pt' => $this->service->get_pt_highlights(), 'get_course' => $this->service->get_course()]);
+        return response()->json(['get_pt' => $this->service->getPtHighlights(), 'get_course' => $this->service->getCourse()]);
     }
 
     // danh sach pt
