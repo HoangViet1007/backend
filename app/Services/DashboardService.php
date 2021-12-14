@@ -63,7 +63,7 @@ class DashboardService extends BaseService
 
 
         $sum_total_in_month = Payment::where('note', StatusConstant::RECHARGE)
-            ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money_old) - sum(money) sum_total_in_month')
+            ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_month')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
