@@ -10,6 +10,7 @@ use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Mail\GetPassword;
 use App\Models\AccountLevel;
+use App\Models\Course;
 use App\Models\Social;
 use App\Models\SpecializeDetail;
 use App\Models\User;
@@ -367,11 +368,14 @@ class UserService extends BaseService
     public function preDelete(int|string $id)
     {
         $countSpecializeDetailCurrentUser = SpecializeDetail::where('user_id', $id)->count();
-        if ($countSpecializeDetailCurrentUser > 0) {
+        $countCourse = Course::where('created_by',$id)->count();
+
+        if (($countSpecializeDetailCurrentUser > 0) || ($countCourse > 0)) {
             throw new BadRequestException(
                 ['message' => __("Xoá tài khoản không thành công !")], new Exception()
             );
         }
+
         parent::preDelete($id);
     }
 

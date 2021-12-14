@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\BaseService;
 use App\Services\CourseStudentService;
-use http\Env\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -35,6 +34,11 @@ class CourseStudentController extends Controller
     public function getCoursePlanByCourseStudent($id): JsonResponse
     {
         return response()->json($this->service->getCoursePlanByCourseStudent($id));
+    }
+
+    public function getAllCourseStudent(): JsonResponse
+    {
+        return response()->json($this->service->getAllCourseStudent());
     }
 
     /**
@@ -121,19 +125,19 @@ class CourseStudentController extends Controller
     // sent request customer
     public function sentRequestCustomer(Request $request, $id)
     {
-        return response()->json($this->service->sentRequestCustomer($request,$id));
+        return response()->json($this->service->sentRequestCustomer($request, $id));
     }
 
     // userAgreesCourseStudent
     public function userAgreesCourseStudent(Request $request, $id)
     {
-        return response()->json($this->service->userAgreesCourseStudent($request,$id));
+        return response()->json($this->service->userAgreesCourseStudent($request, $id));
     }
 
     // userDisAgreesCourseStudent
     public function userDisAgreesCourseStudent(Request $request, $id)
     {
-        return response()->json($this->service->userDisAgreesCourseStudent($request,$id));
+        return response()->json($this->service->userDisAgreesCourseStudent($request, $id));
     }
 
     public function getCourseStudentRequestAdminForAdmin()

@@ -159,8 +159,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::resource('bill-personal-trainer', 'BillPersonalTrainerController'); // ở Admin
 
     Route::get('get-request-admin-for-admin', 'CourseStudentController@getCourseStudentRequestAdminForAdmin'); // ở Admin
-   // danh sách comment của PT
+
+    // danh sách comment của PT
     Route::get('list-comment', 'CommentController@listComment');
+
     // thay đổi status của comment
     Route::post('change-status-comment', 'CommentController@chaneStatus');
 
@@ -168,6 +170,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     Route::get('dashboard-admin','DashboardController@DashboardAdmin');
 
+
+
+    // list course student
+    Route::get('get-all-course-student','CourseStudentController@getAllCourseStudent');
 });
 
 // pt
