@@ -29,7 +29,7 @@ use Illuminate\Validation\Rule;
  * @Author apple
  * @Date   Oct 06, 2021
  */
-class CourseService extends BaseService
+    class CourseService extends BaseService
 {
     protected array $status = [StatusConstant::HAPPENING, StatusConstant::PENDING, StatusConstant::PAUSE, StatusConstant::REQUEST];
     protected array $display = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];

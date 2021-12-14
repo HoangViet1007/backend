@@ -894,7 +894,6 @@ class ScheduleService extends BaseService
                 $count_level_pt->update(['account_level_id' => 4]);
             } elseif ($count_student > 12) {
                 $count_level_pt->update(['account_level_id' => 5]);
-            } else {
             }
         }
     }
