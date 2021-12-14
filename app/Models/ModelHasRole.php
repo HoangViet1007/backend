@@ -11,4 +11,8 @@ class ModelHasRole extends Model
     protected $table = 'model_has_roles';
     protected $guarded = [] ;
     protected $fillable = ['role_id','user_id'] ;
+
+    public function role(){
+        return $this->hasMany(Role::class,'role_id','id');
+    }
 }

@@ -32,11 +32,11 @@ class ClientService extends BaseService
      * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
 
-    public function get_pt_highlights()
+    public function getPtHighlights()
     {
 
         $get_pt = User::with(['accountLevels', 'modelHasRoles' => function ($query) {
-            $query->where('role_id', 3);
+            $query->where('role_id', config('constant.role_pt'));
         }
         ])->orderBy('account_level_id', 'desc')->limit(config('constant.limit'))
             ->get();
@@ -50,7 +50,7 @@ class ClientService extends BaseService
         return $get_pt;
     }
 
-    public function get_course()
+    public function getCourse()
     {
         $get_course = Course::where('display', StatusConstant::ACTIVE)
             ->with(['customerLevel', 'teacher' => function ($query) {
@@ -91,7 +91,7 @@ class ClientService extends BaseService
                 ->join('specializes', 'specializes.id',
                     'specialize_details.specialize_id')
                 ->with('accountLevels', 'specializeDetails.specialize')
-                ->where('roles.id', 3)
+                ->where('roles.id', config('constant.role_pt'))
                 ->where('users.status', StatusConstant::ACTIVE)
                 ->when($specializes, function ($q) use ($specializes) {
                     $arraySpecialize = explode(',', $specializes) ?? [0];
@@ -115,7 +115,7 @@ class ClientService extends BaseService
             if (count($array_course) > 0) {
                 $detail_pt['count_student'] = CourseStudent::where('status', StatusConstant::COMPLETE)->whereIn('course_id', $array_course)->count();
             }
-            $detail_pt['course_related'] = $this->get_courses($id);
+            $detail_pt['course_related'] = $this->getCourses($id);
 
             return $detail_pt;
         } else {
@@ -126,7 +126,7 @@ class ClientService extends BaseService
         }
     }
 
-    public function get_courses($user_id)
+    public function getCourses($user_id)
     {
         $get_course = Course::where('display', StatusConstant::ACTIVE)
             ->where('created_by', $user_id)

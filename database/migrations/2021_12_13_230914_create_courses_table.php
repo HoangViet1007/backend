@@ -1,9 +1,9 @@
 <?php
 
-use App\Constants\StatusConstant;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Constants\StatusConstant;
 
 class CreateCoursesTable extends Migration
 {
@@ -23,11 +23,12 @@ class CreateCoursesTable extends Migration
             $table->float('price', 12, 2);
             $table->text('description');
             $table->text('content');
-            $table->enum('status', [StatusConstant::PENDING, StatusConstant::HAPPENING, StatusConstant::PAUSE])->default(StatusConstant::PENDING);
+            $table->enum('status', [StatusConstant::PENDING, StatusConstant::HAPPENING, StatusConstant::PAUSE, StatusConstant::REQUEST])->default(StatusConstant::PENDING);
+            $table->enum('display', [StatusConstant::ACTIVE, StatusConstant::INACTIVE])->default(StatusConstant::ACTIVE);
+            $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('specialize_detail_id');
             $table->unsignedBigInteger('customer_level_id');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

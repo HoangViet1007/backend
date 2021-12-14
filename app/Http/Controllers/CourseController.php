@@ -85,7 +85,7 @@ class CourseController extends Controller
 
     public function getCourseByIdInClient($id): JsonResponse
     {
-        
+
         return response()->json(['detail_course'=>$this->service->getCourseByIdInClient($id),'get_course'=>$this->service->relatedCourses($id)]);
     }
 

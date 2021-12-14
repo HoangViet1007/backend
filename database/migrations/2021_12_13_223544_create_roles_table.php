@@ -17,6 +17,7 @@ class CreateRolesTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('display_name');
+            $table->boolean('is_mutable')->default(true);
             $table->timestamps();
             $table->softDeletes();
         });

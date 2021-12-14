@@ -22,7 +22,7 @@ class CommentController extends Controller
 
     public function listComment()
     {
-        return response()->json($this->commentService->list_comment());
+        return response()->json($this->commentService->listComment());
     }
 
     public function chaneStatus(Request $request){
