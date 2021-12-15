@@ -277,6 +277,8 @@ class CourseStudentService extends BaseService
         }
         $course_student->update(['user_consent' => StatusConstant::USERAGREES]);
 
+        // update gửi emai cho người dùng
+
         return true;
     }
 
