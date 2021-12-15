@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Stage extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $table = 'stages';
     protected $primaryKey = 'id';
