@@ -9,6 +9,7 @@ use App\Exceptions\SystemException;
 use App\Models\Comment;
 use App\Models\Course;
 use App\Models\CourseStudent;
+use App\Models\ModelHasRole;
 use App\Models\Setting;
 use App\Models\User;
 use Exception;
@@ -35,10 +36,10 @@ class ClientService extends BaseService
     public function getPtHighlights()
     {
 
-        $get_pt = User::with(['accountLevels', 'modelHasRoles' => function ($query) {
-            $query->where('role_id', config('constant.role_pt'));
-        }
-        ])->orderBy('account_level_id', 'desc')->limit(config('constant.limit'))
+        $get_pt = User::with(['accountLevels'])
+            ->join('model_has_roles', 'model_has_roles.user_id', 'users.id')
+            ->where('model_has_roles.role_id', config('constant.role_pt'))
+            ->orderBy('account_level_id', 'desc')->limit(config('constant.limit'))
             ->get();
         $get_pt->map(function ($item) {
             $item['count_course'] = Course::where('created_by', $item->id)->where('display', StatusConstant::ACTIVE)
@@ -46,6 +47,7 @@ class ClientService extends BaseService
 
             return $item;
         });
+
 
         return $get_pt;
     }

@@ -267,7 +267,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer']], fu
     Route::get('get-schedule-by-customer/{id}', 'ScheduleController@getScheduleByCustomer');
 
     // dashboard customer
-    Route::get('dashboard-customer','DashboardController@chaneStatus');
+    Route::get('dashboard-customer','DashboardController@DashboardCustomer');
 });
 
 Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
