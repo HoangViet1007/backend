@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class CoursePlanes extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $table      = 'course_planes';
     protected $primaryKey = 'id';
