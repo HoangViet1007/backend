@@ -57,7 +57,7 @@ class CommetnService extends BaseService
 
     public function listComment()
     {
-        $data = $this->queryHelper->buildQuery($this->model)->with('course','user');
+        $data = $this->queryHelper->buildQuery($this->model)->with('course','user_comment');
         return $data->paginate(QueryHelper::limit());
     }
 
