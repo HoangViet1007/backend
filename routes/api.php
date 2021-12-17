@@ -79,6 +79,7 @@ Route::group(['prefix' => '/'], function () {
 
     // contact
     Route::resource('contact', 'ContactController');
+    Route::post('send-email-contact','ContactController@sendEmailContact');
 
     // get course noi bat
     Route::get('list-course', 'CourseController@getCourse');

@@ -410,13 +410,13 @@ class CourseStudentService extends BaseService
                 );
             }
 
-            // check duyet tuan tu
-            if ($this->getCourseStudentOldEst($id) == false) {
-                throw new BadRequestException(
-                    ['message' => __("Không thể duyệt đăng ký này, hãy duyệt một cách tuần tự !")],
-                    new Exception()
-                );
-            }
+            // // check duyet tuan tu
+            // if ($this->getCourseStudentOldEst($id) == false) {
+            //     throw new BadRequestException(
+            //         ['message' => __("Không thể duyệt đăng ký này, hãy duyệt một cách tuần tự !")],
+            //         new Exception()
+            //     );
+            // }
 
             /*
              * khi duyêt khoa hoc để học viên bắt đầu học thì cần phải thêm đủ lịch cho những buổi học off
@@ -457,7 +457,7 @@ class CourseStudentService extends BaseService
         }
 
         throw new BadRequestException(
-            ['message' => __("Duyệt đăng ký khoá học không thành công !")],
+            ['message' => __("Đăng kí không tồn tại !")],
             new Exception()
         );
     }
@@ -490,7 +490,7 @@ class CourseStudentService extends BaseService
             // check xem dang ki nay dã du so buoi hoc thanh cong ma o co khieu lai
             if (!($this->getCountScheduleComplete($id) == $this->getCountCoursePlanOff($course_id))) {
                 throw new BadRequestException(
-                    ['message' => __("Không thể gửi yêu cầu khi có sự khiếu nại của người dùng !")],
+                    ['message' => __("Khoá học chưa kết thúc hoặc có thể khoá học đang có sự khiêu nại từ người dùng !")],
                     new Exception()
                 );
             }
@@ -543,7 +543,7 @@ class CourseStudentService extends BaseService
     public function getCountCoursePlanOff($course_id)
     {
         $stageId     = Stage::where('course_id', $course_id)->pluck('id')->toArray();
-        $course_plan = CoursePlanes::whereIn('stage_id', $stageId)->where('type', 0)->count();
+        $course_plan = CoursePlanes::whereIn('stage_id', $stageId)->where('type', 0)->where('status',StatusConstant::ACTIVE)->count();
 
         return $course_plan;
     }
