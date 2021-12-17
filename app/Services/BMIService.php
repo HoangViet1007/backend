@@ -25,7 +25,8 @@ class BMIService extends BaseService
         if($this->doValidate($request, $rules)){
             $weight = (float)$request['weight'];
             $height = (float)$request['height'];
-            $BMI = ($weight/($height*2));
+            $heightM = $height * 0.01;
+            $BMI = ($weight/($heightM*$heightM));
         }
         $BMI->{'BMI'} = $BMI;
         return $BMI ;
