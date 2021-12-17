@@ -490,7 +490,7 @@ class CourseStudentService extends BaseService
             // check xem dang ki nay dã du so buoi hoc thanh cong ma o co khieu lai
             if (!($this->getCountScheduleComplete($id) == $this->getCountCoursePlanOff($course_id))) {
                 throw new BadRequestException(
-                    ['message' => __("Không thể gửi yêu cầu khi có sự khiếu nại của người dùng !")],
+                    ['message' => __("Khoá học chưa kết thúc hoặc có thể khoá học đang có sự khiêu nại từ người dùng !")],
                     new Exception()
                 );
             }
