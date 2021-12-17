@@ -34,6 +34,11 @@ class PermissionController extends Controller
         return response()->json($this->service->getAllPermission2());
     }
 
+    public function getAllPermissionNoPaginate(): JsonResponse
+    {
+        return response()->json($this->service->getAllPermissionNoPaginate());
+    }
+
     /**
      * Show the form for creating a new resource.
      *
