@@ -20,6 +20,7 @@ use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -174,7 +175,16 @@ class CourseService extends BaseService
                 $entity = $this->queryHelper->buildQuery($this->model)
                                             ->with(['customerLevel', 'specializeDetails.user',
                                                     'specializeDetails.specialize'])
-                                            ->with(['stagesClient.course_planes' => function ($q) {
+                                            ->with(['stagesClient.course_planes' => function ( $q) {
+                                                $q->select(
+                                                    [
+                                                        'course_planes.id',
+                                                        'course_planes.stage_id',
+                                                        'course_planes.name',
+                                                        'course_planes.type',
+                                                        'course_planes.status'
+                                                    ]);
+                                                $q->join('stages','stages.id','=','course_planes.stage_id');
                                                 $q->where('course_planes.status', StatusConstant::ACTIVE);
                                             }])
                                             ->with(['comments.user_comment' => function ($query) {

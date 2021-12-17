@@ -27,6 +27,11 @@ class PermissionService extends BaseService
         return $result;
     }
 
+    public function getAllPermissionNoPaginate()
+    {
+        return Permission::all();
+    }
+
     public function getAllPermission2()
     {
         $data = $this->queryHelper->buildQuery($this->model);
