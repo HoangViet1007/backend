@@ -137,7 +137,7 @@ class UserController extends Controller
         if (!Auth::attempt($credentials)) {
             return response()->json([
                                         'message' => 'Mật khẩu hoặc tài khoản không chính xác !'
-                                    ], 401);
+                                    ], 400);
         }
 
         // create token
