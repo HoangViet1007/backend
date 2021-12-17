@@ -11,6 +11,8 @@ use App\Helpers\QueryHelper;
 use App\Mail\GetPassword;
 use App\Models\AccountLevel;
 use App\Models\Course;
+use App\Models\Role;
+use App\Models\RoleHasPermission;
 use App\Models\Social;
 use App\Models\SpecializeDetail;
 use App\Models\User;
@@ -205,7 +207,7 @@ class UserService extends BaseService
         }
 
         $request_role_ids = $request->role_ids ?? [];
-        if(in_array(2,$request_role_ids) == true && in_array(3,$request_role_ids)){
+        if (in_array(2, $request_role_ids) == true && in_array(3, $request_role_ids)) {
             throw new BadRequestException(
                 ['message' => __("Không thể chọn đồng thời cả chức vụ PT và Customer !")], new Exception()
             );
@@ -226,7 +228,7 @@ class UserService extends BaseService
     {
         // check role input
         $request_role_ids = $request->role_ids ?? [];
-        if(in_array(2,$request_role_ids) == true && in_array(3,$request_role_ids)){
+        if (in_array(2, $request_role_ids) == true && in_array(3, $request_role_ids)) {
             throw new BadRequestException(
                 ['message' => __("Không thể chọn đồng thời cả chức vụ PT và Customer !")],
                 new Exception()
@@ -344,23 +346,23 @@ class UserService extends BaseService
 
     public function postEditUser(int|string $id, object $request, Model $model)
     {
-        if(isset($request->socials)){
-            $userSocial = UserSocial::where('user_id',$id);
+        if (isset($request->socials)) {
+            $userSocial = UserSocial::where('user_id', $id);
             $userSocial->delete();
-            if(count($request->socials) > 0){
-                foreach ($request->socials as $item){
-                    $data = new UserSocial();
-                    $data->link = $item['link'];
-                    $data->user_id = $id;
+            if (count($request->socials) > 0) {
+                foreach ($request->socials as $item) {
+                    $data            = new UserSocial();
+                    $data->link      = $item['link'];
+                    $data->user_id   = $id;
                     $data->social_id = $item['id'];
                     $data->save();
                 }
-            }else{
-                $userSocial = UserSocial::where('user_id',$id);
+            } else {
+                $userSocial = UserSocial::where('user_id', $id);
                 $userSocial->delete();
             }
-        }else{
-            $userSocial = UserSocial::where('user_id',$id);
+        } else {
+            $userSocial = UserSocial::where('user_id', $id);
             $userSocial->delete();
         }
     }
@@ -368,7 +370,7 @@ class UserService extends BaseService
     public function preDelete(int|string $id)
     {
         $countSpecializeDetailCurrentUser = SpecializeDetail::where('user_id', $id)->count();
-        $countCourse = Course::where('created_by',$id)->count();
+        $countCourse                      = Course::where('created_by', $id)->count();
 
         if (($countSpecializeDetailCurrentUser > 0) || ($countCourse > 0)) {
             throw new BadRequestException(
@@ -388,13 +390,34 @@ class UserService extends BaseService
     public function getCurrentUserInformation(object $request): object
     {
         try {
-            $entity             = $this->model->with(['roles', 'accountLevels','socials.userSocials'])->findOrFail($request->user()->id);
+            $entity                 = $this->model->with(['roles', 'accountLevels', 'socials.userSocials'])
+                                                  ->findOrFail($request->user()->id);
             $entity->{'social_all'} = Social::all();
+
+            $entity->{'array_permissions'} = $this->getPermissionInfoUserLogin($entity->roles);
 
             return $entity;
         } catch (Exception $e) {
             throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
+    }
+
+    public function getPermissionInfoUserLogin($value)
+    {
+        $arrayPer                = [];
+        $namePerCurrentUserLogin = [];
+        foreach ($value as $item) {
+            $data = Role::find($item->id);
+            array_push($arrayPer, $data->id);
+            $per = RoleHasPermission::where('role_id', $data->id)
+                                    ->join('permissions', 'permissions.id', 'role_has_permissions.permission_id')
+                                    ->get();
+            foreach ($per as $item2){
+                array_push($namePerCurrentUserLogin,$item2->name);
+            }
+        }
+
+        return $namePerCurrentUserLogin;
     }
 
     public function updatePassword(object $request)
