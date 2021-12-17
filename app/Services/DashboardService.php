@@ -174,19 +174,18 @@ class DashboardService extends BaseService
         $count_specialize = SpecializeDetail::where('user_id', $id)->count();
 
         $month_in_year = [
-            ['January' => 0],
-            ['February' => 0],
-            ['March' => 0],
-            ['April' => 0],
-            ['May' => 0],
-            ['June' => 0],
-            ['July' => 0],
-            ['August' => 0],
-            ['September' => 0],
-            ['October' => 0],
-            ['November' => 0],
-            ['December' => 0]
-
+            'January' => 0,
+            'February' => 0,
+            'March' => 0,
+            'April' => 0,
+            'May' => 0,
+            'June' => 0,
+            'July' => 0,
+            'August' => 0,
+            'September' => 0,
+            'October' => 0,
+            'November' => 0,
+            'December' => 0
         ];
 
         foreach ($sum_total_in_month as $value_new) {
@@ -216,13 +215,64 @@ class DashboardService extends BaseService
         $id = Auth::user()->id;
         $count_course = CourseStudent::where('user_id', $id)->count();
         $sum_money_spent_month = Bill::where('user_id', $id)->whereMonth('created_at', $month)->sum('money');
-        $sum_money_spent_month_in_year = Bill::where('user_id', $id)->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
+        $sum_money_spent_month_in_years = Bill::where('user_id', $id)->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
+
+        // naapj vao website
         $sum_money_loaded_money_month = Payment::where('user_id', $id)->whereMonth('created_at', $month)->sum('money');
-        $sum_money_loaded_money_month_in_year = Payment::where('user_id', $id)->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
+        $sum_money_loaded_money_month_in_years = Payment::where('user_id', $id)->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
+
+
+        $sum_money_spent_month_in_year = [
+            'January' => 0,
+            'February' => 0,
+            'March' => 0,
+            'April' => 0,
+            'May' => 0,
+            'June' => 0,
+            'July' => 0,
+            'August' => 0,
+            'September' => 0,
+            'October' => 0,
+            'November' => 0,
+            'December' => 0
+
+        ];
+
+        foreach ($sum_money_spent_month_in_years as $value_new) {
+            foreach ($sum_money_spent_month_in_year as $key => $value) {
+                if ($key == $value_new->month) {
+                    $sum_money_spent_month_in_year[$key] = $value_new->sum_total_in_website;
+                }
+            }
+        }
+
+        $sum_money_loaded_money_month_in_year = [
+            'January' => 0,
+            'February' => 0,
+            'March' => 0,
+            'April' => 0,
+            'May' => 0,
+            'June' => 0,
+            'July' => 0,
+            'August' => 0,
+            'September' => 0,
+            'October' => 0,
+            'November' => 0,
+            'December' => 0
+
+        ];
+
+        foreach ($sum_money_loaded_money_month_in_years as $value_new) {
+            foreach ($sum_money_loaded_money_month_in_year as $key => $value) {
+                if ($key == $value_new->month) {
+                    $sum_money_loaded_money_month_in_year[$key] = $value_new->sum_total_in_website;
+                }
+            }
+        }
 
         $data['count_course'] = $count_course;
         $data['sum_money_spent_month'] = $sum_money_spent_month;
