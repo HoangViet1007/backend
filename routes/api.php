@@ -93,10 +93,6 @@ Route::group(['prefix' => '/'], function () {
     // get all chuyên môn cho list khoá học client
     Route::get('list-specialize-for-client', 'SpecializeController@getSpecializeForClient');
 
-    // thanh toan
-    Route::post('thanh-toan', 'PaymentController@createPayment');
-    Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
-
     // get list pt in client
     Route::get('/get-list-pt-client','ClientController@getListPtClient');
 
@@ -131,6 +127,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     // permission
     Route::post('permission-import', 'PermissionController@import');
     Route::get('permission-export', 'PermissionController@export');
+    Route::get('permission-nopaginate', 'PermissionController@getAllPermissionNoPaginate');
     Route::get('get-all-permission', 'PermissionController@getAllPermission');
     Route::resource('permission', 'PermissionController');
 
@@ -245,6 +242,10 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt']], function
 Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer']], function () {
     // hoa don
     Route::get('hoa-don', 'BillController@listBillByCustomer');
+
+    // thanh toan
+    Route::post('thanh-toan', 'PaymentController@createPayment');
+    Route::post('thanh-toan/thong-bao', 'PaymentController@returnPayment');
 
     Route::get('khach-hang/payment', 'PaymentController@listPaymentByCustomer');
 
