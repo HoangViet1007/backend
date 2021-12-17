@@ -37,6 +37,10 @@ class ContactController extends Controller
         return response()->json($this->service->add($request));
     }
 
+    public function sendEmailContact(Request $request){
+        return response()->json($this->service->sendEmailContact($request));
+    }
+
     /**
      * Display the specified resource.
      *

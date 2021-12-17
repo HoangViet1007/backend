@@ -2,9 +2,7 @@
 
 namespace App\Mail;
 
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -22,13 +20,14 @@ class ScheduleCourse extends Mailable
     protected $name_pt;
     // lịch học trong ngày
     protected $arr_schedule;
-// ngày hiện tại
-protected $date;
-    public function __construct($name_pt, $arr_schedule,$date)
+    // ngày hiện tại
+    protected $date;
+
+    public function __construct($name_pt, $arr_schedule, $date)
     {
-        $this->name_pt = $name_pt;
+        $this->name_pt      = $name_pt;
         $this->arr_schedule = $arr_schedule;
-        $this->date = $date;
+        $this->date         = $date;
     }
 
     /**
@@ -39,10 +38,10 @@ protected $date;
     public function build()
     {
         return $this->view('send_email.scheduleCourse')
-            ->subject('Email thông báo lịch dạy học ngày ' . $this->date)
-            ->with([
-                'name_pt' => $this->name_pt,
-                'arr_schedule' => $this->arr_schedule
-            ]);
+                    ->subject('Email thông báo lịch dạy học ngày ' . $this->date)
+                    ->with([
+                               'name_pt'      => $this->name_pt,
+                               'arr_schedule' => $this->arr_schedule
+                           ]);
     }
 }
