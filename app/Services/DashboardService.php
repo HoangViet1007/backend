@@ -96,6 +96,23 @@ class DashboardService extends BaseService
 
         ];
 
+
+        $sum_total_month_in_year = [
+            'January' => 0,
+            'February' => 0,
+            'March' => 0,
+            'April' => 0,
+            'May' => 0,
+            'June' => 0,
+            'July' => 0,
+            'August' => 0,
+            'September' => 0,
+            'October' => 0,
+            'November' => 0,
+            'December' => 0
+
+        ];
+
         foreach ($sum_revenue_website as $value_new) {
             foreach ($month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
@@ -104,6 +121,13 @@ class DashboardService extends BaseService
             }
         }
 
+        foreach ( $sum_total_in_month as $value){{
+            foreach ($sum_total_month_in_year as $key => $value) {
+                if ($key == $value_new->month) {
+                    $sum_total_month_in_year[$key] = $value_new->sum_total_in_month;
+                }
+            }
+        }}
 
         $data = [
             'count_pt_active' => $count_pt_active,
@@ -112,7 +136,7 @@ class DashboardService extends BaseService
             'count_user_inactive' => $count_user_inactive,
             'count_course' => $count_course,
             'sum_revenue_month' => $sum_revenue_month,
-            'sum_total_in_month' => $sum_total_in_month,
+            'sum_total_in_month' => $sum_total_month_in_year,
             'sum_revenue_website' => $month_in_year,
             'sum_revenue_month_website' => $sum_revenue_month_website,
             'count_specializes' => $count_specializes
@@ -150,18 +174,18 @@ class DashboardService extends BaseService
         $count_specialize = SpecializeDetail::where('user_id', $id)->count();
 
         $month_in_year = [
-            'January' => 0,
-            'February' => 0,
-            'March' => 0,
-            'April' => 0,
-            'May' => 0,
-            'June' => 0,
-            'July' => 0,
-            'August' => 0,
-            'September' => 0,
-            'October' => 0,
-            'November' => 0,
-            'December' => 0
+            ['January' => 0],
+            ['February' => 0],
+            ['March' => 0],
+            ['April' => 0],
+            ['May' => 0],
+            ['June' => 0],
+            ['July' => 0],
+            ['August' => 0],
+            ['September' => 0],
+            ['October' => 0],
+            ['November' => 0],
+            ['December' => 0]
 
         ];
 
