@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 
 class Rechage extends Mailable
 {
@@ -16,9 +17,15 @@ class Rechage extends Mailable
      *
      * @return void
      */
-    public function __construct()
+    public $code_bank, $code_vnp, $nameUser, $money, $time, $note;
+    public function __construct($code_bank, $code_vnp, $nameUser, $money, $time, $note)
     {
-        //
+        $this->code_bank = $code_bank;
+        $this->code_vnp = $code_vnp;
+        $this->nameUser = $nameUser;
+        $this->money = $money;
+        $this->time = $time;
+        $this->note = $note;
     }
 
     /**
@@ -28,6 +35,6 @@ class Rechage extends Mailable
      */
     public function build()
     {
-        return $this->view('view.name');
+        return $this->from('ngohongnguyenstudy2020@gmail.com', 'YM')->subject('Email xác nạp tiền thành công vào ngày ' . Carbon::now('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s'))->view('Money.Rechage');
     }
 }

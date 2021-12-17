@@ -11,6 +11,9 @@ use App\Models\CourseStudent;
 use App\Models\Course;
 use App\Constants\StatusConstant;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CoursePayment;
+use App\Mail\Rechage;
 
 
 /**
@@ -181,7 +184,9 @@ class PaymentService extends BaseService
             $bill = Bill::create($billData);
             $returnData['bill_id'] = $bill->id;
             $returnData['note'] = StatusConstant::COURSEPAYMENT;
-
+            $course = Course::find($request->course_id);
+            Mail::to(Auth::user()->email)
+                ->send(new CoursePayment($bill->code_bill, Auth::user()->name, $course->name, $bill->money, $bill->time, 'Thanh toán khóa học'));
         } else {
             // cong tien user
             $user = User::find(Auth::id());
@@ -190,6 +195,12 @@ class PaymentService extends BaseService
             ];
             $user->update($money);
             $returnData['note'] = StatusConstant::RECHARGE;
+
+            $payment = Payment::create($returnData);
+            $paymentRel = Payment::with('bill.course', 'user')->where('payments.id', $payment->id)->first();
+            Mail::to(Auth::user()->email)
+                ->send(new Rechage($payment->code_bank, $payment->code_vnp, Auth::user()->name, $payment->money, $payment->time, 'Nạp tiền vào website'));
+            return $paymentRel;
         }
         $payment = Payment::create($returnData);
         $paymentRel = Payment::with('bill.course', 'user')->where('payments.id', $payment->id)->first();
