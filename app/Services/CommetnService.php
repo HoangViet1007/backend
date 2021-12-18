@@ -74,10 +74,11 @@ class CommetnService extends BaseService
         $comment = Comment::find($request->id);
         if ($comment) {
             if ($request['status'] == StatusConstant::ACTIVE) {
-                return $comment->update(['status' => StatusConstant::INACTIVE]);
-            } else {
                 return $comment->update(['status' => StatusConstant::ACTIVE]);
+            } else {
+                return $comment->update(['status' => StatusConstant::INACTIVE]);
             }
+
         } else {
             throw new BadRequestException(
                 ['message' => __("Không thể thay đổi trạng thái của bình luận !")], new Exception()
