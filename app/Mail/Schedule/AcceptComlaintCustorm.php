@@ -22,7 +22,7 @@ class AcceptComlaintCustorm extends Mailable
     protected $name_student;
     protected $date_complain;
 
-    public function __construct($name_custorm,$name_cousre_plane, $name_pt, $date_complain)
+    public function __construct($name_custorm, $name_cousre_plane, $name_pt, $date_complain)
     {
         $this->name_cousre_plane = $name_cousre_plane;
         $this->name_custorm = $name_custorm;
@@ -39,6 +39,7 @@ class AcceptComlaintCustorm extends Mailable
     {
         return $this->view('Schedule.AcceptComlaintCustorm')
             ->subject('Thông báo đơn khiếu nại ' . $this->name_cousre_plane)
+            ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
             ->with([
                 'name_cousre_plane' => $this->name_cousre_plane,
                 'name_pt' => $this->name_pt,
