@@ -38,6 +38,7 @@ class ScheduleCourse extends Mailable
     public function build()
     {
         return $this->view('send_email.scheduleCourse')
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
                     ->subject('Email thông báo lịch dạy học ngày ' . $this->date)
                     ->with([
                                'name_pt'      => $this->name_pt,

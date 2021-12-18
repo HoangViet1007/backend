@@ -39,6 +39,7 @@ class CancelCourse extends Mailable
     public function build()
     {
         return $this->view('send_email.cancelCourse')
+            ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
             ->subject('Email thông báo hủy khóa học '.$this->name_couser)
             ->with([
                 'name_student' => $this->name_student,

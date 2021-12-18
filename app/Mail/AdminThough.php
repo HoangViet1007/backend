@@ -32,6 +32,7 @@ class AdminThough extends Mailable
     public function build()
     {
         return $this->view('send_email.AdminThough')
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
                     ->subject('Thư thông báo khoá học đã được duyệt')
                     ->with([
                                'name_course'  => $this->name_course,

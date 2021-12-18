@@ -19,7 +19,7 @@
             <div class="col-md-12">
                 <p style="font-weight: bold;">Xin chào Anh/Chị {{ $name }} !</p>
                 <p>
-                    {{ $description }}
+                    {!! $description !!}
                 </p>
                 <p>Cảm ơn anh chị đã liên hệ đến website của chúng tôi !</p>
             </div>
