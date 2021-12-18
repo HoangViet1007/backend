@@ -36,6 +36,7 @@ class PtThough extends Mailable
     public function build()
     {
         return $this->view('send_email.ptThough')
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
                     ->subject('Thư thông báo khoá học đã được duyệt')
                     ->with([
                                'student_name' => $this->student_name,

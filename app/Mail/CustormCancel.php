@@ -38,6 +38,7 @@ class CustormCancel extends Mailable
     public function build()
     {
         return $this->view('send_email.CustormCancel')
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
                     ->subject('Mail huỷ khoá học từ khách hàng')
                     ->with([
                                'teacher_name' => $this->teacher_name,

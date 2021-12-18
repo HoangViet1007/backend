@@ -38,6 +38,7 @@ class sendEmailContact extends Mailable
     public function build()
     {
         return $this->view('send_email.sendEmailContact')
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
                     ->subject($this->title)
                     ->with([
                                'name'        => $this->name,
