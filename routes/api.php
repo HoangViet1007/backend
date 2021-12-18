@@ -110,7 +110,7 @@ Route::group(['prefix' => '/'], function () {
 });
 
 // admin
-Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], function () {
 
     // setting
     Route::resource('setting', 'SettingController');
@@ -165,17 +165,14 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
     Route::post('change-status-comment', 'CommentController@chaneStatus');
 
    // dashboard admin
-
     Route::get('dashboard-admin','DashboardController@DashboardAdmin');
-
-
 
     // list course student
     Route::get('get-all-course-student','CourseStudentController@getAllCourseStudent');
 });
 
 // pt
-Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt']], function () {
+Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt','checkStatusUser']], function () {
     // Certificates of PT and Admin
     Route::get('get-list-certificates-specialize/{id}', 'CertificateController@listCertificatesSpecialize');
     Route::resource('certificates', 'CertificateController');
@@ -239,7 +236,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt']], function
 });
 
 // customer
-Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer']], function () {
+Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer','checkStatusUser']], function () {
     // hoa don
     Route::get('hoa-don', 'BillController@listBillByCustomer');
 
@@ -272,7 +269,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer']], fu
     Route::get('dashboard-customer','DashboardController@DashboardCustomer');
 });
 
-Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], function () {
     Route::get('/who-am-i', 'UserController@getCurrentUserInformation');
     //user
     Route::post('update-password', 'UserController@updatePassword');// car hai cai deu dung pt vaf cusstomer
@@ -289,7 +286,6 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api'], function () {
 
     // add comment
     Route::post('add-comment', 'CommentController@addComment');
-
 
 });
 

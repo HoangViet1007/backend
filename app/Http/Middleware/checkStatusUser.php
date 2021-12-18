@@ -2,10 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Constants\StatusConstant;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class checkLogin
+class checkStatusUser
 {
     /**
      * Handle an incoming request.
@@ -16,6 +18,10 @@ class checkLogin
      */
     public function handle(Request $request, Closure $next)
     {
+        $user = Auth::user();
+        if($user['status'] == StatusConstant::INACTIVE){
+            abort(403, 'Access denied');
+        }
         return $next($request);
     }
 }
