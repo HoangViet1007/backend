@@ -36,6 +36,7 @@ class AcceptComlaintPT extends Mailable
     public function build()
     {
         return $this->view('Schedule.AcceptComlaintPT')
+            ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
             ->subject('Thông báo đơn khiếu nại ' . $this->name_cousre_plane)
             ->with([
                 'name_cousre_plane' => $this->name_cousre_plane,

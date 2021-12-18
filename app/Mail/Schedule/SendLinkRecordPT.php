@@ -22,7 +22,7 @@ class SendLinkRecordPT extends Mailable
     protected $date_complain;
     protected $content;
 
-    public function __construct($name_student, $name_cousre_plane, $name_pt, $date_complain,$content)
+    public function __construct($name_student, $name_cousre_plane, $name_pt, $date_complain, $content)
     {
         $this->name_student = $name_student;
         $this->name_pt = $name_pt;
@@ -30,6 +30,7 @@ class SendLinkRecordPT extends Mailable
         $this->date_complain = $date_complain;
         $this->content = $content;
     }
+
     /**
      * Build the message.
      *
@@ -39,12 +40,13 @@ class SendLinkRecordPT extends Mailable
     {
         return $this->view('Schedule.SendLinkRecordPT')
             ->subject('Yêu cầu gửi link Record')
+            ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
             ->with([
                 'name_student' => $this->name_pt,
                 'name_cousre_plane' => $this->name_cousre_plane,
                 'name_pt' => $this->name_pt,
                 'date_complain' => $this->date_complain,
-                'content'=>$this->content
+                'content' => $this->content
             ]);
     }
 }

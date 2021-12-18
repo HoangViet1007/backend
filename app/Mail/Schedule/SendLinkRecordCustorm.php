@@ -22,7 +22,7 @@ class SendLinkRecordCustorm extends Mailable
     protected $date_complain;
     protected $content;
 
-    public function __construct($name_student, $name_cousre_plane, $name_pt, $date_complain,$content)
+    public function __construct($name_student, $name_cousre_plane, $name_pt, $date_complain, $content)
     {
         $this->name_student = $name_student;
         $this->name_pt = $name_pt;
@@ -39,13 +39,14 @@ class SendLinkRecordCustorm extends Mailable
     public function build()
     {
         return $this->view('Schedule.SendLinkRecordPT')
+            ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
             ->subject('Yêu cầu gửi link Record')
             ->with([
                 'name_student' => $this->name_pt,
                 'name_cousre_plane' => $this->name_cousre_plane,
                 'name_pt' => $this->name_pt,
                 'date_complain' => $this->date_complain,
-                'content'=>$this->content
+                'content' => $this->content
             ]);
     }
 }

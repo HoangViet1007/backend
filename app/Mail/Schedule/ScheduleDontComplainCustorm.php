@@ -37,6 +37,7 @@ class ScheduleDontComplainCustorm extends Mailable
     public function build()
     {
         return $this->view('Schedule.ScheduleDontComplainCustorm')
+            ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
             ->subject('Đơn khiếu nại khóa học ' . $this->name_cousre_plane . ' bị hủy')
             ->with([
                 'name_pt' => $this->name_pt,
