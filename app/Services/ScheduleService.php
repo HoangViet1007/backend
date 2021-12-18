@@ -659,13 +659,34 @@ class ScheduleService extends BaseService
         $schedule = Schedule::find($id);
         if ($schedule->status != StatusConstant::COMPLETE) {
             throw new BadRequestException(
-                ['message' => __("Khóa học chưa kết thúc, quý khách vui lòng đợi thêm !")],
+                ['message' => __("Buổi học chưa kết thúc, quý khách vui lòng đợi thêm !")],
                 new Exception()
             );
         }
         if (!$request->reason_complain || $request->reason_complain == "") {
             throw new BadRequestException(
                 ['message' => __("Vui lòng nhập lý do bạn khiếu nại buổi học !")],
+                new Exception()
+            );
+        }
+    }
+
+    // customer hủy khiếu nại
+    public function cancelComplain($id)
+    {
+        $user = Auth::user();
+        $userId = $user['id'];
+        if (!($userId == $this->checkScheduleCurrentCustomer($id))) {
+            throw new BadRequestException(
+                ['message' => __("Lịch học không tồn tại !")],
+                new Exception()
+            );
+        }
+
+        $schedule = Schedule::find($id);
+        if ($schedule->complain != StatusConstant::COMPLAIN) {
+            throw new BadRequestException(
+                ['message' => __("Buổi học này không bị khiếu nại !")],
                 new Exception()
             );
         }
@@ -678,6 +699,22 @@ class ScheduleService extends BaseService
         ]);
 
         return $schedule;
+    }
+
+    public function getComplainForCustomer()
+    {
+        $this->preGetAll();
+        $courseStudent = CourseStudent::where('user_id', Auth::id())->first();
+        $data = Schedule::where(['complain' => StatusConstant::COMPLAIN, 'course_student_id' => $courseStudent->id])->with(['course_student.users', 'course_planes.stage.course.teacher']);
+
+        try {
+            $response = $data->paginate(QueryHelper::limit());
+            $this->postGetAll($response);
+            return $response;
+
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
     // bắt dầu buổi học
@@ -762,8 +799,6 @@ class ScheduleService extends BaseService
         return $schedule;
     }
 
-    // CRON JOB send email course PT
-
     public function schedulePT()
     {
 
@@ -826,7 +861,6 @@ class ScheduleService extends BaseService
         }
     }
 
-    // CRON JOB send email schedule custorm
 
     public function scheduleCustorm()
     {
@@ -886,7 +920,6 @@ class ScheduleService extends BaseService
             }
         }
     }
-    // CRON JOB update level
 
     public function updateLevel()
     {
@@ -923,7 +956,7 @@ class ScheduleService extends BaseService
             $date_now = \Carbon\Carbon::now();
             if ($dueDateTime >= $date_now) {
                 $update = Schedule::find($value->id);
-                $update->update(['status'=>StatusConstant::COMPLETE,'participation'=>StatusConstant::NOJOIN]);
+                $update->update(['status' => StatusConstant::COMPLETE, 'participation' => StatusConstant::NOJOIN]);
             }
         }
     }
