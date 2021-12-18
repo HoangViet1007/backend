@@ -526,16 +526,19 @@ class ScheduleService extends BaseService
                     case 'nocomplain' :
 
                         // send email pt
-                        Mail::to($email_pt)->send(new ScheduleDontComplainPT($name_cousre_plane, $name_pt, $date_complain));
+                        Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleDontComplainPT($name_cousre_plane, $name_pt, $date_complain));
                         // send email custorm
-                        Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
+                        Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleDontComplainCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
                         if (Mail::failures()) {
                             throw new BadRequestException(
                                 ['message' => __("Gửi email không thành công !")],
                                 new Exception()
                             );
                         } else {
-                            $data->update(['complain' => StatusConstant::NOCOMPLAINTS, 'check_link_record' => null, 'date_send_link_record' => null]);
+                            $data->update(['complain' => StatusConstant::NOCOMPLAINTS,
+                                'reason_complain'=>null,
+                             ]);
+
                             return true;
                         }
 
@@ -555,14 +558,20 @@ class ScheduleService extends BaseService
                                 new Exception()
                             );
                         } else {
-                            $data->update(['status' => StatusConstant::UNFINISHED, 'complain' => StatusConstant::NOCOMPLAINTS]);
+                            $data->update(['status' => StatusConstant::UNFINISHED,
+                                'complain' => StatusConstant::NOCOMPLAINTS,
+                                'link_record'=>null,
+                                'check_link_record' => null,
+                                'date_send_link_record' => null,
+                                'reason_complain'=>null]);
                             return true;
 
                         }
 
                     case 'send_link_record' :
 
-                        Mail::to('ngohongnguyen016774@gmail.com')->send(new SendLinkRecordCustorm($name_custorm, $name_cousre_plane, $name_pt, $date_complain));
+                        Mail::to('ngohongnguyen016774@gmail.com')
+                            ->send(new SendLinkRecordPT($name_custorm, $name_cousre_plane, $name_pt, $date_complain,$data['reason_complain']));
 
                         if (Mail::failures()) {
                             throw new BadRequestException(
@@ -571,7 +580,8 @@ class ScheduleService extends BaseService
                             );
                         } else {
 
-                            $data->update(['check_link_record' => StatusConstant::SENTSUCCESS, 'date_send_link_record' => Carbon::now()->addDay()]);
+                            $data->update(['check_link_record' => StatusConstant::SENTSUCCESS,
+                                'date_send_link_record' => Carbon::now()->addDay()]);
                             return true;
                         }
 
@@ -752,6 +762,8 @@ class ScheduleService extends BaseService
         return $schedule;
     }
 
+    // CRON JOB send email course PT
+
     public function schedulePT()
     {
 
@@ -814,6 +826,7 @@ class ScheduleService extends BaseService
         }
     }
 
+    // CRON JOB send email schedule custorm
 
     public function scheduleCustorm()
     {
@@ -873,6 +886,7 @@ class ScheduleService extends BaseService
             }
         }
     }
+    // CRON JOB update level
 
     public function updateLevel()
     {
@@ -897,7 +911,7 @@ class ScheduleService extends BaseService
         }
     }
 
-    // CRON JOB
+    // CRON JOB update course success
 
     public function updateCourseSucces()
     {

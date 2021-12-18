@@ -35,6 +35,7 @@ class ScheduleCourseCustorm extends Mailable
     public function build()
     {
         return $this->view('Schedule.ScheduleCourseCustorm')
+            ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
             ->subject('Thông báo lịch học ngày ' . $this->date)
             ->with([
                 'name_student' => $this->name_student,

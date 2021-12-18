@@ -18,7 +18,7 @@
             <div class="col-md-12">
                 <p style="font-weight: bold;">Xin chào {{ $name_custorm }} !</p>
                 <p>Khóa học {{$name_cousre_plane}} vào ngày {{$date_complain}} do {{$name_pt}} dạy đã bị hủy khiếu nại.
-                    Qua xem xét chúng tôi thấy PT thực hiện đúng nội quy khi dạy học.Nên bạn sẽ được sử thua trong vụ khiếu nại này </p>
+                    Qua xem xét chúng tôi thấy PT thực hiện đúng nội quy khi dạy học.Nên đơn khiếu nại này sẽ không có hiệu lực. </p>
                 <i>Mọi thắc mắc về buổi học quý khách vui lòng liên hệ đến 0828890896 ! Một lần nữa cảm ơn quý khách
                     đã tin tưởng website chúng tôi !</i>
             </div>
