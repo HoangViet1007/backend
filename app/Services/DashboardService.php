@@ -29,9 +29,29 @@ class DashboardService extends BaseService
         $this->model = new Demo();
     }
 
-
-    public function dashboardAdmin()
+    public function validatedashboardAdmin($request)
     {
+        $year = Carbon::now()->addYear()->year;
+        $this->doValidate($request, [
+            'year_turnover' => 'numeric|min:2020|max:' . $year,
+            'year_profit' => 'numeric|min:2020|max:' . $year,
+        ], [
+            'year_turnover.min' => 'Năm không hợp lệ!',
+            'year_turnover.max' => 'Năm không hợp lệ!',
+            'year_turnover.numeric' => 'Năm không đúng định dạng !',
+            'year_profit.min' => 'Năm không hợp lệ!',
+            'year_profit.max' => 'Năm không hợp lệ!',
+            'year_profit.numeric' => 'Năm không đúng định dạng !',
+
+        ]);
+    }
+
+
+
+    public function dashboardAdmin($request)
+    {
+        $this->validatedashboardAdmin($request);
+
         $count_pt_active = User::where('status', StatusConstant::ACTIVE)->with([
                 'modelHasRoles' => function ($query) {
                     $query->where('role_id', config('constant.role_pt'));
@@ -59,20 +79,25 @@ class DashboardService extends BaseService
         $count_course = Course::where('status', StatusConstant::HAPPENING)->where('display', StatusConstant::ACTIVE)->count();
         // tinh doanh thu theo thang
         $month = Carbon::now()->month;
+        $year_turnover = $request->year_turnover ?? Carbon::now()->year;
+        $year_profit = $request->year_profit ?? Carbon::now()->year;
 
         $sum_revenue_month = Payment::whereMonth('created_at', $month)->where('note', StatusConstant::RECHARGE)->sum('money');
 
 
         $sum_total_in_month = Payment::where('note', StatusConstant::RECHARGE)
+            ->whereYear('created_at',$year_turnover)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_month')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
         $sum_revenue_website = BillPersonalTrainer::selectRaw('year(created_at) year, monthname(created_at) month, sum(money_old) - sum(money) sum_total_in_website')
+            ->whereYear('created_at',$year_profit)
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
         $sum_revenue_month_website = BillPersonalTrainer::whereMonth('created_at', $month)
+            ->whereYear('created_at',$year_profit)
             ->selectRaw('sum(money_old) - sum(money) sum_total_in_month_website')
             ->whereMonth('created_at', $month)
             ->get();
@@ -116,18 +141,20 @@ class DashboardService extends BaseService
         foreach ($sum_revenue_website as $value_new) {
             foreach ($month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
-                    $month_in_year[$key] = $value_new->sum_total_in_website;
+                    $month_in_year[$key] = $value_new->sum_total_in_website ?? 0;
                 }
             }
         }
 
-        foreach ( $sum_total_in_month as $value){{
-            foreach ($sum_total_month_in_year as $key => $value) {
-                if ($key == $value_new->month) {
-                    $sum_total_month_in_year[$key] = $value_new->sum_total_in_month;
+        foreach ($sum_total_in_month as $value) {
+            {
+                foreach ($sum_total_month_in_year as $key => $value) {
+                    if ($key == $value_new->month) {
+                        $sum_total_month_in_year[$key] = $value_new->sum_total_in_month ?? 0;
+                    }
                 }
             }
-        }}
+        }
 
         $data = [
             'count_pt_active' => $count_pt_active,
@@ -146,8 +173,32 @@ class DashboardService extends BaseService
 
     }
 
-    public function dashboardPT()
+
+    public function validatedashboardPT($request)
     {
+        $year = Carbon::now()->addYear()->year;
+        $this->doValidate($request, [
+            'year_count_student' => 'numeric|min:2020|max:' . $year,
+            'year_sum_money'=>'numeric|min:2020|max:' . $year,
+
+        ], [
+            'year_count_student.min' => 'Năm không hợp lệ!',
+            'year_count_student.max' => 'Năm không hợp lệ!',
+            'year_count_student.numeric' => 'Năm không đúng định dạng !',
+            'year_sum_money.min' => 'Năm không hợp lệ!',
+            'year_sum_money.max' => 'Năm không hợp lệ!',
+            'year_sum_money.numeric' => 'Năm không đúng định dạng !',
+
+        ]);
+    }
+
+
+    public function dashboardPT($request)
+    {
+        $year_sum_money= $request->year_sum_money ?? Carbon::now()->year;
+        $year_count_student= $request->year_count_student ?? Carbon::now()->year;
+
+        $this->validatedashboardPT($request);
         $id = Auth::user()->id;
         $date_now = Carbon::now();
         $month = $date_now->month;
@@ -159,18 +210,22 @@ class DashboardService extends BaseService
             $count_student = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)->whereIn('course_id', $array_id_course)->count();
             $count_student_month = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)
                 ->whereMonth('created_at', $month)
+                ->whereYear('created_at', $year_count_student)
                 ->whereIn('course_id', $array_id_course)->count();
         }
 
         $sum_money_month = BillPersonalTrainer::where('user_id', $id)
             ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year_sum_money)
             ->groupBy(DB::raw('MONTH(created_at)'))->sum('money');
 
+
+
         $sum_total_in_month = BillPersonalTrainer::where('user_id', $id)
-            ->selectRaw('year(created_at) year, month(created_at) month, sum(money) sum_total_in_month')
+            ->whereYear('created_at',$year_sum_money)
+            ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_month')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
-
         $count_specialize = SpecializeDetail::where('user_id', $id)->count();
 
         $month_in_year = [
@@ -191,7 +246,7 @@ class DashboardService extends BaseService
         foreach ($sum_total_in_month as $value_new) {
             foreach ($month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
-                    $month_in_year[$key] = $value_new->sum_total_in_website;
+                    $month_in_year[$key] = $value_new->sum_total_in_month;
                 }
             }
         }
@@ -208,20 +263,47 @@ class DashboardService extends BaseService
 
     }
 
-    public function dashboardCustomer()
+
+    public function validatedashboardCustomer($request)
     {
+        $year = Carbon::now()->addYear()->year;
+        $this->doValidate($request, [
+            'year_loaded_money' => 'numeric|min:2020|max:' . $year,
+            'year_money_spent' => 'numeric|min:2020|max:' . $year,
+
+        ], [
+            'year_loaded_money.min' => 'Năm không hợp lệ!',
+            'year_loaded_money.max' => 'Năm không hợp lệ!',
+            'year_loaded_money.numeric' => 'Năm không đúng định dạng !',
+            'year_money_spent.min' => 'Năm không hợp lệ!',
+            'year_money_spent.max' => 'Năm không hợp lệ!',
+            'year_money_spent.numeric' => 'Năm không đúng định dạng !',
+        ]);
+    }
+
+    public function dashboardCustomer($request)
+    {
+        $this->validatedashboardCustomer($request);
+        $year_money_spent = $request->year_money_spent ?? Carbon::now()->year;
+        $year_loaded_money = $request->year_loaded_money ?? Carbon::now()->year;
         $date_now = Carbon::now();
         $month = $date_now->month;
         $id = Auth::user()->id;
         $count_course = CourseStudent::where('user_id', $id)->count();
-        $sum_money_spent_month = Bill::where('user_id', $id)->whereMonth('created_at', $month)->sum('money');
-        $sum_money_spent_month_in_years = Bill::where('user_id', $id)->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
+        $sum_money_spent_month = Bill::where('user_id', $id)->whereMonth('created_at', $month)->whereYear('created_at',$year_money_spent )->sum('money');
+        $sum_money_spent_month_in_years = Bill::where('user_id', $id)
+            ->whereYear('created_at',$year_money_spent )
+            ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
         // naapj vao website
-        $sum_money_loaded_money_month = Payment::where('user_id', $id)->whereMonth('created_at', $month)->sum('money');
-        $sum_money_loaded_money_month_in_years = Payment::where('user_id', $id)->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
+        $sum_money_loaded_money_month = Payment::where('user_id', $id)
+            ->whereYear('created_at',$year_loaded_money )
+            ->whereMonth('created_at', $month)->sum('money');
+        $sum_money_loaded_money_month_in_years = Payment::where('user_id', $id)
+            ->whereYear('created_at',$year_loaded_money )
+            ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
@@ -245,7 +327,7 @@ class DashboardService extends BaseService
         foreach ($sum_money_spent_month_in_years as $value_new) {
             foreach ($sum_money_spent_month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
-                    $sum_money_spent_month_in_year[$key] = $value_new->sum_total_in_website;
+                    $sum_money_spent_month_in_year[$key] = $value_new->sum_total_in_website ?? 0;
                 }
             }
         }
@@ -269,7 +351,7 @@ class DashboardService extends BaseService
         foreach ($sum_money_loaded_money_month_in_years as $value_new) {
             foreach ($sum_money_loaded_money_month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
-                    $sum_money_loaded_money_month_in_year[$key] = $value_new->sum_total_in_website;
+                    $sum_money_loaded_money_month_in_year[$key] = $value_new->sum_total_in_website ?? 0;
                 }
             }
         }

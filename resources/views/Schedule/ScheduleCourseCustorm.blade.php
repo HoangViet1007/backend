@@ -29,7 +29,7 @@
                 thể hình
             </div>
             <div class="col-md-12">
-                <p style="font-weight: bold;">Xin chào {{ $name_student }} !</p>
+                <p style="font-weight: bold;">Xin chào quaan loll !</p>
                 <p>Thời khóa biểu</p>
                 <table>
                     <thead>

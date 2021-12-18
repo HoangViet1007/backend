@@ -25,7 +25,7 @@ class CommentController extends Controller
         return response()->json($this->commentService->listComment());
     }
 
-    public function chaneStatus(Request $request){
+    public function changeStatus(Request $request){
 
         return response()->json($this->commentService->changeStatus($request));
 

@@ -822,9 +822,7 @@ class ScheduleService extends BaseService
         $schedule = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
             ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
             ->leftJoin('courses', 'course_students.course_id', 'courses.id')
-            ->when($date, function ($q) use ($date) {
-                $q->where('schedules.date', $date);
-            })
+            ->where('date', '2021-12-18')
             ->where('course_students.status', StatusConstant::SCHEDULE)
             ->select('schedules.*')
             ->get();
@@ -869,6 +867,7 @@ class ScheduleService extends BaseService
                 $data['info_course'] = $data_childer;
                 $arrInfoStudent[$data_key] = $data;
             }
+
             foreach ($arrInfoStudent as $value) {
                 Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleCourseCustorm($value['name_student'], $value['info_course'], $date));
             }
