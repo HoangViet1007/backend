@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -29,6 +28,7 @@ class TetSendMailNotify extends Mailable
     public function build()
     {
         return $this->subject('Nguyên gửi mail')
-            ->view('test_send_email');
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
+                    ->view('test_send_email');
     }
 }
