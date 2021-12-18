@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Services\BaseService;
 use App\Services\DashboardService;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -15,20 +16,20 @@ class DashboardController extends Controller
         $this->service = new DashboardService();
     }
 
-    public function DashboardAdmin()
+    public function DashboardAdmin(Request $request)
     {
-        return response($this->service->DashboardAdmin());
+        return response($this->service->DashboardAdmin($request));
     }
 
-    public function DashboardPT()
+    public function DashboardPT(Request $request)
     {
-        return response($this->service->DashboardPT());
+        return response($this->service->DashboardPT($request));
 
     }
 
-    public function DashboardCustomer()
+    public function DashboardCustomer(Request $request)
     {
-        return response($this->service->DashboardCustomer());
+        return response($this->service->DashboardCustomer($request));
 
     }
 

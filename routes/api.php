@@ -162,7 +162,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], fu
     Route::get('list-comment', 'CommentController@listComment');
 
     // thay đổi status của comment
-    Route::post('change-status-comment', 'CommentController@chaneStatus');
+    Route::post('change-status-comment', 'CommentController@changeStatus');
 
    // dashboard admin
     Route::get('dashboard-admin','DashboardController@DashboardAdmin');
