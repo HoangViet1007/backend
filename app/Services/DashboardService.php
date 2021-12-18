@@ -47,7 +47,6 @@ class DashboardService extends BaseService
     }
 
 
-
     public function dashboardAdmin($request)
     {
         $this->validatedashboardAdmin($request);
@@ -86,18 +85,18 @@ class DashboardService extends BaseService
 
 
         $sum_total_in_month = Payment::where('note', StatusConstant::RECHARGE)
-            ->whereYear('created_at',$year_turnover)
+            ->whereYear('created_at', $year_turnover)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_month')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
         $sum_revenue_website = BillPersonalTrainer::selectRaw('year(created_at) year, monthname(created_at) month, sum(money_old) - sum(money) sum_total_in_website')
-            ->whereYear('created_at',$year_profit)
+            ->whereYear('created_at', $year_profit)
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
         $sum_revenue_month_website = BillPersonalTrainer::whereMonth('created_at', $month)
-            ->whereYear('created_at',$year_profit)
+            ->whereYear('created_at', $year_profit)
             ->selectRaw('sum(money_old) - sum(money) sum_total_in_month_website')
             ->whereMonth('created_at', $month)
             ->get();
@@ -179,7 +178,7 @@ class DashboardService extends BaseService
         $year = Carbon::now()->addYear()->year;
         $this->doValidate($request, [
             'year_count_student' => 'numeric|min:2020|max:' . $year,
-            'year_sum_money'=>'numeric|min:2020|max:' . $year,
+            'year_sum_money' => 'numeric|min:2020|max:' . $year,
 
         ], [
             'year_count_student.min' => 'Năm không hợp lệ!',
@@ -195,8 +194,8 @@ class DashboardService extends BaseService
 
     public function dashboardPT($request)
     {
-        $year_sum_money= $request->year_sum_money ?? Carbon::now()->year;
-        $year_count_student= $request->year_count_student ?? Carbon::now()->year;
+        $year_sum_money = $request->year_sum_money ?? Carbon::now()->year;
+        $year_count_student = $request->year_count_student ?? Carbon::now()->year;
 
         $this->validatedashboardPT($request);
         $id = Auth::user()->id;
@@ -207,11 +206,26 @@ class DashboardService extends BaseService
         $array_id_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id');
         $count_student = 0;
         if (count($array_id_course) > 0) {
-            $count_student = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)->whereIn('course_id', $array_id_course)->count();
+            $count_student = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)
+                ->whereIn('course_id', $array_id_course)
+                ->count();
+
+            $count_student_month_in_year = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)
+                ->whereMonth('created_at', $month)
+                ->whereYear('created_at', $year_count_student)
+                ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
+                ->whereIn('course_id', $array_id_course)
+                ->selectRaw('year(created_at) year, monthname(created_at) month, COUNT(id) as sum_student_in_month')
+                ->get();
+
+
             $count_student_month = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)
                 ->whereMonth('created_at', $month)
                 ->whereYear('created_at', $year_count_student)
-                ->whereIn('course_id', $array_id_course)->count();
+                ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
+                ->whereIn('course_id', $array_id_course)
+                ->selectRaw('year(created_at) year, monthname(created_at) month, COUNT(id) as sum_student_in_month')->count();
+
         }
 
         $sum_money_month = BillPersonalTrainer::where('user_id', $id)
@@ -220,9 +234,8 @@ class DashboardService extends BaseService
             ->groupBy(DB::raw('MONTH(created_at)'))->sum('money');
 
 
-
         $sum_total_in_month = BillPersonalTrainer::where('user_id', $id)
-            ->whereYear('created_at',$year_sum_money)
+            ->whereYear('created_at', $year_sum_money)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_month')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
@@ -246,11 +259,35 @@ class DashboardService extends BaseService
         foreach ($sum_total_in_month as $value_new) {
             foreach ($month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
-                    $month_in_year[$key] = $value_new->sum_total_in_month;
+                    $month_in_year[$key] = $value_new->sum_total_in_month ?? 0;
                 }
             }
         }
 
+        if (count($count_student_month_in_year) > 0) {
+            $count_student_month_in_years = [
+                'January' => 0,
+                'February' => 0,
+                'March' => 0,
+                'April' => 0,
+                'May' => 0,
+                'June' => 0,
+                'July' => 0,
+                'August' => 0,
+                'September' => 0,
+                'October' => 0,
+                'November' => 0,
+                'December' => 0
+            ];
+
+            foreach ($count_student_month_in_year as $value_new) {
+                foreach ($count_student_month_in_years as $key => $value) {
+                    if ($key == $value_new->month) {
+                        $count_student_month_in_years[$key] = $value_new->sum_student_in_month ?? 0;
+                    }
+                }
+            }
+        }
 
         $data['count_course'] = $count_course;
         $data['count_student'] = $count_student;
@@ -258,6 +295,7 @@ class DashboardService extends BaseService
         $data['sum_money_month'] = $sum_money_month;
         $data['count_student_month'] = $count_student_month;
         $data['sum_total_in_month'] = $month_in_year;
+        $data['count_student_month_in_year'] = $count_student_month_in_years;
 
         return $data;
 
@@ -290,19 +328,19 @@ class DashboardService extends BaseService
         $month = $date_now->month;
         $id = Auth::user()->id;
         $count_course = CourseStudent::where('user_id', $id)->count();
-        $sum_money_spent_month = Bill::where('user_id', $id)->whereMonth('created_at', $month)->whereYear('created_at',$year_money_spent )->sum('money');
+        $sum_money_spent_month = Bill::where('user_id', $id)->whereMonth('created_at', $month)->whereYear('created_at', $year_money_spent)->sum('money');
         $sum_money_spent_month_in_years = Bill::where('user_id', $id)
-            ->whereYear('created_at',$year_money_spent )
+            ->whereYear('created_at', $year_money_spent)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
         // naapj vao website
         $sum_money_loaded_money_month = Payment::where('user_id', $id)
-            ->whereYear('created_at',$year_loaded_money )
+            ->whereYear('created_at', $year_loaded_money)
             ->whereMonth('created_at', $month)->sum('money');
         $sum_money_loaded_money_month_in_years = Payment::where('user_id', $id)
-            ->whereYear('created_at',$year_loaded_money )
+            ->whereYear('created_at', $year_loaded_money)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
