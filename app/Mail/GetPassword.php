@@ -2,9 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -20,10 +18,10 @@ class GetPassword extends Mailable
     protected $password;
     protected $user;
 
-    public function __construct( $user,$password)
+    public function __construct($user, $password)
     {
         $this->password = $password;
-        $this->user = $user;
+        $this->user     = $user;
     }
 
     /**
@@ -34,10 +32,11 @@ class GetPassword extends Mailable
     public function build()
     {
         return $this->view('GetPassword')
-            ->subject('Email lấy lại mật khẩu')
-            ->with([
-                'password' => $this->password,
-                'user' => $this->user
-            ]);
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
+                    ->subject('Email lấy lại mật khẩu')
+                    ->with([
+                               'password' => $this->password,
+                               'user'     => $this->user
+                           ]);
     }
 }

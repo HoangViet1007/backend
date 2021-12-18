@@ -25,7 +25,7 @@ class PTCantTeach extends Mailable
         $this->student_name = $student_name;
         $this->time_study   = $time_study;
         $this->name_couser  = $name_couser;
-        $this->created_at    = $created_at;
+        $this->created_at   = $created_at;
     }
 
     /**
@@ -36,12 +36,13 @@ class PTCantTeach extends Mailable
     public function build()
     {
         return $this->view('send_email.ptCantTeach')
+                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
                     ->subject('Thư huỷ khoá học từ phía PT')
                     ->with([
                                'studentName' => $this->student_name,
                                'time_study'  => $this->time_study,
                                'name_couser' => $this->name_couser,
-                               'created_at'   => $this->created_at,
+                               'created_at'  => $this->created_at,
                            ]);
 
     }
