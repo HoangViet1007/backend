@@ -145,14 +145,12 @@ class DashboardService extends BaseService
             }
         }
 
-        foreach ($sum_total_in_month as $value) {
-            {
+        foreach ($sum_total_in_month as $value_new) {
                 foreach ($sum_total_month_in_year as $key => $value) {
                     if ($key == $value_new->month) {
                         $sum_total_month_in_year[$key] = $value_new->sum_total_in_month ?? 0;
                     }
                 }
-            }
         }
 
         $data = [
