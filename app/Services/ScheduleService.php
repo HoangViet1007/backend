@@ -668,6 +668,13 @@ class ScheduleService extends BaseService
                 new Exception()
             );
         }
+
+        $schedule->update([
+            'complain' => StatusConstant::COMPLAIN,
+            'reason_complain' => $request->reason_complain
+        ]);
+
+        return $schedule;
     }
 
     // customer hủy khiếu nại
@@ -693,8 +700,8 @@ class ScheduleService extends BaseService
         // gửi mail cho pt thông báo bị khiếu nại ở đây
 
         $schedule->update([
-            'complain' => StatusConstant::COMPLAIN,
-            'reason_complain' => $request->reason_complain
+            'complain' => StatusConstant::NOCOMPLAINTS,
+            'reason_complain' => NULL
         ]);
 
         return $schedule;
