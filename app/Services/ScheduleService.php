@@ -668,6 +668,13 @@ class ScheduleService extends BaseService
                 new Exception()
             );
         }
+
+        $schedule->update([
+            'complain' => StatusConstant::COMPLAIN,
+            'reason_complain' => $request->reason_complain
+        ]);
+
+        return $schedule;
     }
 
     // customer hủy khiếu nại
@@ -693,8 +700,8 @@ class ScheduleService extends BaseService
         // gửi mail cho pt thông báo bị khiếu nại ở đây
 
         $schedule->update([
-            'complain' => StatusConstant::COMPLAIN,
-            'reason_complain' => $request->reason_complain
+            'complain' => StatusConstant::NOCOMPLAINTS,
+            'reason_complain' => NULL
         ]);
 
         return $schedule;
@@ -703,12 +710,16 @@ class ScheduleService extends BaseService
     public function getComplainForCustomer()
     {
         $this->preGetAll();
-        $courseStudent = CourseStudent::where('user_id', Auth::id())->first();
-        $data = Schedule::where(['complain' => StatusConstant::COMPLAIN, 'course_student_id' => $courseStudent->id])->with(['course_student.users', 'course_planes.stage.course.teacher']);
-
+        $courseStudent = CourseStudent::where('user_id', Auth::id())->get();
+        $courseStudentId = [];
+        foreach ($courseStudent as $item) {
+            $courseStudentId[] = $item->id;
+        }
+        $data = Schedule::where(['complain' => StatusConstant::COMPLAIN])->whereIn('course_student_id', $courseStudentId)->with(['course_student.users', 'course_planes.stage.course.teacher']);
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
+
             return $response;
 
         } catch (Exception $e) {

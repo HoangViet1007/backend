@@ -29,7 +29,7 @@ class BMIService extends BaseService
             $BMI = ($weight/($heightM*$heightM));
         }
         $BMI->{'BMI'} = $BMI;
-        return $BMI ;
+        return $BMI;
     }
 
 

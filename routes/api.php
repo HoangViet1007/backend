@@ -110,7 +110,7 @@ Route::group(['prefix' => '/'], function () {
 });
 
 // admin
-Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], function () {
+Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser', 'verified_custom'], function () {
 
     // setting
     Route::resource('setting', 'SettingController');
@@ -172,7 +172,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], fu
 });
 
 // pt
-Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt','checkStatusUser']], function () {
+Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt','checkStatusUser', 'verified_custom']], function () {
     // Certificates of PT and Admin
     Route::get('get-list-certificates-specialize/{id}', 'CertificateController@listCertificatesSpecialize');
     Route::resource('certificates', 'CertificateController');
@@ -238,7 +238,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt','checkStatu
 });
 
 // customer
-Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer','checkStatusUser']], function () {
+Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer','checkStatusUser', 'verified_custom']], function () {
     // hoa don
     Route::get('hoa-don', 'BillController@listBillByCustomer');
 
@@ -292,5 +292,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], fu
     Route::post('add-comment', 'CommentController@addComment');
 
 });
+
+Route::get('email/verify/{id}', 'VerificationController@verify')->name('verification.verify');
+
+Route::get('email/resend', 'VerificationController@resend')->name('verification.resend');
 
 

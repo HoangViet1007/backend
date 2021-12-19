@@ -222,6 +222,7 @@ class UserService extends BaseService
         if (isset($account_level_id)) {
             $model->update(['account_level_id' => $account_level_id]);
         }
+        $model->sendEmailVerificationNotification();
     }
 
     public function preUpdate(int|string $id, object $request)
