@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'authCustomer' => \App\Http\Middleware\AuthCustomer::class,
         'authPt' => \App\Http\Middleware\AuthPt::class,
         'checkStatusUser' => \App\Http\Middleware\checkStatusUser::class,
+        'verified_custom' => \App\Http\Middleware\EmailVerifyCustom::class,
     ];
 }

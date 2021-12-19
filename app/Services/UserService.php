@@ -216,13 +216,13 @@ class UserService extends BaseService
 
     public function postAddUser(object $request, Model $model, array $role_ids, $account_level_id)
     {
-        $model->sendEmailVerificationNotification();
         if (isset($role_ids)) {
             $model->roles()->attach($role_ids);
         }
         if (isset($account_level_id)) {
             $model->update(['account_level_id' => $account_level_id]);
         }
+        $model->sendEmailVerificationNotification();
     }
 
     public function preUpdate(int|string $id, object $request)
