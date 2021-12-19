@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Constants\StatusConstant;
+use App\Models\AccountLevel;
 use App\Models\Bill;
 use App\Models\BillPersonalTrainer;
 use App\Models\Course;
 use App\Models\CourseStudent;
 use App\Models\Demo;
+use App\Models\ModelHasRole;
 use App\Models\Payment;
 use App\Models\Schedule;
 use App\Models\Specialize;
@@ -51,38 +53,24 @@ class DashboardService extends BaseService
     {
         $this->validatedashboardAdmin($request);
 
-        $count_pt_active = User::where('status', StatusConstant::ACTIVE)->with([
-                'modelHasRoles' => function ($query) {
-                    $query->where('role_id', config('constant.role_pt'));
-                }]
-        )->count();
+        $count_pt = ModelHasRole::where('role_id', config('constant.role_pt'))->count();
 
-        $count_pt_inactive = User::where('status', StatusConstant::INACTIVE)->with([
-                'modelHasRoles' => function ($query) {
-                    $query->where('role_id', config('constant.role_pt'));
-                }]
-        )->count();
 
-        $count_user_active = User::where('status', StatusConstant::ACTIVE)->with([
-                'modelHasRoles' => function ($query) {
-                    $query->where('role_id', config('constant.role_customer'));
-                }]
-        )->count();
+        $count_customer = ModelHasRole::where('role_id', config('constant.role_customer'))->count();
 
-        $count_user_inactive = User::where('status', StatusConstant::INACTIVE)->with([
-                'modelHasRoles' => function ($query) {
-                    $query->where('role_id', config('constant.role_customer'));
-                }]
-        )->count();
-
-        $count_course = Course::where('status', StatusConstant::HAPPENING)->where('display', StatusConstant::ACTIVE)->count();
+        $count_staff = ModelHasRole::whereNotIn('role_id', [config('constant.role_pt'), config('constant.role_customer')])->count();
+        $count_payment_pt = CourseStudent::where('status', StatusConstant::REQUESTADMIN)->count();
+        $account_level = AccountLevel::count();
+        $count_complain = Schedule::where('complain', StatusConstant::COMPLAIN)->count();
+        $count_course = Course::where('display', StatusConstant::ACTIVE)->count();
         // tinh doanh thu theo thang
         $month = Carbon::now()->month;
         $year_turnover = $request->year_turnover ?? Carbon::now()->year;
         $year_profit = $request->year_profit ?? Carbon::now()->year;
-
+// sum money nap vao website
         $sum_revenue_month = Payment::whereMonth('created_at', $month)->where('note', StatusConstant::RECHARGE)->sum('money');
 
+// sum money nap vao website
 
         $sum_total_in_month = Payment::where('note', StatusConstant::RECHARGE)
             ->whereYear('created_at', $year_turnover)
@@ -90,10 +78,13 @@ class DashboardService extends BaseService
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
+
+        // doanh thu
         $sum_revenue_website = BillPersonalTrainer::selectRaw('year(created_at) year, monthname(created_at) month, sum(money_old) - sum(money) sum_total_in_website')
             ->whereYear('created_at', $year_profit)
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
+        // doanh thu
 
         $sum_revenue_month_website = BillPersonalTrainer::whereMonth('created_at', $month)
             ->whereYear('created_at', $year_profit)
@@ -136,34 +127,41 @@ class DashboardService extends BaseService
             'December' => 0
 
         ];
-
+        $sum_revenue_website_year = 0;
         foreach ($sum_revenue_website as $value_new) {
             foreach ($month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
                     $month_in_year[$key] = $value_new->sum_total_in_website ?? 0;
+                    $sum_revenue_website_year += $value_new->sum_total_in_website;
+                }
+            }
+        }
+        $sum_total_year = 0;
+        foreach ($sum_total_in_month as $value_new) {
+            foreach ($sum_total_month_in_year as $key => $value) {
+                if ($key == $value_new->month) {
+                    $sum_total_month_in_year[$key] = $value_new->sum_total_in_month ?? 0;
+                    $sum_total_year += $value_new->sum_total_in_month;
                 }
             }
         }
 
-        foreach ($sum_total_in_month as $value_new) {
-                foreach ($sum_total_month_in_year as $key => $value) {
-                    if ($key == $value_new->month) {
-                        $sum_total_month_in_year[$key] = $value_new->sum_total_in_month ?? 0;
-                    }
-                }
-        }
-
         $data = [
-            'count_pt_active' => $count_pt_active,
-            'count_pt_inactive' => $count_pt_inactive,
-            'count_user_active' => $count_user_active,
-            'count_user_inactive' => $count_user_inactive,
+            'count_pt' => $count_pt,
+            'count_customer' => $count_customer,
+            'count_staff' => $count_staff,
             'count_course' => $count_course,
             'sum_revenue_month' => $sum_revenue_month,
+            'count_specializes' => $count_specializes,
+            'count_payment_pt' => $count_payment_pt,
+            'account_level' => $account_level,
+            'sum_total_year' => $sum_total_year,
+            'count_complain' => $count_complain,
+            'sum_revenue_website_year' => $sum_revenue_website_year,
+            'sum_revenue_month_website' => $sum_revenue_month_website,
             'sum_total_in_month' => $sum_total_month_in_year,
             'sum_revenue_website' => $month_in_year,
-            'sum_revenue_month_website' => $sum_revenue_month_website,
-            'count_specializes' => $count_specializes
+
         ];
 
         return $data;
@@ -253,14 +251,17 @@ class DashboardService extends BaseService
             'November' => 0,
             'December' => 0
         ];
-
+        $sum_total_year = 0;
         foreach ($sum_total_in_month as $value_new) {
             foreach ($month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
                     $month_in_year[$key] = $value_new->sum_total_in_month ?? 0;
+                    $sum_total_year += $value_new->sum_total_in_month;
                 }
             }
         }
+
+        $count_student_year = 0;
 
         if (count($count_student_month_in_year) > 0) {
             $count_student_month_in_years = [
@@ -282,6 +283,7 @@ class DashboardService extends BaseService
                 foreach ($count_student_month_in_years as $key => $value) {
                     if ($key == $value_new->month) {
                         $count_student_month_in_years[$key] = $value_new->sum_student_in_month ?? 0;
+                        $count_student_year += $value_new->sum_student_in_month;
                     }
                 }
             }
@@ -291,9 +293,11 @@ class DashboardService extends BaseService
         $data['count_student'] = $count_student;
         $data['count_specialize'] = $count_specialize;
         $data['sum_money_month'] = $sum_money_month;
+        $data['sum_total_year'] = $sum_total_year;
         $data['count_student_month'] = $count_student_month;
         $data['sum_total_in_month'] = $month_in_year;
         $data['count_student_month_in_year'] = $count_student_month_in_years;
+        $data['count_student_year'] = $count_student_year;
 
         return $data;
 
@@ -359,11 +363,12 @@ class DashboardService extends BaseService
             'December' => 0
 
         ];
-
+        $money_spent_years = 0;
         foreach ($sum_money_spent_month_in_years as $value_new) {
             foreach ($sum_money_spent_month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
                     $sum_money_spent_month_in_year[$key] = $value_new->sum_total_in_website ?? 0;
+                    $money_spent_years = $value_new->sum_total_in_website;
                 }
             }
         }
@@ -383,18 +388,21 @@ class DashboardService extends BaseService
             'December' => 0
 
         ];
-
+        $money_loaded_years = 0;
         foreach ($sum_money_loaded_money_month_in_years as $value_new) {
             foreach ($sum_money_loaded_money_month_in_year as $key => $value) {
                 if ($key == $value_new->month) {
                     $sum_money_loaded_money_month_in_year[$key] = $value_new->sum_total_in_website ?? 0;
+                    $money_loaded_years = $value_new->sum_total_in_website;
                 }
             }
         }
 
         $data['count_course'] = $count_course;
+        $data['money_spent_years'] = $money_spent_years;
         $data['sum_money_spent_month'] = $sum_money_spent_month;
         $data['sum_money_spent_month_in_year'] = $sum_money_spent_month_in_year;
+        $data['money_loaded_years'] = $money_loaded_years;
         $data['sum_money_loaded_money_month'] = $sum_money_loaded_money_month;
         $data['sum_money_loaded_money_month_in_year'] = $sum_money_loaded_money_month_in_year;
 

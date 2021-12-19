@@ -28,7 +28,7 @@
                 thể hình
             </div>
             <div class="col-md-12">
-                <p style="font-weight: bold;">Xin chào {{ $name_pt }} !</p>
+                <p style="font-weight: bold;">Xin chào pt {{ $name_pt }} !</p>
                 <p>Thời khóa biểu</p>
                 <table>
                     <thead>

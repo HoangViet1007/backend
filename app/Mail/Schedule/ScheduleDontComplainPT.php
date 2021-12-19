@@ -37,7 +37,7 @@ class ScheduleDontComplainPT extends Mailable
     {
         return $this->view('Schedule.ScheduleDontComplainPT')
             ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
-            ->subject('Đơn khiếu nại ' . $this->name_cousre_plane . 'bị hủy')
+            ->subject('Đơn khiếu nại ' . $this->name_cousre_plane . ' bị hủy')
             ->with([
                 'name_cousre_plane' => $this->name_cousre_plane,
                 'name_pt' => $this->name_pt,
