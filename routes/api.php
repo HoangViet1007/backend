@@ -263,6 +263,8 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer','chec
     Route::put('not-engaged/{id}', 'ScheduleController@notEngaged');
     Route::put('engaged/{id}', 'ScheduleController@engaged');
     Route::put('complanin/{id}', 'ScheduleController@complanin');
+    Route::put('cancel-complain/{id}', 'ScheduleController@cancelComplain');
+    Route::get('get-complain-for-customer', 'ScheduleController@getComplainForCustomer');
     Route::get('get-schedule-by-customer/{id}', 'ScheduleController@getScheduleByCustomer');
 
     // dashboard customer

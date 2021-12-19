@@ -140,6 +140,18 @@ class ScheduleController extends Controller
         return response()->json($this->service->complanin($id, $request));
     }
 
+    // huy khieu nai tu nguoi dung
+    public function cancelComplain($id): JsonResponse
+    {
+        return response()->json($this->service->cancelComplain($id));
+    }
+
+    // lay khieu nai ở customer
+    public function getComplainForCustomer(): JsonResponse
+    {
+        return response()->json($this->service->getComplainForCustomer());
+    }
+
     /*
      * bat dau buoi hoc
      * chuyển status thành đang diễn gia buổi học (HAPPENNING)
