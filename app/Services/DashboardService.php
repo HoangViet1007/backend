@@ -329,8 +329,12 @@ class DashboardService extends BaseService
         $date_now = Carbon::now();
         $month = $date_now->month;
         $id = Auth::user()->id;
+
         $count_course = CourseStudent::where('user_id', $id)->count();
-        $sum_money_spent_month = Bill::where('user_id', $id)->whereMonth('created_at', $month)->whereYear('created_at', $year_money_spent)->sum('money');
+        $sum_money_spent_month = Bill::where('user_id', $id)
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year_money_spent)
+            ->sum('money');
         $sum_money_spent_month_in_years = Bill::where('user_id', $id)
             ->whereYear('created_at', $year_money_spent)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
