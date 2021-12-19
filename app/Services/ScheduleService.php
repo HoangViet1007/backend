@@ -536,8 +536,8 @@ class ScheduleService extends BaseService
                             );
                         } else {
                             $data->update(['complain' => StatusConstant::NOCOMPLAINTS,
-                                'reason_complain'=>null,
-                             ]);
+                                'reason_complain' => null,
+                            ]);
 
                             return true;
                         }
@@ -560,10 +560,10 @@ class ScheduleService extends BaseService
                         } else {
                             $data->update(['status' => StatusConstant::UNFINISHED,
                                 'complain' => StatusConstant::NOCOMPLAINTS,
-                                'link_record'=>null,
+                                'link_record' => null,
                                 'check_link_record' => null,
                                 'date_send_link_record' => null,
-                                'reason_complain'=>null]);
+                                'reason_complain' => null]);
                             return true;
 
                         }
@@ -571,7 +571,7 @@ class ScheduleService extends BaseService
                     case 'send_link_record' :
 
                         Mail::to('ngohongnguyen016774@gmail.com')
-                            ->send(new SendLinkRecordPT($name_custorm, $name_cousre_plane, $name_pt, $date_complain,$data['reason_complain']));
+                            ->send(new SendLinkRecordPT($name_custorm, $name_cousre_plane, $name_pt, $date_complain, $data['reason_complain']));
 
                         if (Mail::failures()) {
                             throw new BadRequestException(
@@ -704,12 +704,16 @@ class ScheduleService extends BaseService
     public function getComplainForCustomer()
     {
         $this->preGetAll();
-        $courseStudent = CourseStudent::where('user_id', Auth::id())->first();
-        $data = Schedule::where(['complain' => StatusConstant::COMPLAIN, 'course_student_id' => $courseStudent->id])->with(['course_student.users', 'course_planes.stage.course.teacher']);
-
+        $courseStudent = CourseStudent::where('user_id', Auth::id())->get();
+        $courseStudentId = [];
+        foreach ($courseStudent as $item) {
+            $courseStudentId[] = $item->id;
+        }
+        $data = Schedule::where(['complain' => StatusConstant::COMPLAIN])->whereIn('course_student_id', $courseStudentId)->with(['course_student.users', 'course_planes.stage.course.teacher']);
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
+
             return $response;
 
         } catch (Exception $e) {
