@@ -236,7 +236,7 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt','checkStatu
 });
 
 // customer
-Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer','checkStatusUser']], function () {
+Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authCustomer','checkStatusUser', 'verified']], function () {
     // hoa don
     Route::get('hoa-don', 'BillController@listBillByCustomer');
 
@@ -290,5 +290,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], fu
     Route::post('add-comment', 'CommentController@addComment');
 
 });
+
+Route::get('email/verify/{id}', 'VerificationController@verify')->name('verification.verify');
+
+Route::get('email/resend', 'VerificationController@resend')->name('verification.resend');
 
 
