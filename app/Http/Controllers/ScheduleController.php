@@ -76,7 +76,7 @@ class ScheduleController extends Controller
         return response()->json($this->service->add($request));
     }
 
-    public function scheduleRepeat(Request $request):JsonResponse
+    public function scheduleRepeat(Request $request): JsonResponse
     {
         return response()->json($this->service->scheduleRepeat($request));
     }
@@ -185,13 +185,22 @@ class ScheduleController extends Controller
         return response()->json($this->service->delete($id));
     }
 
-    public function scheduleCustormAndPT(){
+    public function scheduleCustormAndPT()
+    {
         return response()->json($this->service->updateLevel());
 
     }
 
-    public function updateCourseSucces(){
+    public function updateCourseSucces()
+    {
         return response()->json($this->service->updateCourseSucces());
+
+    }
+
+
+    public function listComplainPt()
+    {
+        return response()->json($this->service->listComplainPt());
 
     }
 }
