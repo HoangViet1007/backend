@@ -331,6 +331,7 @@ class DashboardService extends BaseService
         $id = Auth::user()->id;
 
         $count_course = CourseStudent::where('user_id', $id)->count();
+        
         $sum_money_spent_month = Bill::where('user_id', $id)
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year_money_spent)
@@ -343,8 +344,10 @@ class DashboardService extends BaseService
 
         // naapj vao website
         $sum_money_loaded_money_month = Payment::where('user_id', $id)
+            ->where('status',StatusConstant::RECHARGE)
             ->whereYear('created_at', $year_loaded_money)
             ->whereMonth('created_at', $month)->sum('money');
+
         $sum_money_loaded_money_month_in_years = Payment::where('user_id', $id)
             ->whereYear('created_at', $year_loaded_money)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_website')
