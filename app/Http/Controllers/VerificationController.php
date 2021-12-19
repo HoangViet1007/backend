@@ -18,7 +18,7 @@ class VerificationController extends Controller
             $user->markEmailAsVerified();
         }
 
-        return redirect()->to('/');
+        return redirect()->away('https://ngon.in');
     }
 
     public function resend() {

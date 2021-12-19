@@ -15,7 +15,8 @@ class BMIController extends Controller
             $message = "";
             $weight  = (float)$request['weight'];
             $height  = (float)$request['height'];
-            $BMI     = number_format(($weight / ($height * 2)), 2, '.', '');
+            $heightM = $height * 0.01;
+            $BMI     = number_format(($weight / ($heightM * $heightM)), 2, '.', '');
 
             if ($height < 2) {
                 $ideal_weight = number_format(($height - floor($height)) * 100 * 9 / 10, 0, '.', '');
