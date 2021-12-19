@@ -25,7 +25,7 @@ class EmailVerifyCustom
                 ! $request->user()->hasVerifiedEmail())) {
             return $request->expectsJson()
                 ? abort(400, 'Email verify.')
-                : Redirect::guest(URL::route($redirectToRoute ?: 'verification.notice'));
+                : "";
         }
 
         return $next($request);
