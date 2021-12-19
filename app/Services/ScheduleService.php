@@ -810,6 +810,7 @@ class ScheduleService extends BaseService
             ->when($date, function ($q) use ($date) {
                 $q->where('schedules.date', $date);
             })
+            ->where('schedules.status', StatusConstant::UNFINISHED)
             ->where('course_students.status', StatusConstant::SCHEDULE)
             ->select('schedules.*')
             ->get();
@@ -856,7 +857,7 @@ class ScheduleService extends BaseService
                 $arrInfoTeacher[$data_key] = $data;
             }
             foreach ($arrInfoTeacher as $value) {
-                Mail::to($value->email)->send(new ScheduleCourse($value['name_teacher'], $value['info_course'], $date));
+                Mail::to('ngohongnguyen016774@gmail,com')->send(new ScheduleCourse($value['name_teacher'], $value['info_course'], $date));
             }
         }
     }
