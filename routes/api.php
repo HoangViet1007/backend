@@ -227,6 +227,8 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt','checkStatu
     Route::put('update-status-schedule-complete/{id}', 'ScheduleController@updateStatusScheduleComplete');
     Route::put('start-schedule/{id}', 'ScheduleController@startSchedule');
     Route::put('end-schedule/{id}', 'ScheduleController@endSchedule');
+    Route::get('list-course-complain', 'ScheduleController@listComplainPt');
+
 
     Route::get('bill-personal-trainer-pt', 'BillPersonalTrainerController@getAllBillPtForPt'); // ở PT
 

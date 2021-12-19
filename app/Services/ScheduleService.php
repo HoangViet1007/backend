@@ -457,7 +457,6 @@ class ScheduleService extends BaseService
         }
         // gui email thong bao cho nguoi dung da hoc xong
 
-        dd($id);
         $schedule = Schedule::find($id);
         $schedule->update(['status' => StatusConstant::COMPLETE]);
     }
@@ -536,8 +535,8 @@ class ScheduleService extends BaseService
                             );
                         } else {
                             $data->update(['complain' => StatusConstant::NOCOMPLAINTS,
-                                'reason_complain'=>null,
-                             ]);
+                                'reason_complain' => null,
+                            ]);
 
                             return true;
                         }
@@ -560,10 +559,10 @@ class ScheduleService extends BaseService
                         } else {
                             $data->update(['status' => StatusConstant::UNFINISHED,
                                 'complain' => StatusConstant::NOCOMPLAINTS,
-                                'link_record'=>null,
+                                'link_record' => null,
                                 'check_link_record' => null,
                                 'date_send_link_record' => null,
-                                'reason_complain'=>null]);
+                                'reason_complain' => null]);
                             return true;
 
                         }
@@ -571,7 +570,7 @@ class ScheduleService extends BaseService
                     case 'send_link_record' :
 
                         Mail::to('ngohongnguyen016774@gmail.com')
-                            ->send(new SendLinkRecordPT($name_custorm, $name_cousre_plane, $name_pt, $date_complain,$data['reason_complain']));
+                            ->send(new SendLinkRecordPT($name_custorm, $name_cousre_plane, $name_pt, $date_complain, $data['reason_complain']));
 
                         if (Mail::failures()) {
                             throw new BadRequestException(
@@ -954,11 +953,34 @@ class ScheduleService extends BaseService
 
         foreach ($list_course as $value) {
             $dueDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $value->date . ' ' . $value->time_start)->addDay(2);
-            $date_now = \Carbon\Carbon::now();
+            $date_now = Carbon::now();
             if ($dueDateTime >= $date_now) {
                 $update = Schedule::find($value->id);
                 $update->update(['status' => StatusConstant::COMPLETE, 'participation' => StatusConstant::NOJOIN]);
             }
         }
     }
+
+    public function listComplainPt()
+    {
+        try {
+            $id = Auth::user()->id;
+            $date_now = Carbon::now();
+
+            $list_course = Schedule::where('status', StatusConstant::UNFINISHED)
+                ->where('created_at','<',$date_now)
+                ->with(['course_student.courses' => function ($query) use ($id) {
+                    $query->where('courses.created_by', $id);
+                }])
+
+                ->get();
+
+
+            return $list_course;
+
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
+    }
+
 }
