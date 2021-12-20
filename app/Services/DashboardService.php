@@ -233,9 +233,10 @@ class DashboardService extends BaseService
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_month')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
+        $sum_money = BillPersonalTrainer::where('user_id', $id)->sum('money');
         $count_specialize = SpecializeDetail::where('user_id', $id)->count();
 
-        $count_request_admin = CourseStudent::where('status', StatusConstant::REQUESTADMIN)->whereIn('course_id',$array_id_course )->count();
+        $count_request_admin = CourseStudent::where('status', StatusConstant::REQUESTADMIN)->whereIn('course_id', $array_id_course)->count();
 
         $month_in_year = [
             'January' => 0,
@@ -300,7 +301,7 @@ class DashboardService extends BaseService
         $data['count_student_month'] = $count_student_month;
         $data['sum_total_in_month'] = $month_in_year;
         $data['count_student_month_in_year'] = $count_student_month_in_years;
-
+        $data['sum_money'] = $sum_money ?? 0;
         return $data;
 
     }
