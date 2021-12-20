@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Constants\StatusConstant;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Course;
@@ -11,6 +12,7 @@ use App\Services\BaseService;
 use App\Models\Stage;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\BadRequestException;
 use Illuminate\Validation\Rule;
@@ -56,7 +58,7 @@ class StageService extends BaseService
     {
         $course_id = Stage::find($id)->course_id;
         $courseService = new CourseService();
-        if($courseService->countUserLearning($course_id) > 0){
+        if ($courseService->countUserLearning($course_id) > 0) {
             throw new BadRequestException(
                 ['message' => "Xoá giai đoạn khoá học không thành công !"], new Exception()
             );
@@ -71,7 +73,7 @@ class StageService extends BaseService
                 'required',
                 Rule::unique('stages',)->where(function ($query) use ($request, $id) {
                     return $query->where('course_id', $request->course_id)
-                                 ->where('id', '!=', $id);
+                        ->where('id', '!=', $id);
                 }),
             ],
             'short_content' => 'required',
@@ -105,7 +107,7 @@ class StageService extends BaseService
     public function listStage($id)
     {
         $this->preGetAll();
-        $data = $this->queryHelper->buildQuery($this->model)->where('course_id', $id);
+        $data = $this->queryHelper->buildQuery($this->model)->where('course_id', $id)->with('course');
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
@@ -127,6 +129,24 @@ class StageService extends BaseService
             );
         }
         return true;
+    }
+
+    public function detailStage($id)
+    {
+
+        try {
+            $this->model = $this->model->with('course');
+            $entity = $this->model->findOrFail($id);
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 
 }

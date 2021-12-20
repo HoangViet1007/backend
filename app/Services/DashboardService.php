@@ -237,6 +237,8 @@ class DashboardService extends BaseService
             ->get();
         $count_specialize = SpecializeDetail::where('user_id', $id)->count();
 
+        $count_request_admin = CourseStudent::where('status', StatusConstant::REQUESTADMIN)->whereIn('course_id',$array_id_course )->count();
+
         $month_in_year = [
             'January' => 0,
             'February' => 0,
@@ -251,6 +253,8 @@ class DashboardService extends BaseService
             'November' => 0,
             'December' => 0
         ];
+
+
         $sum_total_year = 0;
         foreach ($sum_total_in_month as $value_new) {
             foreach ($month_in_year as $key => $value) {
@@ -294,10 +298,11 @@ class DashboardService extends BaseService
         $data['count_specialize'] = $count_specialize;
         $data['sum_money_month'] = $sum_money_month;
         $data['sum_total_year'] = $sum_total_year;
+        $data['count_request_admin'] = $count_request_admin;
+        $data['count_student_year'] = $count_student_year;
         $data['count_student_month'] = $count_student_month;
         $data['sum_total_in_month'] = $month_in_year;
         $data['count_student_month_in_year'] = $count_student_month_in_years;
-        $data['count_student_year'] = $count_student_year;
 
         return $data;
 
@@ -344,7 +349,7 @@ class DashboardService extends BaseService
 
         // naapj vao website
         $sum_money_loaded_money_month = Payment::where('user_id', $id)
-            ->where('note',StatusConstant::RECHARGE)
+            ->where('note', StatusConstant::RECHARGE)
             ->whereYear('created_at', $year_loaded_money)
             ->whereMonth('created_at', $month)->sum('money');
 
