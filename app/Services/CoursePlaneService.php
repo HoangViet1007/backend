@@ -140,6 +140,7 @@ class CoursePlaneService extends BaseService
 
 //    public function preAdd(object $request)
 //    {
+ // Updload video to S3
 //        $url = '';
 //        if (!empty($request->file('video_link'))) {
 //            $path = Storage::disk('s3')->put('images/originals', $request->file('video_link'), 'public');
@@ -155,8 +156,18 @@ class CoursePlaneService extends BaseService
     {
         $item = $this->get($id);
 
-        $url = '';
         if ($item) {
+            if($request->type == config('constant.type.image')) {
+               $request['video_link'] = '';
+            }
+            else{
+                if($request->type == config('constant.type.video') && $request->video_link == ''){
+                    throw new BadRequestException(
+                        ['message' => "Hãy nhập video cho khóa học !"], new Exception()
+                    );
+                }
+            }
+
             // check xem co ai dang hoc khoa hoc ma buoi hoc nay dc asssign hay ko
             $stage_id      = $item->stage_id;
             $course_id     = Stage::find($stage_id)->course_id;
@@ -166,8 +177,8 @@ class CoursePlaneService extends BaseService
                     ['message' => "Cập nhập giai đoạn không thành công !"], new Exception()
                 );
             }
-            dd($request->video_link);
-            // update
+
+            // update video to S3
 //            $result = str_replace(env('S3_URL'), '', $item->video_link);
 //            Storage::disk('s3')->delete($result);
 //            if (!empty($request->file('video_link')) || $request->file('video_link') != "") {
