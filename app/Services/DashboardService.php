@@ -201,7 +201,7 @@ class DashboardService extends BaseService
         $count_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
         $array_id_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id');
         $count_student = 0;
-        if (count($array_id_course) > 0) {
+
             $count_student = CourseStudent::whereIn('course_id', $array_id_course)
                 ->count();
 
@@ -220,7 +220,7 @@ class DashboardService extends BaseService
                 ->whereIn('course_id', $array_id_course)
                 ->selectRaw('year(created_at) year, monthname(created_at) month, COUNT(id) as sum_student_in_month')->count();
 
-        }
+
 
         $sum_money_month = BillPersonalTrainer::where('user_id', $id)
             ->whereMonth('created_at', $month)
