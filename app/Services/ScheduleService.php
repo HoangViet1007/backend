@@ -980,6 +980,7 @@ class ScheduleService extends BaseService
 
             $list_course = Schedule::where('status', StatusConstant::UNFINISHED)
                 ->where('created_at','<',$date_now)
+                ->with(['course_student.users'])
                 ->with(['course_student.courses' => function ($query) use ($id) {
                     $query->where('courses.created_by', $id);
                 }])
