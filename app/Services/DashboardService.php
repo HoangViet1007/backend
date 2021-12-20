@@ -263,22 +263,22 @@ class DashboardService extends BaseService
 
         $count_student_year = 0;
 
-        if (count($count_student_month_in_year) > 0) {
-            $count_student_month_in_years = [
-                'January' => 0,
-                'February' => 0,
-                'March' => 0,
-                'April' => 0,
-                'May' => 0,
-                'June' => 0,
-                'July' => 0,
-                'August' => 0,
-                'September' => 0,
-                'October' => 0,
-                'November' => 0,
-                'December' => 0
-            ];
+        $count_student_month_in_years = [
+            'January' => 0,
+            'February' => 0,
+            'March' => 0,
+            'April' => 0,
+            'May' => 0,
+            'June' => 0,
+            'July' => 0,
+            'August' => 0,
+            'September' => 0,
+            'October' => 0,
+            'November' => 0,
+            'December' => 0
+        ];
 
+        if (count($count_student_month_in_year) > 0) {
             foreach ($count_student_month_in_year as $value_new) {
                 foreach ($count_student_month_in_years as $key => $value) {
                     if ($key == $value_new->month) {
