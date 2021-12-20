@@ -41,7 +41,7 @@ class CoursePlansController extends Controller
 
     public function detailCoursePlanes($id): JsonResponse
     {
-        return response()->json(($this->service->get($id)));
+        return response()->json(($this->service->detailCoursePlanes($id)));
     }
 
 }
