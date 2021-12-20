@@ -5,11 +5,13 @@ namespace App\Services;
 use App\Constants\S3Constant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Models\CoursePlanes;
 use App\Models\Stage;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -210,5 +212,21 @@ class CoursePlaneService extends BaseService
         }
         parent::preDelete($id);
 
+    }
+
+    public function detailCoursePlanes($id){
+        try {
+            $this->model = $this->model->with('cousre');
+            $entity = $this->model->findOrFail($id);
+
+            return $entity;
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundException(
+                ['message' => __("not-exist", ['attribute' => __('entity')]) . ": $id"],
+                $e
+            );
+        } catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
+        }
     }
 }
