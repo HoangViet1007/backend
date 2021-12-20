@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Constants\AccountLevelConstant;
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
 use App\Constants\RoleConstant;
+use App\Exceptions\ForbiddenException;
 use App\Models\AccountLevel;
 use App\Models\Role;
 use App\Services\BaseService;
 use App\Services\UserService;
+use App\Trait\RoleAndPermissionTrait;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -19,6 +24,7 @@ class UserController extends Controller
 {
     public BaseService $service;
 
+    use RoleAndPermissionTrait;
     public function __construct()
     {
         $this->service = new UserService();
@@ -62,6 +68,9 @@ class UserController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if (!$this->hasPermission(PermissionConstant::user(ActionConstant::ADD)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $data     = Role::where('name', RoleConstant::CUSTOMER)->first();
         $role_ids = [$data->id];
 

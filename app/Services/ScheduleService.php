@@ -23,6 +23,7 @@ use App\Models\Stage;
 use Carbon\CarbonPeriod;
 use App\Models\User;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -165,13 +166,6 @@ class ScheduleService extends BaseService
             ]
         );
 
-        // check
-        if ($this->checkDateIsNotInRange($request->date, $request->time_start) == false ||
-            $this->checkDateIsNotInRange($request->date, $request->time_end) == false) {
-            throw new BadRequestException(
-                ['message' => __("Giờ học này đã bị trùng, vui lòng chọn giờ học khác !")], new Exception()
-            );
-        }
         // dem xem da them lich qua so buoi hoc off chua thif check sôa buổi off của > só schedule của customer
         /* truyền lên count_student -> course_id -> đếm số buổi học off
          *  lấy za số schedule của customer :
@@ -185,6 +179,14 @@ class ScheduleService extends BaseService
                     new Exception()
                 );
             }
+        }
+
+        // check
+        if ($this->checkDateIsNotInRange($request->date, $request->time_start) == false ||
+            $this->checkDateIsNotInRange($request->date, $request->time_end) == false) {
+            throw new BadRequestException(
+                ['message' => __("Giờ học này đã bị trùng, vui lòng chọn giờ học khác !")], new Exception()
+            );
         }
 
         // handle request
@@ -276,6 +278,12 @@ class ScheduleService extends BaseService
         $course_student_id = $request->course_student_id ?? null;
         $course_student = CourseStudent::find($course_student_id);
 
+        if(!($course_student->status == StatusConstant::SCHEDULE || $course_student->status == StatusConstant::UNSCHEDULED)){
+            throw new BadRequestException(
+                ['message' => __("Chỉnh sửa buổi học thất bại !")], new Exception()
+            );
+        }
+
         $course_student_service = new CourseStudentService();
 
         // validate
@@ -293,7 +301,7 @@ class ScheduleService extends BaseService
                     'required',
                     Rule::unique('schedules',)->where(function ($query) use ($course_student_id, $id) {
                         return $query->where('course_student_id', '=', $course_student_id)
-                            ->where('id', '!=', $id);
+                                     ->where('id', '!=', $id);
                     }),
                     'in:' . implode(',', $arrayCoursePlanOff),
                 ],
@@ -331,6 +339,14 @@ class ScheduleService extends BaseService
             ]);
         } else {
             $request->status = StatusConstant::UNFINISHED;
+        }
+    }
+
+    public function postUpdate(int|string $id, object $request, Model $model)
+    {
+        $course_student = CourseStudent::find($model->course_student_id);
+        if($course_student->status == StatusConstant::SCHEDULE){
+            $course_student->update(['status' => StatusConstant::UNSCHEDULED]);
         }
     }
 
