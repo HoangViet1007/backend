@@ -206,7 +206,7 @@ class DashboardService extends BaseService
                 ->whereIn('course_id', $array_id_course)
                 ->count();
 
-            $count_student_month_in_year = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)
+            $count_student_month_in_year = CourseStudent::whereIn('status', [StatusConstant::SCHEDULE, StatusConstant::COMPLETE])
                 ->whereMonth('created_at', $month)
                 ->whereYear('created_at', $year_count_student)
                 ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
@@ -281,7 +281,6 @@ class DashboardService extends BaseService
             'November' => 0,
             'December' => 0
         ];
-
         if (count($count_student_month_in_year) > 0) {
             foreach ($count_student_month_in_year as $value_new) {
                 foreach ($count_student_month_in_years as $key => $value) {
