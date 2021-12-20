@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
 use App\Constants\SexConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\ForbiddenException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
@@ -17,6 +20,7 @@ use App\Models\Social;
 use App\Models\SpecializeDetail;
 use App\Models\User;
 use App\Models\UserSocial;
+use App\Trait\RoleAndPermissionTrait;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
@@ -39,6 +43,7 @@ class UserService extends BaseService
     protected array $status = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
     protected array $sex    = [SexConstant::MALE, SexConstant::FEMALE];
 
+    use RoleAndPermissionTrait;
     function createModel(): void
     {
         $this->model = new User();
@@ -46,6 +51,9 @@ class UserService extends BaseService
 
     public function getAll(): LengthAwarePaginator
     {
+        if (!$this->hasPermission(PermissionConstant::user(ActionConstant::LIST)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $this->preGetAll();
         $request      = \request()->all();
         $specializes  = $request['specializes__id__eq'] ?? null;
@@ -207,9 +215,11 @@ class UserService extends BaseService
         }
 
         $request_role_ids = $request->role_ids ?? [];
-        if (in_array(2, $request_role_ids) == true && in_array(3, $request_role_ids)) {
+        if ((in_array(2, $request_role_ids) == true && in_array(3, $request_role_ids))
+            || (count($request_role_ids) > 1 && in_array(2, $request_role_ids))
+            || (count($request_role_ids) > 1 && in_array(3, $request_role_ids))) {
             throw new BadRequestException(
-                ['message' => __("Không thể chọn đồng thời cả chức vụ PT và Customer !")], new Exception()
+                ['message' => __("Chỉ được chọn 1 chức vụ PT hoặc Customer !")], new Exception()
             );
         }
     }
@@ -227,6 +237,9 @@ class UserService extends BaseService
 
     public function preUpdate(int|string $id, object $request)
     {
+        if (!$this->hasPermission(PermissionConstant::user(ActionConstant::EDIT)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         // check role input
         $request_role_ids = $request->role_ids ?? [];
         if (in_array(2, $request_role_ids) == true && in_array(3, $request_role_ids)) {
@@ -370,6 +383,9 @@ class UserService extends BaseService
 
     public function preDelete(int|string $id)
     {
+        if (!$this->hasPermission(PermissionConstant::user(ActionConstant::DELETE)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $countSpecializeDetailCurrentUser = SpecializeDetail::where('user_id', $id)->count();
         $countCourse                      = Course::where('created_by', $id)->count();
 
@@ -418,7 +434,7 @@ class UserService extends BaseService
             }
         }
 
-        return $namePerCurrentUserLogin;
+        return array_unique($namePerCurrentUserLogin);
     }
 
     public function updatePassword(object $request)

@@ -1,14 +1,19 @@
 <?php
 namespace App\Services;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
+use App\Exceptions\ForbiddenException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Models\Permission;
+use App\Trait\RoleAndPermissionTrait;
 use Exception;
 
 class PermissionService extends BaseService
 {
 
+    use RoleAndPermissionTrait;
     function createModel(): void
     {
         $this->model = new Permission();

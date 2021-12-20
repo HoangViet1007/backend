@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\ForbiddenException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Mail\CustormCancel;
@@ -16,6 +19,7 @@ use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
+use App\Trait\RoleAndPermissionTrait;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -26,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
  */
 class CourseStudentService extends BaseService
 {
+    use RoleAndPermissionTrait;
 
     function createModel(): void
     {
@@ -85,6 +90,8 @@ class CourseStudentService extends BaseService
 
     public function getAllCourseStudent()
     {
+        if (!$this->hasPermission(PermissionConstant::student(ActionConstant::LIST)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
         try {
             $data = $this->queryHelper->buildQuery($this->model)
                                       ->join('courses', 'courses.id', 'course_students.course_id')
@@ -326,6 +333,8 @@ class CourseStudentService extends BaseService
     // lấy danh sách khóa học đã dạy xong và gửi yêu cầu lên admin
     public function getCourseStudentRequestAdminForAdmin()
     {
+        if (!$this->hasPermission(PermissionConstant::payment(ActionConstant::LIST)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
         try {
             $data     = $this->queryHelper->buildQuery($this->model)
                                           ->with(['courses.teacher', 'schedules', 'users'])

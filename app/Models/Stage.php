@@ -23,8 +23,7 @@ class Stage extends Model
     public function course_planes_client(): HasMany
     {
         return $this->hasMany(CoursePlanes::class)
-                    ->where('status', StatusConstant::ACTIVE)
-                    ->select('id','name');
+                    ->where('status', StatusConstant::ACTIVE);
     }
 
     public function course_planes_off(): HasMany

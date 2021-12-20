@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\ForbiddenException;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
@@ -16,6 +19,7 @@ use App\Models\CourseStudent;
 use App\Models\SpecializeDetail;
 use App\Models\Stage;
 use App\Models\User;
+use App\Trait\RoleAndPermissionTrait;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
@@ -35,7 +39,7 @@ class CourseService extends BaseService
     protected array $status  = [StatusConstant::HAPPENING, StatusConstant::PENDING, StatusConstant::PAUSE, StatusConstant::REQUEST];
     protected array $display = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
 
-
+    use RoleAndPermissionTrait;
     function createModel(): void
     {
         $this->model = new Course();
@@ -187,7 +191,7 @@ class CourseService extends BaseService
                                                 $q->join('stages','stages.id','=','course_planes.stage_id');
                                                 $q->where('course_planes.status', StatusConstant::ACTIVE);
                                             }])
-                                            ->with(['comments.user_comment' => function ($query) {
+                                            ->with(['comments_client.user_comment' => function ($query) {
                                                 $query->where('status', StatusConstant::ACTIVE);
                                             }])
                                             ->with(['course_students' => function ($query) {
@@ -240,6 +244,9 @@ class CourseService extends BaseService
     // get course request
     public function getCourseRequest()
     {
+        if (!$this->hasPermission(PermissionConstant::course(ActionConstant::LIST)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $data = $this->queryHelper->buildQuery($this->model)
                                   ->with(['teacher', 'customerLevel', 'specializeDetails',
                                           'specializeDetails.specialize', 'stagesClient.course_planes_client'])
@@ -551,6 +558,9 @@ class CourseService extends BaseService
 
     public function updateCourseForAdmin($id, object $request)
     {
+        if (!$this->hasPermission(PermissionConstant::course(ActionConstant::EDIT)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $course = Course::findOrFail($id);
         if (!$course) {
             throw new BadRequestException(

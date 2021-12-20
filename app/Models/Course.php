@@ -64,4 +64,9 @@ class Course extends Model
     {
         return $this->hasMany(Comment::class,'id_course','id');
     }
+
+    public function comments_client()
+    {
+        return $this->hasMany(Comment::class,'id_course','id')->where('status',StatusConstant::ACTIVE);
+    }
 }

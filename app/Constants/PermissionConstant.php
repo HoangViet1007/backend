@@ -26,7 +26,7 @@ class PermissionConstant
 
     public static function account_level(string $action): string
     {
-        return 'account_level' . ':' . $action;
+        return 'account-level' . ':' . $action;
     }
 
     public static function complain(string $action): string
@@ -34,10 +34,46 @@ class PermissionConstant
         return 'complain' . ':' . $action;
     }
 
-    public static function order(string $action): string
+    public static function bill(string $action): string
     {
-        return 'order' . ':' . $action;
+        return 'bill' . ':' . $action;
     }
+
+    public static function dashboard(string $action): string
+    {
+        return 'dashboard' . ':' . $action;
+    }
+
+    public static function student(string $action): string
+    {
+        return 'student' . ':' . $action;
+    }
+
+    public static function payment(string $action): string
+    {
+        return 'payment' . ':' . $action;
+    }
+
+    public static function comment(string $action): string
+    {
+        return 'comment' . ':' . $action;
+    }
+
+    public static function role(string $action): string
+    {
+        return 'role' . ':' . $action;
+    }
+
+    public static function permission(string $action): string
+    {
+        return 'permission' . ':' . $action;
+    }
+
+    public static function contact(string $action): string
+    {
+        return 'contact' . ':' . $action;
+    }
+
 
 }
 

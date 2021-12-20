@@ -79,7 +79,6 @@ Route::group(['prefix' => '/'], function () {
 
     // contact
     Route::resource('contact', 'ContactController');
-    Route::post('send-email-contact','ContactController@sendEmailContact');
 
     // get course noi bat
     Route::get('list-course', 'CourseController@getCourse');
@@ -115,6 +114,10 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser', 've
     // setting
     Route::resource('setting', 'SettingController');
 
+    //conatct
+    Route::get('get-list-contact','ContactController@index');
+    Route::post('send-email-contact','ContactController@sendEmailContact');
+
     // customer_level
     Route::resource('customer_level', 'CustomerLevelController');
 
@@ -140,6 +143,9 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser', 've
     // complain in admin
     Route::get('list-complain', 'ScheduleAdminController@listComplain');
     Route::put('change-complain', 'ScheduleAdminController@changeComplain');
+
+    // user and pt đều dùng để sửa status khoá học
+    Route::put('course/pt/{id}', 'CourseController@updateCourseForAdmin');
 
     // bill
     Route::resource('bill', 'BillController');
@@ -206,7 +212,6 @@ Route::group(['prefix' => '/', 'middleware' => ['auth:api', 'authPt','checkStatu
     Route::get('course/pt/all', 'CourseController@getAllCourseCurrentPtNoPaginate');
     Route::get('course/pt', 'CourseController@getCourseCurrentPt');
     Route::get('course/pt/{id}', 'CourseController@getCourseCurrentPtById');
-    Route::put('course/pt/{id}', 'CourseController@updateCourseForAdmin');
     Route::resource('course', 'CourseController');
 
     // course student
@@ -290,6 +295,7 @@ Route::group(['prefix' => '/', 'middleware' => 'auth:api','checkStatusUser'], fu
 
     // add comment
     Route::post('add-comment', 'CommentController@addComment');
+
 
 });
 

@@ -85,12 +85,12 @@ class ClientService extends BaseService
             $specializes = $request['specializes'] ?? null;
             $data = $this->queryHelper->removeParam('specializes')
                 ->buildQuery(new User())
-                ->join('model_has_roles', 'model_has_roles.user_id', 'users.id')
-                ->join('roles', 'roles.id', 'model_has_roles.role_id')
-                ->join('account_levels', 'account_levels.id', 'users.account_level_id')
-                ->join('specialize_details', 'users.id',
+                ->leftJoin('model_has_roles', 'model_has_roles.user_id', 'users.id')
+                ->leftJoin('roles', 'roles.id', 'model_has_roles.role_id')
+                ->leftJoin('account_levels', 'account_levels.id', 'users.account_level_id')
+                ->leftJoin('specialize_details', 'users.id',
                     'specialize_details.user_id')
-                ->join('specializes', 'specializes.id',
+                ->leftJoin('specializes', 'specializes.id',
                     'specialize_details.specialize_id')
                 ->with('accountLevels', 'specializeDetails.specialize')
                 ->where('roles.id', config('constant.role_pt'))
