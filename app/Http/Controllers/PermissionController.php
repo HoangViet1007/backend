@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
+use App\Exceptions\ForbiddenException;
 use App\Exports\ExportPermission;
 use App\Imports\ImportPermission;
 use App\Services\BaseService;
 use App\Services\PermissionService;
+use App\Trait\RoleAndPermissionTrait;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -14,6 +19,7 @@ class PermissionController extends Controller
 {
     public BaseService $service;
 
+    use RoleAndPermissionTrait;
     public function __construct()
     {
         $this->service = new PermissionService();
@@ -31,6 +37,9 @@ class PermissionController extends Controller
 
     public function getAllPermission(): JsonResponse
     {
+        if (!$this->hasPermission(PermissionConstant::permission(ActionConstant::LIST)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         return response()->json($this->service->getAllPermission2());
     }
 
@@ -58,6 +67,9 @@ class PermissionController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if (!$this->hasPermission(PermissionConstant::permission(ActionConstant::ADD)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         return response()->json($this->service->add($request));
     }
 
@@ -95,6 +107,9 @@ class PermissionController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
+        if (!$this->hasPermission(PermissionConstant::permission(ActionConstant::EDIT)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         return response()->json($this->service->update($id, $request));
     }
 
@@ -107,11 +122,17 @@ class PermissionController extends Controller
      */
     public function destroy($id): JsonResponse
     {
+        if (!$this->hasPermission(PermissionConstant::permission(ActionConstant::DELETE)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         return response()->json($this->service->delete($id));
     }
 
     public function import(Request $request)
     {
+        if (!$this->hasPermission(PermissionConstant::permission(ActionConstant::IMPORT)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $permissionService = new PermissionService();
         $permissionService->doValidate($request,
                                        [
@@ -131,6 +152,9 @@ class PermissionController extends Controller
 
     public function export()
     {
+        if (!$this->hasPermission(PermissionConstant::permission(ActionConstant::EXPORT)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         return Excel::download(new ExportPermission(), 'Template_permission.xlsx');
     }
 }

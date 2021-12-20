@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
+use App\Exceptions\ForbiddenException;
+use App\Trait\RoleAndPermissionTrait;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\BaseService;
@@ -11,6 +16,7 @@ class BillController extends Controller
 {
     public BaseService $service;
 
+    use RoleAndPermissionTrait;
     public function __construct()
     {
         $this->service = new BillService();
@@ -23,6 +29,9 @@ class BillController extends Controller
      */
     public function index(): JsonResponse
     {
+        if (!$this->hasPermission(PermissionConstant::bill(ActionConstant::CUSTOMER)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         return response()->json($this->service->getBillByAdmin());
     }
 

@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
 use App\Constants\StatusConstant;
+use App\Exceptions\ForbiddenException;
 use App\Models\AccountLevel;
 use App\Models\Bill;
 use App\Models\BillPersonalTrainer;
@@ -15,7 +18,9 @@ use App\Models\Schedule;
 use App\Models\Specialize;
 use App\Models\SpecializeDetail;
 use App\Models\User;
+use App\Trait\RoleAndPermissionTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -25,7 +30,7 @@ use Illuminate\Support\Facades\DB;
  */
 class DashboardService extends BaseService
 {
-
+    use RoleAndPermissionTrait;
     function createModel(): void
     {
         $this->model = new Demo();
@@ -51,7 +56,14 @@ class DashboardService extends BaseService
 
     public function dashboardAdmin($request)
     {
-        $this->validatedashboardAdmin($request);
+        if (!$this->hasPermission(PermissionConstant::dashboard(ActionConstant::LIST)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
+        $count_pt_active = User::where('status', StatusConstant::ACTIVE)->with([
+                'modelHasRoles' => function ($query) {
+                    $query->where('role_id', config('constant.role_pt'));
+                }]
+        )->count();
 
         $count_pt = ModelHasRole::where('role_id', config('constant.role_pt'))->count();
 

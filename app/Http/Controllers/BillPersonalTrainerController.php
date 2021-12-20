@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
+use App\Exceptions\ForbiddenException;
 use App\Services\BaseService;
 use App\Services\CourseStudentService;
+use App\Trait\RoleAndPermissionTrait;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\BillPersonalTrainerService;
@@ -17,6 +22,7 @@ class BillPersonalTrainerController extends Controller
      */
     public BaseService $service;
 
+    use RoleAndPermissionTrait;
     public function __construct()
     {
         $this->service = new BillPersonalTrainerService();
@@ -24,6 +30,9 @@ class BillPersonalTrainerController extends Controller
 
     public function index()
     {
+        if (!$this->hasPermission(PermissionConstant::bill(ActionConstant::PAYMENT)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         return response()->json($this->service->getAllBillPtForAdmin());
     }
 

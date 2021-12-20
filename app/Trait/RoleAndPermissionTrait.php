@@ -19,7 +19,7 @@ trait RoleAndPermissionTrait
                                        'permissions.id')
                                 ->join('roles', 'role_has_permissions.role_id', '=', 'roles.id')
                                 ->join('model_has_roles', 'model_has_roles.role_id', '=', 'roles.id')
-                                ->where('model_has_roles.model_id', BaseService::currentUser()?->id)
+                                ->where('model_has_roles.user_id', BaseService::currentUser()?->id)
                                 ->where('permissions.name', $permissionName)
                                 ->first();
 

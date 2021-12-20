@@ -2,11 +2,15 @@
 
 namespace App\Services;
 
+use App\Constants\ActionConstant;
+use App\Constants\PermissionConstant;
 use App\Constants\StatusConstant;
 use App\Exceptions\BadRequestException;
+use App\Exceptions\ForbiddenException;
 use App\Helpers\QueryHelper;
 use App\Models\Comment;
 use App\Models\CourseStudent;
+use App\Trait\RoleAndPermissionTrait;
 use Illuminate\Validation\Rule;
 use Exception;
 
@@ -14,6 +18,7 @@ class CommetnService extends BaseService
 {
     protected array $status = [StatusConstant::ACTIVE, StatusConstant::INACTIVE];
 
+    use RoleAndPermissionTrait;
     function createModel(): void
     {
         $this->model = new Comment();
@@ -57,12 +62,18 @@ class CommetnService extends BaseService
 
     public function listComment()
     {
+        if (!$this->hasPermission(PermissionConstant::comment(ActionConstant::LIST)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $data = $this->queryHelper->buildQuery($this->model)->with('course','user_comment');
         return $data->paginate(QueryHelper::limit());
     }
 
     public function changeStatus($request)
     {
+        if (!$this->hasPermission(PermissionConstant::comment(ActionConstant::EDITSTATUS)))
+            throw new ForbiddenException(__('Access denied'), new Exception());
+
         $this->doValidate($request,
             [
                 'status' => 'in:' . implode(',', $this->status),
