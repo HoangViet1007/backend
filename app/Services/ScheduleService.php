@@ -481,7 +481,7 @@ class ScheduleService extends BaseService
     public function listComplain()
     {
         $this->preGetAll();
-        $data = Schedule::where('complain', StatusConstant::COMPLAIN)->with(['course_student.users', 'course_planes.stage.course.teacher']);
+        $data = Schedule::where('complain', StatusConstant::COMPLAIN)->with(['course_student.users', 'course_planes.stage.course.teacher','course_student.courses.teacher']);
 
         try {
             $response = $data->paginate(QueryHelper::limit());
