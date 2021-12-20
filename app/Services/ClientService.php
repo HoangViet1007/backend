@@ -110,22 +110,25 @@ class ClientService extends BaseService
 
     public function detailPT($id)
     {
-        $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->first();
-        if ($detail_pt) {
-            $detail_pt['count_course'] = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
-            $array_course = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();
-            if (count($array_course) > 0) {
-                $detail_pt['count_student'] = CourseStudent::where('status', StatusConstant::COMPLETE)->whereIn('course_id', $array_course)->count();
-            }
-            $detail_pt['course_related'] = $this->getCourses($id);
+        try {
+            $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->first();
+            if ($detail_pt) {
+                $detail_pt['count_course'] = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
+                $array_course = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();
+                $detail_pt['count_student'] = CourseStudent::whereNotIn('status',[StatusConstant::CANCELEDBYPT,StatusConstant::CANCELED])->whereIn('course_id', $array_course)->count();
+                $detail_pt['course_related'] = $this->getCourses($id);
 
-            return $detail_pt;
-        } else {
-            throw new BadRequestException(
-                ['message' => __("PT không tồn tại !")],
-                new \Exception()
-            );
+                return $detail_pt;
+            } else {
+                throw new BadRequestException(
+                    ['message' => __("PT không tồn tại !")],
+                    new \Exception()
+                );
+            }
+        }catch (Exception $e) {
+            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
         }
+
     }
 
     public function getCourses($user_id)
