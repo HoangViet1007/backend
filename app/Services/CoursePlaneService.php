@@ -163,9 +163,10 @@ class CoursePlaneService extends BaseService
             $courseService = new CourseService();
             if ($courseService->countUserLearning($course_id) > 0) {
                 throw new BadRequestException(
-                    ['message' => "Xoá giai đoạn khoá học không thành công !"], new Exception()
+                    ['message' => "Cập nhập giai đoạn không thành công !"], new Exception()
                 );
             }
+            dd($request->video_link);
             // update
 //            $result = str_replace(env('S3_URL'), '', $item->video_link);
 //            Storage::disk('s3')->delete($result);
