@@ -202,12 +202,10 @@ class DashboardService extends BaseService
         $array_id_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id');
         $count_student = 0;
         if (count($array_id_course) > 0) {
-            $count_student = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)
-                ->whereIn('course_id', $array_id_course)
+            $count_student = CourseStudent::whereIn('course_id', $array_id_course)
                 ->count();
 
-            $count_student_month_in_year = CourseStudent::whereIn('status', [StatusConstant::SCHEDULE, StatusConstant::COMPLETE])
-                ->whereMonth('created_at', $month)
+            $count_student_month_in_year = CourseStudent::whereNotIn('status', [StatusConstant::CANCELED, StatusConstant::CANCELEDBYPT])
                 ->whereYear('created_at', $year_count_student)
                 ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
                 ->whereIn('course_id', $array_id_course)
@@ -215,7 +213,7 @@ class DashboardService extends BaseService
                 ->get();
 
 
-            $count_student_month = CourseStudent::where('status', StatusConstant::SCHEDULE, StatusConstant::COMPLETE)
+            $count_student_month = CourseStudent::whereNotIn('status', [StatusConstant::CANCELED, StatusConstant::CANCELEDBYPT])
                 ->whereMonth('created_at', $month)
                 ->whereYear('created_at', $year_count_student)
                 ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
