@@ -488,8 +488,8 @@ class ScheduleService extends BaseService
     public function listComplain()
     {
         $this->preGetAll();
-        $data = Schedule::where('complain', StatusConstant::COMPLAIN)
-                        ->where('schedules.participation', StatusConstant::NOJOIN)
+        $data = Schedule::where('schedules.complain', StatusConstant::COMPLAIN)
+                        ->where('schedules.participation', StatusConstant::JOIN)
                         ->with(['course_student.users', 'course_planes.stage.course.teacher', 'course_student.courses.teacher']);
 
         try {
