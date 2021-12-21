@@ -19,7 +19,6 @@ use App\Models\CourseStudent;
 use App\Models\Schedule;
 use App\Models\Stage;
 use App\Models\User;
-use AWS\CRT\Log;
 use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -733,9 +732,9 @@ class ScheduleService extends BaseService
         // gửi mail cho pt thông báo bị khiếu nại ở đây
 
         $schedule->update([
-            'complain' => StatusConstant::NOCOMPLAINTS,
-            'reason_complain' => null
-        ]);
+                              'complain'        => StatusConstant::NOCOMPLAINTS,
+                              'reason_complain' => null
+                          ]);
 
         return $schedule;
     }
@@ -743,14 +742,14 @@ class ScheduleService extends BaseService
     public function getComplainForCustomer()
     {
         $this->preGetAll();
-        $courseStudent = CourseStudent::where('user_id', Auth::id())->get();
+        $courseStudent   = CourseStudent::where('user_id', Auth::id())->get();
         $courseStudentId = [];
         foreach ($courseStudent as $item) {
             $courseStudentId[] = $item->id;
         }
         $data = Schedule::where(['complain' => StatusConstant::COMPLAIN])
-            ->whereIn('course_student_id', $courseStudentId)
-            ->with(['course_student.users', 'course_planes.stage.course.teacher']);
+                        ->whereIn('course_student_id', $courseStudentId)
+                        ->with(['course_student.users', 'course_planes.stage.course.teacher']);
         try {
             $response = $data->paginate(QueryHelper::limit());
             $this->postGetAll($response);
@@ -765,7 +764,7 @@ class ScheduleService extends BaseService
     // bắt dầu buổi học
     public function startSchedule($id, object $request)
     {
-        $user = Auth::user();
+        $user   = Auth::user();
         $userId = $user['id'];
         if (!($userId == $this->checkScheduleCurrentUser($id))) {
             throw new BadRequestException(
