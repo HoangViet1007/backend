@@ -440,7 +440,7 @@ class ScheduleService extends BaseService
          * */
         $user = Auth::user();
         $userId = $user['id'];
-        if (!($userId == $this->checkScheduleCurrentCustomer($id))) {
+        if (!($userId == $this->checkScheduleCurrentUser($id))) {
             throw new BadRequestException(
                 ['message' => __("Lịch học không tồn tại !")],
                 new Exception()
@@ -449,7 +449,7 @@ class ScheduleService extends BaseService
 
         $schedule = Schedule::find($id);
         $course_student = CourseStudent::find($schedule->course_student_id);
-        if (!($schedule->status == StatusConstant::UNFINISHED || $course_student->status == StatusConstant::COMPLETE || $course_student->status == StatusConstant::UNSCHEDULED)) {
+        if (!($course_student->status == StatusConstant::COMPLETE || $course_student->status == StatusConstant::UNSCHEDULED)) {
             throw new BadRequestException(
                 ['message' => __("Xoá lịch học không thành công !")],
                 new Exception()
@@ -901,12 +901,12 @@ class ScheduleService extends BaseService
                     'name_course' => $value->course_planes->stage->course->name,
                 ];
 
-                $data['info_course'] = $data_childer;
+                $data['info_course']       = $data_childer;
                 $arrInfoTeacher[$data_key] = $data;
             }
             foreach ($arrInfoTeacher as $value) {
-                Mail::to($value['email'])->send(new ScheduleCourse($value['name_teacher'],
-                    $value['info_course'], $date));
+                Mail::to('ngohongnguyen016774@gmail,com')->send(new ScheduleCourse($value['name_teacher'],
+                                                                                   $value['info_course'], $date));
             }
         }
     }
@@ -914,62 +914,62 @@ class ScheduleService extends BaseService
 
     public function scheduleCustorm()
     {
-        $date = Carbon::now()->format('Y-m-d');
+        $date = Carbon::now();
 
         $schedule
-            = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
-            ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
-            ->leftJoin('courses', 'course_students.course_id', 'courses.id')
-            ->where('date', $date)
-            ->where('course_students.status', StatusConstant::SCHEDULE)
-            ->select('schedules.*')
-            ->get();
-
+                        = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
+                                  ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
+                                  ->leftJoin('courses', 'course_students.course_id', 'courses.id')
+                                  ->where('date', '2021-12-18')
+                                  ->where('course_students.status', StatusConstant::SCHEDULE)
+                                  ->select('schedules.*')
+                                  ->get();
         $arrInfoStudent = [];
         foreach ($schedule as $key => $value) {
             $data_key = $value->course_student->users->id;
 
             if (array_key_exists($data_key, $arrInfoStudent)) {
                 $data_childer = [
-                    'link_room' => $value->link_room,
-                    'time_start' => $value->time_start,
-                    'time_end' => $value->time_end,
-                    'title' => $value->title,
-                    'name_teacher' => $value->course_planes->stage->course->teacher->name,
-                    'email_teacher' => $value->course_planes->stage->course->teacher->email,
-                    'phone_teacher' => $value->course_planes->stage->course->teacher->phone,
+                    'link_room'         => $value->link_room,
+                    'time_start'        => $value->time_start,
+                    'time_end'          => $value->time_end,
+                    'title'             => $value->title,
+                    'name_teacher'      => $value->course_planes->stage->course->teacher->name,
+                    'email_teacher'     => $value->course_planes->stage->course->teacher->email,
+                    'phone_teacher'     => $value->course_planes->stage->course->teacher->phone,
                     'name_course_plane' => $value->course_planes->name,
-                    'name_stage' => $value->course_planes->stage->name,
-                    'name_course' => $value->course_planes->stage->course->name,
+                    'name_stage'        => $value->course_planes->stage->name,
+                    'name_course'       => $value->course_planes->stage->course->name,
                 ];
                 array_push($arrInfoStudent[$data_key]['info_course'], $data_childer);
             } else {
-                $data = [];
-                $data_childer = [];
-                $data['id'] = $value->course_student->users->id;
+                $data                 = [];
+                $data_childer         = [];
+                $data['id']           = $value->course_student->users->id;
                 $data['name_student'] = $value->course_student->users->name;
-                $data['email'] = $value->course_student->users->email;
+                $data['email']        = $value->course_student->users->email;
 
                 $data_childer[] = [
-                    'link_room' => $value->link_room,
-                    'time_start' => $value->time_start,
-                    'time_end' => $value->time_end,
-                    'title' => $value->title,
-                    'name_teacher' => $value->course_planes->stage->course->teacher->name,
-                    'email_teacher' => $value->course_planes->stage->course->teacher->email,
-                    'phone_teacher' => $value->course_planes->stage->course->teacher->phone,
+                    'link_room'         => $value->link_room,
+                    'time_start'        => $value->time_start,
+                    'time_end'          => $value->time_end,
+                    'title'             => $value->title,
+                    'name_teacher'      => $value->course_planes->stage->course->teacher->name,
+                    'email_teacher'     => $value->course_planes->stage->course->teacher->email,
+                    'phone_teacher'     => $value->course_planes->stage->course->teacher->phone,
                     'name_course_plane' => $value->course_planes->name,
-                    'name_stage' => $value->course_planes->stage->name,
-                    'name_course' => $value->course_planes->stage->course->name,
+                    'name_stage'        => $value->course_planes->stage->name,
+                    'name_course'       => $value->course_planes->stage->course->name,
                 ];
 
-                $data['info_course'] = $data_childer;
+                $data['info_course']       = $data_childer;
                 $arrInfoStudent[$data_key] = $data;
             }
+
             foreach ($arrInfoStudent as $value) {
-                Mail::to($value['email'])->send(new ScheduleCourseCustorm($value['name_student'],
-                    $value['info_course'],
-                    $date));
+                Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleCourseCustorm($value['name_student'],
+                                                                                          $value['info_course'],
+                                                                                          $date));
             }
         }
     }
@@ -977,19 +977,19 @@ class ScheduleService extends BaseService
     public function updateLevel()
     {
 
-        $info_teacher = CourseStudent::with('courses')->get();
+        $info_teacher     = CourseStudent::with('courses')->get();
         $array_id_teacher = $info_teacher->pluck('courses.created_by')->unique();
 
         foreach ($array_id_teacher as $value) {
-            $count_student = CourseStudent::join('courses', 'course_students.course_id', 'courses.id')
-                ->where('courses.created_by', $value)
-                ->whereNotIn('course_students.status', [StatusConstant::CANCELED, StatusConstant::CANCELEDBYPT])->count();
+            $count_student  = CourseStudent::with(['courses' => function ($qr) use ($value) {
+                return $qr->where('created_by', $value);
+            }])->where('status', StatusConstant::COMPLETE)->count();
             $count_level_pt = User::find($value);
-            if ($count_student <= 7 && $count_student > 5) {
+            if ($count_student <= 7 || $count_student > 5) {
                 $count_level_pt->update(['account_level_id' => 2]);
-            } elseif ($count_student <= 9 && $count_student > 7) {
+            } elseif ($count_student <= 9 || $count_student > 7) {
                 $count_level_pt->update(['account_level_id' => 3]);
-            } elseif ($count_student <= 12 && $count_student > 9) {
+            } elseif ($count_student <= 12 || $count_student > 9) {
                 $count_level_pt->update(['account_level_id' => 4]);
             } elseif ($count_student > 12) {
                 $count_level_pt->update(['account_level_id' => 5]);
@@ -1006,7 +1006,7 @@ class ScheduleService extends BaseService
 
         foreach ($list_course as $value) {
             $dueDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $value->date . ' ' . $value->time_start)->addDay(2);
-            $date_now = Carbon::now();
+            $date_now    = Carbon::now();
             if ($dueDateTime >= $date_now) {
                 $update = Schedule::find($value->id);
                 $update->update(['status' => StatusConstant::COMPLETE, 'participation' => StatusConstant::NOJOIN]);
@@ -1019,16 +1019,15 @@ class ScheduleService extends BaseService
         try {
             $user     = Auth::user();
             $id       = $user['id'];
+            $date_now = Carbon::now();
 
             $list_course = Schedule::join('course_students', 'course_students.id', 'schedules.course_student_id')
-                                   ->where('course_students.status', StatusConstant::UNSCHEDULED)
-                                   ->where('schedules.status', StatusConstant::UNFINISHED)
-                                   ->where('schedules.complain', StatusConstant::COMPLAIN)
+                                   ->where('status', StatusConstant::UNFINISHED)
+                                   ->where('created_at', '<', $date_now)
                                    ->with(['course_student.users'])
                                    ->with(['course_student.courses' => function ($query) use ($id) {
                                        $query->where('courses.created_by', $id);
                                    }])
-                                   ->select('schedules.*')
                                    ->get();
 
             return $list_course;
