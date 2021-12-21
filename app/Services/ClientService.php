@@ -111,10 +111,18 @@ class ClientService extends BaseService
     public function detailPT($id)
     {
         try {
-            $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->with('socials.userSocials')->first();
+            $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->with('socials.userSocials')->select('name',
+                'image',
+                'address',
+                'description',
+                'phone',
+                'status',
+                'sex',
+                'account_level_id')->first();
             if ($detail_pt) {
-                $detail_pt['count_course'] = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
-                $array_course = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();
+
+                $detail_pt['count_course'] = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
+                $array_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();
                 $detail_pt['count_student'] = CourseStudent::whereNotIn('status',[StatusConstant::CANCELEDBYPT,StatusConstant::CANCELED])->whereIn('course_id', $array_course)->count();
                 $detail_pt['course_related'] = $this->getCourses($id);
 
