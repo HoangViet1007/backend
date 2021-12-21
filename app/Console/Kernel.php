@@ -29,8 +29,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('command:schedule-pt')->everyMinute();
-        $schedule->command('command:schedule-of-custorm')->everyTwoMinutes();
+        $schedule->command('command:schedule-pt')->dailyAt('04:50');
+        $schedule->command('command:schedule-of-custorm')->dailyAt('05:00');
         $schedule->command('command:update-level')->dailyAt('00:00');
         $schedule->command('command:update-course-sucess')->hourly();
 
