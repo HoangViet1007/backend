@@ -174,7 +174,7 @@ class CoursePlaneService extends BaseService
             $courseService = new CourseService();
             if ($courseService->countUserLearning($course_id) > 0) {
                 throw new BadRequestException(
-                    ['message' => "Cập nhập giai đoạn không thành công !"], new Exception()
+                    ['message' => "Cập nhập buổi học không thành công !"], new Exception()
                 );
             }
 

@@ -333,10 +333,12 @@ class ScheduleService extends BaseService
         // handle request
         if ($request instanceof Request) {
             $request->merge([
-                'status' => StatusConstant::UNFINISHED,
-            ]);
+                                'status' => StatusConstant::UNFINISHED,
+                                'complain' => StatusConstant::NOCOMPLAINTS
+                            ]);
         } else {
             $request->status = StatusConstant::UNFINISHED;
+            $request->complain = StatusConstant::NOCOMPLAINTS;
         }
     }
 
@@ -481,7 +483,8 @@ class ScheduleService extends BaseService
     {
         $this->preGetAll();
         $data = Schedule::where('complain', StatusConstant::COMPLAIN)
-            ->with(['course_student.users', 'course_planes.stage.course.teacher', 'course_student.courses.teacher']);
+                        ->where('schedules.participation', StatusConstant::NOJOIN)
+                        ->with(['course_student.users', 'course_planes.stage.course.teacher', 'course_student.courses.teacher']);
 
         try {
             $response = $data->paginate(QueryHelper::limit());
@@ -582,12 +585,14 @@ class ScheduleService extends BaseService
                                 new Exception()
                             );
                         } else {
-                            $data->update(['status' => StatusConstant::UNFINISHED,
-                                'complain' => StatusConstant::NOCOMPLAINTS,
-                                'link_record' => null,
-                                'check_link_record' => null,
-                                'date_send_link_record' => null,
-                                'reason_complain' => null]);
+                            $data->update(['status'                => StatusConstant::UNFINISHED,
+                                           'link_record'           => null,
+                                           'check_link_record'     => null,
+                                           'date_send_link_record' => null,
+                                           'reason_complain'       => null]);
+
+                            $course_student = CourseStudent::find($data->course_student_id);
+                            $course_student->update(['status' => StatusConstant::UNSCHEDULED]);
 
                             return true;
 
@@ -1013,18 +1018,19 @@ class ScheduleService extends BaseService
     public function listComplainPt()
     {
         try {
-            $user = Auth::user();
-            $id = $user['id'];
-            $date_now = Carbon::now();
+            $user     = Auth::user();
+            $id       = $user['id'];
 
             $list_course = Schedule::join('course_students', 'course_students.id', 'schedules.course_student_id')
-                ->where('status', StatusConstant::UNFINISHED)
-                ->where('created_at', '<', $date_now)
-                ->with(['course_student.users'])
-                ->with(['course_student.courses' => function ($query) use ($id) {
-                    $query->where('courses.created_by', $id);
-                }])
-                ->get();
+                                   ->where('course_students.status', StatusConstant::UNSCHEDULED)
+                                   ->where('schedules.status', StatusConstant::UNFINISHED)
+                                   ->where('schedules.complain', StatusConstant::COMPLAIN)
+                                   ->with(['course_student.users'])
+                                   ->with(['course_student.courses' => function ($query) use ($id) {
+                                       $query->where('courses.created_by', $id);
+                                   }])
+                                   ->select('schedules.*')
+                                   ->get();
 
             return $list_course;
 
