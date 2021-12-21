@@ -844,7 +844,7 @@ class ScheduleService extends BaseService
     public function schedulePT()
     {
 
-        $date = Carbon::now();
+        $date = Carbon::now()->format('Y-m-d');
 
         $schedule
                         = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
@@ -900,7 +900,7 @@ class ScheduleService extends BaseService
                 $arrInfoTeacher[$data_key] = $data;
             }
             foreach ($arrInfoTeacher as $value) {
-                Mail::to('ngohongnguyen016774@gmail,com')->send(new ScheduleCourse($value['name_teacher'],
+                Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleCourse($value['name_teacher'],
                                                                                    $value['info_course'], $date));
             }
         }
@@ -909,7 +909,7 @@ class ScheduleService extends BaseService
 
     public function scheduleCustorm()
     {
-        $date = Carbon::now();
+        $date = Carbon::now()->format('Y-m-d');
 
         $schedule
                         = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
