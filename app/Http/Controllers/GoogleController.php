@@ -99,7 +99,7 @@ class GoogleController extends Controller
             // nếu có thi true nếu ko thì false
 
             // lấy za role_id của user trong he thong
-            if(!empty($user)){
+            if (!empty($user)) {
                 $modelHasRole = ModelHasRole::where('user_id', $user->user_id)->first();
                 // lấy za name role
                 $role = Role::find($modelHasRole->role_id);
@@ -126,6 +126,7 @@ class GoogleController extends Controller
                                              'status'            => StatusConstant::ACTIVE,
                                              'password'          => $userSocial->getId(),
                                              'email_verified_at' => Carbon::now()->toDateTimeString(),
+                                             'account_level_id'  => 1
                                          ]);
                     $socialAccount->fill(['user_id' => $user->id])->save();
 
