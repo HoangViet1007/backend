@@ -37,7 +37,6 @@ class CoursePayment extends Mailable
     public function build()
     {
         return $this->from('ngohongnguyenstudy2020@gmail.com', 'YM')
-                    ->from('ngohongnguyenstudy2020@gmail.com', 'YM')
                     ->subject('Đơn hàng mua khóa học xác nhận ngày ' . Carbon::now('Asia/Ho_Chi_Minh')
                                                                              ->format('Y-m-d H:i:s'))
                     ->view('Money.CoursePayment');
