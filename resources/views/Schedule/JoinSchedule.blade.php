@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Xác nhận đơn hàng</title>
+    <title></title>
 </head>
 
 <body>
@@ -19,16 +19,12 @@
             <div class="col-md-12">
                 <p style="font-weight: bold;">Xin chào {{ $nameUser }} !</p>
                 <p>Cảm ơn bạn đã tin tưởng YM !</p>
-                <h4>THÔNG TIN ĐƠN MUA</h4>
-                <p>Mã hóa đơn: <span style="color: #fff">{{ $code_bill }}</span></p>
-                <p>Tên khách hàng: <span style="color: #fff">{{ $nameUser }}</span></p>
-                <p>Tên khóa học: <span style="color: #fff">{{ $nameCourse }}</span></p>
-                <p>Số tiền: <span style="color: #fff">{{ number_format($money) }} Đ</span></p>
-                <p>Thời gian: <span style="color: #fff">{{ $time }}</span></p>
-                <p>Loại thanh toán: <span style="color: #fff">{{ $status }}</span></p>
-                -----------------------------------------------------
-                <h4>TỔNG TIỀN: {{ number_format($money) }} Đ</h4>
-                -----------------------------------------------------
+                <h4>THÔNG BÁO HỌC VIÊN XÁC NHẬN THAM GIA BUỔI HỌC</h4>
+                <p>Thời gian bắt đầu: <span style="color: #fff">{{ $time_start }}</span></p>
+                <p>Thời gian kết thúc: <span style="color: #fff">{{ $time_end }}</span></p>
+                <p>Tên buổi học: <span style="color: #fff">{{ $nameCourse }}</span></p>
+                <p>Tên học viên: <span style="color: #fff">{{ $nameUserCustomer }}</span></p>
+                <i>Bạn vui lòng để ý thới gian và bắt đầu buổi học đúng giờ ! </i>
                 <br>
                 <i>Mọi thắc mắc về đơn hàng quý khách vui lòng liên hệ đến 0853009301 ! Một lần nữa cảm ơn quý khách
                     đã tin tưởng YM !</i>
