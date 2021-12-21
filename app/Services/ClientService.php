@@ -111,7 +111,7 @@ class ClientService extends BaseService
     public function detailPT($id)
     {
         try {
-            $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->with('socials.userSocials')->select('name',
+            $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->with('userSocials.socials')->select('name',
                 'image',
                 'address',
                 'description',

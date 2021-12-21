@@ -161,7 +161,7 @@ class CoursePlaneService extends BaseService
                $request['video_link'] = '';
             }
             else{
-                if($request->type == config('constant.type.video') && $request->video_link == ''){
+                if($request->type == config('constant.type.video') && $request->video_link == '' || $request->video_link == null){
                     throw new BadRequestException(
                         ['message' => "Hãy nhập video cho khóa học !"], new Exception()
                     );
