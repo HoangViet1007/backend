@@ -111,7 +111,7 @@ class ClientService extends BaseService
     public function detailPT($id)
     {
         try {
-            $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->first();
+            $detail_pt = User::where('id', $id)->where('status', StatusConstant::ACTIVE)->with('socials.userSocials')->first();
             if ($detail_pt) {
                 $detail_pt['count_course'] = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
                 $array_course = Course::where('created_by', $detail_pt->id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();

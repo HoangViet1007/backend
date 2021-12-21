@@ -65,7 +65,7 @@ class CommetnService extends BaseService
         if (!$this->hasPermission(PermissionConstant::comment(ActionConstant::LIST)))
             throw new ForbiddenException(__('Access denied'), new Exception());
 
-        $data = $this->queryHelper->buildQuery($this->model)->with('course','user_comment');
+        $data = $this->queryHelper->buildQuery($this->model)->with('course.teacher','user_comment');
         return $data->paginate(QueryHelper::limit());
     }
 
