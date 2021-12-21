@@ -8,13 +8,13 @@ use App\Exceptions\SystemException;
 use App\Helpers\QueryHelper;
 use App\Mail\Schedule\AcceptComlaintCustorm;
 use App\Mail\Schedule\AcceptComlaintPT;
-use App\Mail\Schedule\NoJoinSchedule;
+use App\Mail\Schedule\CancelComplainSchedule;
+use App\Mail\Schedule\ComplainSchedule;
 use App\Mail\Schedule\JoinSchedule;
+use App\Mail\Schedule\NoJoinSchedule;
 use App\Mail\Schedule\ScheduleCourseCustorm;
 use App\Mail\Schedule\ScheduleDontComplainCustorm;
 use App\Mail\Schedule\ScheduleDontComplainPT;
-use App\Mail\Schedule\ComplainSchedule;
-use App\Mail\Schedule\CancelComplainSchedule;
 use App\Mail\Schedule\SendLinkRecordPT;
 use App\Mail\ScheduleCourse;
 use App\Models\Course;
@@ -208,7 +208,7 @@ class ScheduleService extends BaseService
         // array day and hour request
         $dayAndHour = $request->day_and_hourse;
         // today and add day
-        $today = date('y-m-d');
+        $today   = date('y-m-d');
         $dayCong = Carbon::now()->addDays(1);
 
         // for
@@ -336,11 +336,11 @@ class ScheduleService extends BaseService
         // handle request
         if ($request instanceof Request) {
             $request->merge([
-                                'status' => StatusConstant::UNFINISHED,
+                                'status'   => StatusConstant::UNFINISHED,
                                 'complain' => StatusConstant::NOCOMPLAINTS
                             ]);
         } else {
-            $request->status = StatusConstant::UNFINISHED;
+            $request->status   = StatusConstant::UNFINISHED;
             $request->complain = StatusConstant::NOCOMPLAINTS;
         }
     }
@@ -350,7 +350,7 @@ class ScheduleService extends BaseService
         $course_student = CourseStudent::find($model->course_student_id);
         if ($course_student->status == StatusConstant::SCHEDULE) {
             $course_student->update([
-                                        'status' => StatusConstant::UNSCHEDULED,
+                                        'status'       => StatusConstant::UNSCHEDULED,
                                         'user_consent' => StatusConstant::UNSENT
                                     ]);
         }
@@ -490,6 +490,7 @@ class ScheduleService extends BaseService
         $this->preGetAll();
         $data = Schedule::where('schedules.complain', StatusConstant::COMPLAIN)
                         ->where('schedules.participation', StatusConstant::JOIN)
+                        ->where('schedules.status',StatusConstant::COMPLETE)
                         ->with(['course_student.users', 'course_planes.stage.course.teacher', 'course_student.courses.teacher']);
 
         try {
@@ -591,11 +592,15 @@ class ScheduleService extends BaseService
                                 new Exception()
                             );
                         } else {
-                            $data->update(['status'                => StatusConstant::UNFINISHED,
-                                           'link_record'           => null,
-                                           'check_link_record'     => null,
-                                           'date_send_link_record' => null,
-                                           'reason_complain'       => null]);
+                            $data->update([
+                                              'status'                => StatusConstant::UNFINISHED,
+                                              'link_record'           => null,
+                                              'check_link_record'     => null,
+                                              'date_send_link_record' => null,
+                                              'reason_complain'       => null,
+                                              'participation'         => null
+
+                                          ]);
 
                             $course_student = CourseStudent::find($data->course_student_id);
                             $course_student->update(['status' => StatusConstant::UNSCHEDULED]);
@@ -657,7 +662,9 @@ class ScheduleService extends BaseService
                               'status'        => StatusConstant::COMPLETE
                           ]);
         $userPt = $schedule->course_student->courses->teacher;
-        Mail::to($userPt->email)->send(new NoJoinSchedule($userPt->name, $schedule->time_start, $schedule->time_end, $schedule->course_student->courses->name , $user->name));
+        Mail::to($userPt->email)->send(new NoJoinSchedule($userPt->name, $schedule->time_start, $schedule->time_end,
+                                                          $schedule->course_student->courses->name, $user->name));
+
         return $schedule;
     }
 
@@ -680,7 +687,9 @@ class ScheduleService extends BaseService
                               'participation' => StatusConstant::JOIN
                           ]);
         $userPt = $schedule->course_student->courses->teacher;
-        Mail::to($userPt->email)->send(new JoinSchedule($userPt->name, $schedule->time_start, $schedule->time_end, $schedule->course_student->courses->name , $user->name));
+        Mail::to($userPt->email)->send(new JoinSchedule($userPt->name, $schedule->time_start, $schedule->time_end,
+                                                        $schedule->course_student->courses->name, $user->name));
+
         return $schedule;
     }
 
@@ -715,7 +724,8 @@ class ScheduleService extends BaseService
                               'reason_complain' => $request->reason_complain
                           ]);
         $userPt = $schedule->course_student->courses->teacher;
-        Mail::to($userPt->email)->send(new ComplainSchedule($userPt->name, $schedule->time_start, $schedule->time_end, $schedule->course_student->courses->name , $user->name));
+        Mail::to($userPt->email)->send(new ComplainSchedule($userPt->name, $schedule->time_start, $schedule->time_end,
+                                                            $schedule->course_student->courses->name, $user->name));
 
         return $schedule;
     }
@@ -747,7 +757,11 @@ class ScheduleService extends BaseService
                               'reason_complain' => null
                           ]);
         $userPt = $schedule->course_student->courses->teacher;
-        Mail::to($userPt->email)->send(new CancelComplainSchedule($userPt->name, $schedule->time_start, $schedule->time_end, $schedule->course_student->courses->name , $user->name));
+        Mail::to($userPt->email)->send(new CancelComplainSchedule($userPt->name, $schedule->time_start,
+                                                                  $schedule->time_end,
+                                                                  $schedule->course_student->courses->name,
+                                                                  $user->name));
+
         return $schedule;
     }
 
@@ -918,7 +932,7 @@ class ScheduleService extends BaseService
             }
             foreach ($arrInfoTeacher as $value) {
                 Mail::to($value['email'])->send(new ScheduleCourse($value['name_teacher'],
-                    $value['info_course'], $date));
+                                                                   $value['info_course'], $date));
             }
         }
     }
@@ -930,12 +944,12 @@ class ScheduleService extends BaseService
 
         $schedule
             = Schedule::with(['course_student.courses', 'course_student.users', 'course_planes.stage.course.teacher'])
-            ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
-            ->leftJoin('courses', 'course_students.course_id', 'courses.id')
-            ->where('date', $date)
-            ->where('course_students.status', StatusConstant::SCHEDULE)
-            ->select('schedules.*')
-            ->get();
+                      ->leftJoin('course_students', 'schedules.course_student_id', 'course_students.id')
+                      ->leftJoin('courses', 'course_students.course_id', 'courses.id')
+                      ->where('date', $date)
+                      ->where('course_students.status', StatusConstant::SCHEDULE)
+                      ->select('schedules.*')
+                      ->get();
 
         $arrInfoStudent = [];
         foreach ($schedule as $key => $value) {
@@ -980,8 +994,8 @@ class ScheduleService extends BaseService
             }
             foreach ($arrInfoStudent as $value) {
                 Mail::to($value['email'])->send(new ScheduleCourseCustorm($value['name_student'],
-                    $value['info_course'],
-                    $date));
+                                                                          $value['info_course'],
+                                                                          $date));
             }
         }
     }
@@ -993,9 +1007,11 @@ class ScheduleService extends BaseService
         $array_id_teacher = $info_teacher->pluck('courses.created_by')->unique();
 
         foreach ($array_id_teacher as $value) {
-            $count_student = CourseStudent::join('courses', 'course_students.course_id', 'courses.id')
-                ->where('courses.created_by', $value)
-                ->whereNotIn('course_students.status', [StatusConstant::CANCELED, StatusConstant::CANCELEDBYPT])->count();
+            $count_student  = CourseStudent::join('courses', 'course_students.course_id', 'courses.id')
+                                           ->where('courses.created_by', $value)
+                                           ->whereNotIn('course_students.status',
+                                                        [StatusConstant::CANCELED, StatusConstant::CANCELEDBYPT])
+                                           ->count();
             $count_level_pt = User::find($value);
             if ($count_student <= 7 && $count_student > 5) {
                 $count_level_pt->update(['account_level_id' => 2]);
@@ -1029,8 +1045,8 @@ class ScheduleService extends BaseService
     public function listComplainPt()
     {
         try {
-            $user     = Auth::user();
-            $id       = $user['id'];
+            $user = Auth::user();
+            $id   = $user['id'];
 
             $list_course = Schedule::join('course_students', 'course_students.id', 'schedules.course_student_id')
                                    ->where('course_students.status', StatusConstant::UNSCHEDULED)
