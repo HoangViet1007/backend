@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Specialize extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table    = 'specializes';
     protected $guarded  = [];
