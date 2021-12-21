@@ -203,4 +203,9 @@ class ScheduleController extends Controller
         return response()->json($this->service->listComplainPt());
 
     }
+
+
+    public function tesst(){
+        return response()->json($this->service->schedulePT());
+    }
 }
