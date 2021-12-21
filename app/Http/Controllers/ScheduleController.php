@@ -206,6 +206,6 @@ class ScheduleController extends Controller
 
 
     public function tesst(){
-        return response()->json($this->service->schedulePT());
+        return response()->json($this->service->updateLevel());
     }
 }
