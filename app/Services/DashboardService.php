@@ -79,24 +79,24 @@ class DashboardService extends BaseService
         $month = Carbon::now()->month;
         $year_turnover = $request->year_turnover ?? Carbon::now()->year;
         $year_profit = $request->year_profit ?? Carbon::now()->year;
-// sum money nap vao website
-        $sum_revenue_month = Payment::whereMonth('created_at', $month)->where('note', StatusConstant::RECHARGE)->sum('money');
+// sum money doanh thu
+        $sum_revenue_month =Bill::whereMonth('created_at', $month)->sum('money');
 
-// sum money nap vao website
+// sum money doanh thu
 
-        $sum_total_in_month = Payment::where('note', StatusConstant::RECHARGE)
-            ->whereYear('created_at', $year_turnover)
+        $sum_total_in_month = Bill::
+            whereYear('created_at', $year_turnover)
             ->selectRaw('year(created_at) year, monthname(created_at) month, sum(money) sum_total_in_month')
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
 
 
-        // doanh thu
+        // lợi nhuận
         $sum_revenue_website = BillPersonalTrainer::selectRaw('year(created_at) year, monthname(created_at) month, sum(money_old) - sum(money) sum_total_in_website')
             ->whereYear('created_at', $year_profit)
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get();
-        // doanh thu
+        // lợi nhuận
 
         $sum_revenue_month_website = BillPersonalTrainer::whereMonth('created_at', $month)
             ->whereYear('created_at', $year_profit)
