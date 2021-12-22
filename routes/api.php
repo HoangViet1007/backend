@@ -303,4 +303,4 @@ Route::get('email/verify/{id}', 'VerificationController@verify')->name('verifica
 
 Route::get('email/resend', 'VerificationController@resend')->name('verification.resend');
 
-
+Route::get('tesst','ScheduleController@tesst');
