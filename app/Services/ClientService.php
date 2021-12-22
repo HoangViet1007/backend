@@ -110,10 +110,9 @@ class ClientService extends BaseService
 
     public function detailPT($id)
     {
-        try {
-            $detail_pt = User::where('id', $id)->with(['socials.userSocials'])
-                ->where('status', StatusConstant::ACTIVE)
-                ->select('name',
+        $detail_pt = User::where('id', $id)->with(['socials.userSocials'])
+            ->where('status', StatusConstant::ACTIVE)
+            ->select('name',
                 'image',
                 'address',
                 'description',
@@ -122,24 +121,20 @@ class ClientService extends BaseService
                 'status',
                 'sex',
                 'account_level_id')->first();
-            if ($detail_pt) {
+               if($detail_pt){
+                   $detail_pt['count_course'] = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
+                   $array_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();
+                   $detail_pt['count_student'] = CourseStudent::whereNotIn('status',[StatusConstant::CANCELEDBYPT,StatusConstant::CANCELED])->whereIn('course_id', $array_course)->count();
+                   $detail_pt['course_related'] = $this->getCourses($id);
 
-                $detail_pt['count_course'] = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
-                $array_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id')->toArray();
-                $detail_pt['count_student'] = CourseStudent::whereNotIn('status',[StatusConstant::CANCELEDBYPT,StatusConstant::CANCELED])->whereIn('course_id', $array_course)->count();
-                $detail_pt['course_related'] = $this->getCourses($id);
+                   return $detail_pt;
 
-                return $detail_pt;
-            } else {
-                throw new BadRequestException(
-                    ['message' => __("PT không tồn tại !")],
-                    new \Exception()
-                );
-            }
-        }catch (Exception $e) {
-            throw new SystemException($e->getMessage() ?? __('system-500'), $e);
-        }
-
+               }else{
+                   throw new BadRequestException(
+                       ['message' => __("PT không tồn tại !")],
+                       new \Exception()
+                   );
+               }
     }
 
     public function getCourses($user_id)
