@@ -210,8 +210,8 @@ class DashboardService extends BaseService
         $date_now = Carbon::now();
         $month = $date_now->month;
 
-        $count_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->count();
-        $array_id_course = Course::where('created_by', $id)->where('display', StatusConstant::ACTIVE)->where('status', StatusConstant::HAPPENING)->pluck('id');
+        $count_course = Course::where('created_by', $id)->count();
+        $array_id_course = Course::where('created_by', $id)->pluck('id');
         $count_student = 0;
 
             $count_student = CourseStudent::whereIn('course_id', $array_id_course)
