@@ -40,6 +40,7 @@ class ClientService extends BaseService
             ->join('model_has_roles', 'model_has_roles.user_id', 'users.id')
             ->where('model_has_roles.role_id', config('constant.role_pt'))
             ->orderBy('account_level_id', 'desc')->limit(config('constant.limit'))
+            ->select('users.*')
             ->get();
         $get_pt->map(function ($item) {
             $item['count_course'] = Course::where('created_by', $item->id)->where('display', StatusConstant::ACTIVE)
