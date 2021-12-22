@@ -486,7 +486,7 @@ class ScheduleService extends BaseService
     {
         $this->preGetAll();
         $data = Schedule::where('complain', StatusConstant::COMPLAIN)
-                        ->where('schedules.participation', StatusConstant::NOJOIN)
+                        ->where('schedules.participation', StatusConstant::JOIN)
                         ->with(['course_student.users', 'course_planes.stage.course.teacher', 'course_student.courses.teacher']);
 
         try {
