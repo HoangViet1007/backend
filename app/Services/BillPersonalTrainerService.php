@@ -89,7 +89,7 @@ class BillPersonalTrainerService extends BaseService
         ];
         $billPt = BillPersonalTrainer::create($arr);
         $courseStudent = CourseStudent::find($request->course_student_id);
-        $courseStudent->update(['status', StatusConstant::COMPLETE]);
+        $courseStudent->update(['status' => StatusConstant::COMPLETE]);
         $billPtRel = BillPersonalTrainer::with('courseStudent.courses', 'user', 'courseStudent.users')->where('bill_personal_trainers.id', $billPt->id)->first();
         return $billPtRel;
     }
