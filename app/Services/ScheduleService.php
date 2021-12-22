@@ -550,11 +550,11 @@ class ScheduleService extends BaseService
                     case 'nocomplain' :
 
                         // send email pt
-                        Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleDontComplainPT($name_cousre_plane,
+                        Mail::to($email_pt)->send(new ScheduleDontComplainPT($name_cousre_plane,
                             $name_pt,
                             $date_complain));
                         // send email custorm
-                        Mail::to('ngohongnguyen016774@gmail.com')->send(new ScheduleDontComplainCustorm($name_custorm,
+                        Mail::to($email_custorm)->send(new ScheduleDontComplainCustorm($name_custorm,
                             $name_cousre_plane,
                             $name_pt,
                             $date_complain));
@@ -607,7 +607,7 @@ class ScheduleService extends BaseService
 
                     case 'send_link_record' :
 
-                        Mail::to('ngohongnguyen016774@gmail.com')
+                        Mail::to($email_pt)
                             ->send(new SendLinkRecordPT($name_custorm, $name_cousre_plane, $name_pt, $date_complain,
                                                         $data['reason_complain']));
 
@@ -1025,14 +1025,18 @@ class ScheduleService extends BaseService
 
     public function updateCourseSucces()
     {
+        $date_check = Carbon::now()->format('Y-m-d');
 
-        $list_course = Schedule::where('status', StatusConstant::UNFINISHED)->get();
+        $list_course = Schedule::where('status', StatusConstant::UNFINISHED)
+            ->where('participation',null)
+            ->where('date','<',$date_check)
+            ->get();
 
         foreach ($list_course as $value) {
             $dueDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $value->date . ' ' . $value->time_start)->addDay(2);
             $date_now    = Carbon::now();
             if ($dueDateTime >= $date_now) {
-                dd($dueDateTime);
+
                 $update = Schedule::find($value->id);
                 $update->update(['status' => StatusConstant::COMPLETE, 'participation' => StatusConstant::NOJOIN]);
             }
