@@ -599,7 +599,10 @@ class ScheduleService extends BaseService
                                           ]);
 
                             $course_student = CourseStudent::find($data->course_student_id);
-                            $course_student->update(['status' => StatusConstant::UNSCHEDULED]);
+                            $course_student->update([
+                                                        'status' => StatusConstant::UNSCHEDULED,
+                                                        'user_consent' => StatusConstant::UNSENT
+                                                    ]);
 
                             return true;
 
