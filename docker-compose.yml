@@ -10,7 +10,7 @@ services:
       - '/var/www/html'
       - './nginx.conf:/etc/nginx/conf.d/nginx.conf'
     ports:
-      - "8000:80"
+      - "81:80"
     depends_on:
       - php
       - mysql
