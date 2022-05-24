@@ -20,7 +20,3 @@ RUN apt-get update && apt-get install -y \
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install PHP DI
-COPY . .
-RUN cp .env.example .env
-RUN composer install --no-dev

@@ -45,7 +45,7 @@ services:
       - app-network
 
   composer:
-    image: composer:alpine
+    image: composer:latest
     container_name: Lr-composer
     volumes:
       - './backend:/var/www/html'
@@ -54,7 +54,7 @@ services:
       - app-network
 
   npm:
-    image: node:alpine
+    image: node:13.7
     container_name: Lr-nodejs
     volumes:
       - './backend:/var/www/html'
