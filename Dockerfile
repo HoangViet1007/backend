@@ -1,4 +1,4 @@
-FROM devilbox/php-fpm-8.1:latest
+FROM devilbox/php-fpm-8.0:latest
 LABEL maintainer="viethqb01@gmail.com"
 
 WORKDIR /var/www/html
@@ -15,10 +15,30 @@ RUN apt-get update && apt-get install -y \
     vim \
     unzip \
     git \
-    curl
+    curl \
 
-# Install composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Configure & Install Extension
+RUN docker-php-ext-configure \
+    opcache --enable-opcache
 
-COPY . .
-RUN composer install --no-dev
+RUN docker-php-ext-install \
+    opcache \
+    pdo_pgsql \
+    pgsql \
+    pdo \
+    gd \
+    xml \
+    intl \
+    sockets \
+    bz2 \
+    pcntl \
+    bcmath \
+    exif \
+    zip
+
+# Install Composer.
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && ln -s $(composer config --global home) /root/composer \
+
+#COPY . .
+#RUN composer install
