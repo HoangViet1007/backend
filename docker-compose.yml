@@ -37,19 +37,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: Lr-php
-    volumes:
-      - './backend:/var/www/html'
     ports:
       - '9000:9000'
-    networks:
-      - app-network
-
-  composer:
-    image: composer:latest
-    container_name: Lr-composer
-    volumes:
-      - './backend:/var/www/html'
-    working_dir: '/var/www/html'
     networks:
       - app-network
 
