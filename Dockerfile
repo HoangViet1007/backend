@@ -1,4 +1,4 @@
-FROM devilbox/php-fpm-8.0:latest
+FROM devilbox/php-fpm-8.1
 LABEL maintainer="viethqb01@gmail.com"
 
 WORKDIR /var/www/html
@@ -22,4 +22,4 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 COPY . .
 RUN cp .env.example .env
-RUN composer install --no-dev
+RUN composer install
