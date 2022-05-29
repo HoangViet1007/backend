@@ -1,4 +1,4 @@
-FROM devilbox/php-fpm-8.1
+FROM wyveo/nginx-php-fpm:php81
 LABEL maintainer="viethqb01@gmail.com"
 
 WORKDIR /var/www/html
@@ -16,13 +16,6 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl
-
-RUN apt-get update && apt-get install -y \
-                libfreetype6-dev \
-                libjpeg62-turbo-dev \
-                libpng-dev \
-        && docker-php-ext-configure gd --with-freetype --with-jpeg \
-        && docker-php-ext-install -j$(nproc) gd
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
