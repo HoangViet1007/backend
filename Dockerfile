@@ -17,25 +17,16 @@ RUN apt-get update && apt-get install -y \
     git \
     curl
 
-RUN docker-php-ext-install \
-    opcache \
-    pdo_pgsql \
-    pgsql \
-    mysqli \
-    pdo_mysql \
-    pdo \
-    sockets \
-    intl \
-    gd \
-    xml \
-    bz2 \
-    pcntl \
-    bcmath \
-    exif
+RUN apt-get update && apt-get install -y \
+                libfreetype6-dev \
+                libjpeg62-turbo-dev \
+                libpng-dev \
+        && docker-php-ext-configure gd --with-freetype --with-jpeg \
+        && docker-php-ext-install -j$(nproc) gd
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-#COPY . .
-RUN cp .env.example .env
+COPY . .
+#RUN cp .env.example .env
 RUN composer install
