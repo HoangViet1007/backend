@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::resource('/demo', 'DemoController');
+Route::get('/demo', 'DemoController@demo');
 // login cho tk thuong
 Route::post('/login', 'UserController@login')->name('login');
 // login cho tk google

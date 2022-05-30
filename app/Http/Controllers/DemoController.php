@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\BaseService;
 use App\Services\DemoService;
 use Illuminate\Http\JsonResponse;
@@ -107,5 +108,10 @@ class DemoController extends Controller
     public function deleteByIds(Request $request): JsonResponse
     {
         return response()->json($this->service->deleteByIds($request));
+    }
+
+    public function demo()
+    {
+        return User::all();
     }
 }
