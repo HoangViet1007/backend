@@ -1,25 +1,58 @@
-FROM wyveo/nginx-php-fpm:php81
-LABEL maintainer="viethqb01@gmail.com"
+FROM php:8.1-cli
+LABEL maintainer="yaangvu@gmail.com"
 
-WORKDIR /var/www/html
+ENV APP_ROOT /var/www/html
+ENV APP_TIMEZONE UTC
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
+WORKDIR ${APP_ROOT}
+
+#Set TimeZone
+ENV TZ=${APP_TIMEZONE}
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+RUN sed -i "s|max_execution_time = 30|max_execution_time = 300|g" "$PHP_INI_DIR/php.ini"
+RUN sed -i "s|memory_limit = 128M|memory_limit = 2G|g" "$PHP_INI_DIR/php.ini"
+RUN echo "opcache.optimization_level=0" >> "$PHP_INI_DIR/php.ini"
+
+# Add Production Dependencies
+RUN apt-get update -y
+RUN apt-get install -y \
+    bash \
+    libpq-dev \
+    zlib1g-dev \
     libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    vim \
-    unzip \
-    git \
-    curl
+    libxml2-dev \
+    libpng-dev \
+    libzip-dev \
+    libbz2-dev \
+    libcurl4-openssl-dev \
+    pkg-config \
+    libssl-dev
+
+# Configure & Install Extension
+RUN docker-php-ext-configure \
+    opcache --enable-opcache
+
+RUN docker-php-ext-install \
+    opcache \
+    pdo_pgsql \
+    pgsql \
+    pdo \
+    gd \
+    xml \
+    intl \
+    sockets \
+    bz2 \
+    pcntl \
+    bcmath \
+    exif \
+    zip
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Install PHP DI
 COPY . .
 #RUN cp .env.example .env
 RUN composer install
